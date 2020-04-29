@@ -153,18 +153,23 @@ function waterParticles(w, h) {
 
 }
 
-// Applies an impulse force in the y direction to a given number of particles evenly distributed throu 
-waterParticles.prototype.applyWaterForce = function(choppiness) {
+// Applies an impulse force in the y direction to a given number of particles evenly distributed throughout the mesh.
+waterParticles.prototype.applyWaterForce = function(choppiness, time) {
+time *= 0.001; // Converts time to seconds
 let particles = this.particles;
-let force = new THREE.Vector3(0,-1,0);
-let scale = 10;
-force.multiplyScalar(scale);
+let speed = 2; // Will go through a full oscillation every two seconds.
+
+let alpha = Math.sin (Math.PI * (time % speed)/2);
+let scale = 20;
+
+// Interpolate between the max force and the min force over time.
+let y = alpha * scale + (1-alpha) * -scale;
+
 for (let i = 0; i < choppiness; i++) {
-    // Returns a random particle index.
-    let random = Math.round(this.particles.length * Math.random());
-    
-    particles[random].position.add(force);
+    let random = Math.round(particles.length * Math.random());
+    particles[random].position.setY(y);
 }
+
 };
 
 // Apply a uniform force due to gravity to all particles in the cloth
@@ -194,11 +199,11 @@ for (let i = 0; i < particles.length; i++) {
 }
 };
 
-waterParticles.prototype.applyForces = function() {
-    let choppiness = 50;
-    // this.applyGravity();
-    this.applyWaterForce(choppiness);
-}
+// waterParticles.prototype.applyForces = function() {
+//     let choppiness = 20;
+//     // this.applyGravity();
+//     this.applyWaterForce(choppiness);
+// }
 
 waterParticles.prototype.enforceConstraints = function() {
     let constraints = this.constraints;

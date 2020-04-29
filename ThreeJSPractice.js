@@ -30,13 +30,9 @@ function plane(width, height) {
 
 const scene = new THREE.Scene();
 
-// Pretty Background:
-// var sceneColor = new THREE.Color();
-// scene.background = sceneColor;
-
 // Water texture:
 const material =  new THREE.MeshPhongMaterial({color: 0x44aa88});
-  
+
 
 // Meshes:
 
@@ -68,11 +64,13 @@ scene.add(ambient);
 // ----------- STUDENT CODE END ------------
 renderer.render(scene, camera);
 
+
 function render(time) {
     time*=0.001; 
+    const choppiness = 30;
 
   // Apply all relevant forces to the water's particles
-  water.applyForces();
+   water.applyWaterForce(choppiness, time);
 
   // For each particle, perform Verlet integration to compute its new position
   water.update();
