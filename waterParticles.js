@@ -23,6 +23,19 @@ function Constraint(p1, p2, distance) {
     // ----------- STUDENT CODE END ------------
   };
 
+  // Internal helper function for computing the 2D index from particles list
+  // 1D index.
+    function indexReverse(i, w) {
+      const xy = [];
+      xy.push (i % (w + 1));
+      xy.push (Math.floor(i / (w + 1)));
+      return xy;
+  }
+  function indexParticles(u, v, w) {
+    return u + v * (w + 1);
+  }
+
+
 // Initialize a list of water particles with constraints like that of a cloth.
 function waterParticles(w, h) {
     // Internal helper function for computing 1D index into particles list
@@ -30,14 +43,14 @@ function waterParticles(w, h) {
     function index(u, v) {
       return u + v * (w + 1);
     }
-
+  
   this.w = w;
   this.h = h;
   this.fabricLength = 500;
   this.mass = 0.1;
 
     // Resting distances
-    this.restDistance = this.fabricLength / this.w; // for adjacent particles
+    this.restDistance = this.fabricLength/ this.w; // for adjacent particles
     this.restDistanceB = 2; // multiplier for 2-away particles
     this.restDistanceS = Math.sqrt(2);
   
@@ -153,21 +166,58 @@ function waterParticles(w, h) {
 
 }
 
+// Helper function for applyWaterForce. Will move a given number of particles surrounding the given particle together.
+function moveParticles (particles, i, offset, yVal, w, h) {
+let particle_xy = indexReverse(i, w); // Find x and y coordinate for this particle in the list of particles.
+let pos_x = particle_xy[0];
+let pos_y = particle_xy[1];
+
+// Get bounding box for the pixels.
+let minx = Math.max(pos_x - offset, 0);
+let miny = Math.max(pos_y - offset, 0);
+let maxx = Math.min(pos_x + offset, w);
+let maxy = Math.min(pos_y + offset, h);
+
+// Move the bounding box by the given y value.
+for (let x = minx; x <= maxx; x++) {
+  for (let y = miny; y <= maxy; y++) {
+    particles[indexParticles(x, y, w)].position.setY(yVal);
+  }
+}
+}
+
+// Helper to Move Water:
+// Find a certain number of random particles.
+function findRandomParticles (length, number) {
+  let randomNumbers = [];
+  for (i = 0; i < number; i++) {
+  let random = Math.round(length * Math.random());
+  randomNumbers.push(random);
+  }
+
+  return randomNumbers;
+}
+
+
 // Applies an impulse force in the y direction to a given number of particles evenly distributed throughout the mesh.
-waterParticles.prototype.applyWaterForce = function(choppiness, time) {
+waterParticles.prototype.applyWaterForce = function(time) {
 time *= 0.001; // Converts time to seconds
 let particles = this.particles;
-let speed = 2; // Will go through a full oscillation every two seconds.
+let speed = 0.5; // Will go through a full oscillation every two seconds.
+let offset = 3; // Will move offset number of particles together, where offset is the radius of the box.
 
 let alpha = Math.sin (Math.PI * (time % speed)/2);
-let scale = 20;
+let scale = 7;
 
 // Interpolate between the max force and the min force over time.
 let y = alpha * scale + (1-alpha) * -scale;
 
-for (let i = 0; i < choppiness; i++) {
-    let random = Math.round(particles.length * Math.random());
-    particles[random].position.setY(y);
+const choppiness = 10;
+const randomNumbers = findRandomParticles(particles.length, choppiness);
+
+// Move them and some of the particles surrounding them.
+for (let i = 0; i < randomNumbers.length; i++) {
+    moveParticles(particles, randomNumbers[i], offset, y, this.w, this.h);
 }
 
 };

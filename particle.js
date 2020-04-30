@@ -77,36 +77,6 @@ Particle.prototype.integrate = function(deltaT) {
   // ----------- STUDENT CODE END ------------
 };
 
-// Handle collisions between this Particle and the provided floor.
-// Note: the fields of floor are documented for completeness, but you
-//       *WILL NOT* need to use all of them.
-// Params:
-// * floor: An object representing the floor of the scene, with properties:
-//    - mesh: THREE.Mesh - the physical representation in the scene
-//    - geometry: THREE.PlaneBufferGeometry - the abstract geometric representation
-//    - material: THREE.MeshPhongMaterial - material information for lighting
-Particle.prototype.handleFloorCollision = function(floorPosition) {
-  const EPS = 3;
-  // ----------- STUDENT CODE BEGIN ------------
-  // Handle collision of this particle with the floor.
-  // ----------- Our reference solution uses 4 lines of code.
-  if (this.position.y < floorPosition.y) {
-    this.position.setY(floorPosition.y + EPS);
-  }
-  // ----------- STUDENT CODE END ------------
-};
-
-Particle.prototype.handleCeilingCollision = function(ceilingPosition) {
-  const EPS = 3;
-  // ----------- STUDENT CODE BEGIN ------------
-  // Handle collision of this particle with the floor.
-  // ----------- Our reference solution uses 4 lines of code.
-  if (this.position.y > ceilingPosition.y) {
-    this.position.setY(ceilingPosition.y - EPS);
-  }
-  // ----------- STUDENT CODE END ------------
-};
-
 // Handle collisions between this Particle and the provided sphere.
 // Note: the fields of sphere are documented for completeness, but you
 //       *WILL NOT* need to use all of them.

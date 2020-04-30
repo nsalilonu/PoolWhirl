@@ -32,6 +32,7 @@ const scene = new THREE.Scene();
 
 // Water texture:
 const material =  new THREE.MeshPhongMaterial({color: 0x44aa88});
+material.shininess = 15;
 
 
 // Meshes:
@@ -53,12 +54,13 @@ const color = 0xFFFFFF;
 const intensity = 1;
 const light = new THREE.DirectionalLight(color, intensity);
 light.position.set(-1, 1, 3);
-const light2 = new THREE.DirectionalLight(color, intensity);
-light.position.set(2, 1, 3);
-scene.add(light2);
+// const light2 = new THREE.DirectionalLight(color, intensity);
+// light.position.set(2, 1, 3);
+// scene.add(light2);
 const ambient = new this.THREE.AmbientLight(color, intensity);
 scene.add(light);
 scene.add(ambient);
+
 
 // Animation:
 // ----------- STUDENT CODE END ------------
@@ -66,11 +68,11 @@ renderer.render(scene, camera);
 
 
 function render(time) {
-    time*=0.001; 
-    const choppiness = 30;
+    time +=30; 
+
 
   // Apply all relevant forces to the water's particles
-   water.applyWaterForce(choppiness, time);
+   water.applyWaterForce(time);
 
   // For each particle, perform Verlet integration to compute its new position
   water.update();
