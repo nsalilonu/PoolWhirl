@@ -5,11 +5,9 @@ function Constraint(p1, p2, distance) {
   }
   
   Constraint.prototype.enforce = function() {
-    // ----------- STUDENT CODE BEGIN ------------
     // Enforce this constraint by applying a correction to the two particles'
     // positions based on their current distance relative to their desired rest
     // distance.
-    // ----------- Our reference solution uses 10 lines of code.
     let v_ab = new THREE.Vector3();
     v_ab.subVectors(this.p2.position, this.p1.position); // A vector that points from p1 to p2.
     let dist_ab = this.p1.position.distanceTo(this.p2.position);
@@ -20,7 +18,6 @@ function Constraint(p1, p2, distance) {
     v_corr.divideScalar(2); // Divide by 2 so that correction can be distributed equally.
     this.p1.position.add(v_corr);
     this.p2.position.sub(v_corr);
-    // ----------- STUDENT CODE END ------------
   };
 
   // Internal helper function for computing the 2D index from particles list
@@ -43,10 +40,10 @@ function waterParticles(w, h) {
     function index(u, v) {
       return u + v * (w + 1);
     }
-  
+  // this.cone = cone;
   this.w = w;
   this.h = h;
-  this.fabricLength = 500;
+  this.fabricLength = this.w;
   this.mass = 0.1;
 
     // Resting distances
@@ -152,13 +149,6 @@ function waterParticles(w, h) {
           }    
         }
       }
-
-      
-    // Constrain the corners of the water
-    particles[index(0, 0)].lockToOriginal();
-    particles[index(w, 0)].lockToOriginal();
-    particles[index(0, h)].lockToOriginal();
-    particles[index(w, h)].lockToOriginal();
   
     // Store the particles and constraints lists into the waterParticles object
     this.particles = particles;
@@ -182,61 +172,27 @@ let maxy = Math.min(pos_y + offset, h);
 for (let x = minx; x <= maxx; x++) {
   for (let y = miny; y <= maxy; y++) {
     particles[indexParticles(x, y, w)].position.setY(yVal);
+    }
   }
 }
-}
-
-// Helper to Move Water:
-// Find a certain number of random particles.
-function findRandomParticles (length, number) {
-  let randomNumbers = [];
-  for (i = 0; i < number; i++) {
-  let random = Math.round(length * Math.random());
-  randomNumbers.push(random);
-  }
-
-  return randomNumbers;
-}
-
 
 // Applies an impulse force in the y direction to a given number of particles evenly distributed throughout the mesh.
-waterParticles.prototype.applyWaterForce = function(time) {
-time *= 0.001; // Converts time to seconds
-let particles = this.particles;
-let speed = 0.5; // Will go through a full oscillation every two seconds.
-let offset = 3; // Will move offset number of particles together, where offset is the radius of the box.
+waterParticles.prototype.applyWaterForce = function(timer) {
+  let particles = this.particles;
+  let force = 2;
+  let offset = 3;
 
-let alpha = Math.sin (Math.PI * (time % speed)/2);
-let scale = 7;
-
-// Interpolate between the max force and the min force over time.
-let y = alpha * scale + (1-alpha) * -scale;
-
-const choppiness = 10;
-const randomNumbers = findRandomParticles(particles.length, choppiness);
-
-// Move them and some of the particles surrounding them.
-for (let i = 0; i < randomNumbers.length; i++) {
-    moveParticles(particles, randomNumbers[i], offset, y, this.w, this.h);
+  for (let i = 0; i < 5; i++) {
+    let random = Math.round(particles.length * Math.random());
+    if (random > particles.length/2) {
+    moveParticles(particles, random, offset, force, this.w, this.h);
+  }
+  if (random < particles.length/2) {
+    moveParticles(particles, random, offset, -force, this.w, this.h);
+  }
 }
 
 };
-
-// Apply a uniform force due to gravity to all particles in the cloth
-waterParticles.prototype.applyGravity = function() {
-    let particles = this.particles;
-    const GRAVITY = 9.8 * 140;
-    // ----------- STUDENT CODE BEGIN ------------
-    // For each particle in the cloth, apply force due to gravity.
-    // ----------- Our reference solution uses 4 lines of code.
-    for (let i = 0; i < particles.length; i++) {
-      let offsetY = particles[i].mass * GRAVITY;
-      let force = new THREE.Vector3();
-      force.setY(offsetY);
-      particles[i].addForce(force);
-    }
-    // ----------- STUDENT CODE END ------------
-  };
 
   // Don't let the particle fall out of the window. Floor is the -scale - 3 of the water force (because EPS is 3).
 waterParticles.prototype.handleCollisions = function() {
@@ -249,23 +205,25 @@ for (let i = 0; i < particles.length; i++) {
 }
 };
 
-// waterParticles.prototype.applyForces = function() {
-//     let choppiness = 20;
-//     // this.applyGravity();
-//     this.applyWaterForce(choppiness);
-// }
+waterParticles.prototype.handleBorders = function() {
+  // Constrain the border of the water.
+  let particles = this.particles;
+  for (let x = 0; x <= this.w; x++) {
+    particles[indexParticles(x, 0, this.w)].lockToOriginal();
+    particles[indexParticles(x, this.h, this.w)].lockToOriginal();
+  }
+  for (let y = 0; y <= this.h; y++) {
+    particles[indexParticles(0, y, this.w)].lockToOriginal();
+    particles[indexParticles(this.w, y, this.w)].lockToOriginal();
+  }
+}
+
 
 waterParticles.prototype.enforceConstraints = function() {
     let constraints = this.constraints;
-    // ----------- STUDENT CODE BEGIN ------------
-    // Enforce all constraints in the cloth.
-    // ----------- Our reference solution uses 3 lines of code.
     for (let i = 0; i < constraints.length; i++) {
       constraints[i].enforce();
     }
-
-    
-    // ----------- STUDENT CODE END ------------
   };
 
 // Update position of particles.

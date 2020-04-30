@@ -1,15 +1,12 @@
 window.onload = function() {
-
+const clothSize = 300;
 // Camera controls:
 const canvas = document.getElementById('canvas');
 const renderer = new THREE.WebGLRenderer({canvas});
 renderer.setSize(window.innerWidth, window.innerHeight);
-let camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 1, 10000);
-  camera.position.y = 450;
-  camera.position.z = 1500;
-//const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-//camera.position.y = 5;
-//camera.position.z = 2;
+let camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 1, 400);
+  camera.position.y = 50;
+  camera.position.z =  clothSize/2;
 
 // Orbit Controls:
 const controls = new THREE.OrbitControls(camera, canvas);
@@ -26,20 +23,21 @@ function plane(width, height) {
       vec.set(x, y, z);
     };
   }
-  let initParameterizedPosition = plane(500,500);
+  let initParameterizedPosition = plane(clothSize,clothSize);
 
 const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0xcce0ff, clothSize, clothSize);
 
 // Water texture:
 const material =  new THREE.MeshPhongMaterial({color: 0x44aa88});
 material.shininess = 15;
 
-
+scene.add(camera);
 // Meshes:
 
 // Water
- const waterGeometry = new THREE.ParametricGeometry(initParameterizedPosition, 500, 500);
-const water = new waterParticles(500, 500);
+ const waterGeometry = new THREE.ParametricGeometry(initParameterizedPosition, clothSize, clothSize);
+const water = new waterParticles(clothSize, clothSize);
 const waterMaterial = material;
 const waterMesh = new THREE.Mesh(waterGeometry, waterMaterial);
 waterMesh.geometry.dynamic = true;
@@ -47,40 +45,39 @@ waterMesh.rotation.x = Math.PI;
 waterMesh.castShadow = true;
 
 scene.add(waterMesh);
-scene.add(camera);
 
 // Lighting:
 const color = 0xFFFFFF;
 const intensity = 1;
 const light = new THREE.DirectionalLight(color, intensity);
-light.position.set(-1, 1, 3);
-// const light2 = new THREE.DirectionalLight(color, intensity);
-// light.position.set(2, 1, 3);
-// scene.add(light2);
+light.position.set(camera.position.x, camera.position.y, camera.position.z);
 const ambient = new this.THREE.AmbientLight(color, intensity);
 scene.add(light);
 scene.add(ambient);
 
 
 // Animation:
-// ----------- STUDENT CODE END ------------
-renderer.render(scene, camera);
+var time = 0;
+animate();
 
+function animate(){
+  time +=30;
+  requestAnimationFrame(animate);
+  render();
+}
 
-function render(time) {
-    time +=30; 
-
+function render() { 
+  let timer = time * 0.0002 * 0.8; // Hack given in Cloth Assignment
+  let speed = 50; // Speed of the whirlpool.
+  waterMesh.rotation.y = timer * speed;
 
   // Apply all relevant forces to the water's particles
-   water.applyWaterForce(time);
+   water.applyWaterForce();
 
   // For each particle, perform Verlet integration to compute its new position
-  water.update();
+   water.update();
 
-  // // Handle collisions with other objects in the scene
-  // water.handleCollisions();
-
-  // Apply cloth constraints
+  // Apply water constraints
   water.enforceConstraints();
 
   // Apply the positions of the water particles to the mesh.
@@ -98,11 +95,7 @@ function render(time) {
 
    // Render! (by golly I hope this works!)
   renderer.render(scene, camera);
-   
-  requestAnimationFrame(render);
   }
-
-requestAnimationFrame(render);
 }
 
 

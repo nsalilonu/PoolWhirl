@@ -1,4 +1,6 @@
 "use strict";
+
+const clothSize = 300;
 function plane(width, height) {
   return function(u, v, vec) {
     let x = u * width - width / 2;
@@ -8,7 +10,7 @@ function plane(width, height) {
   };
 }
 
-let initParameterizedPosition = plane(500,500);
+let initParameterizedPosition = plane(clothSize, clothSize);
 
 // Particle constructor
 function Particle(x, y, z, mass) {
@@ -248,11 +250,3 @@ Particle.prototype.handleBoxCollision = function(box) {
     }
     // ----------- STUDENT CODE END ------------
 };
-
-// ------------------------ Don't worry about this ---------------------------
-// Apply the cached correction vector to this particle's position, and
-// then zero out the correction vector.
-// Particle.prototype.applyCorrection = function() {
-//   this.position.add(this.correction);
-//   this.correction.set(0,0,0);
-// }
