@@ -32,9 +32,39 @@ scene.add(camera);
 // Background scene:
 var sceneColor = new THREE.Color(0xff6666);
 scene.background = sceneColor;
+
+// Sun:
 let sunGeometry = new THREE.SphereGeometry(20);
-let sunMaterial = new THREE.MeshBasicMaterial({color: 0xffa51b});
+let sunMaterial = new THREE.MeshPhongMaterial({color: 0xffa51b});
 let sun = new THREE.Mesh(sunGeometry, sunMaterial);
+sun.translateY(30);
+sun.translateZ(clothSize/2);
+scene.add(sun);
+
+// Clouds:
+let boxGeometry = new THREE.BoxGeometry(40, 10, 10);
+let boxMaterial = new THREE.MeshBasicMaterial();
+let cloudBase = new THREE.Mesh(boxGeometry, boxMaterial);
+cloudBase.translateY(30);
+cloudBase.translateZ(clothSize/2 - 30);
+scene.add(cloudBase);
+
+for (let i = 0; i < 5; i++) {
+  let box = new THREE.Mesh(boxGeometry, boxMaterial);
+  box.translateY(cloudBase.position.y + Math.random() * 50);
+  box.translateZ(cloudBase.position.z + Math.random() * 50);
+  box.translateX(cloudBase.position.x + Math.random() * 50);
+  cloudBase.add(box);
+}
+
+for (let i = 0; i < 5; i++) {
+  let box = new THREE.Mesh(boxGeometry, boxMaterial);
+  box.translateY(cloudBase.position.y - Math.random() * 50);
+  box.translateZ(cloudBase.position.z - Math.random() * 50);
+  box.translateX(cloudBase.position.x - Math.random() * 50);
+  cloudBase.add(box);
+}
+
 
 // Water texture:
 const material =  new THREE.MeshPhongMaterial({color: 0x44aa88});
@@ -56,14 +86,13 @@ scene.add(waterMesh);
 
 // Lighting:
 const color = 0xFFFFFF;
-const intensity = 1;
+const intensity = 0.25;
 const sunColor = 0xffa51b;
 const light = new THREE.DirectionalLight(color, intensity);
 light.position.set(camera.position.x, camera.position.y, camera.position.z);
 const sunLight = new THREE.PointLight(sunColor, 1, 400, 2);
-sunLight.position.set(0, 100, -100);
-// const sunLightHelper = new THREE.PointLightHelper(sunLight, 20, sunColor);
-const ambient = new this.THREE.AmbientLight(color, intensity);
+sunLight.position.set(0, 30, clothSize/2);
+const ambient = new this.THREE.AmbientLight(color, 1);
 scene.add(light);
 scene.add(sunLight);
 scene.add(ambient);
@@ -94,6 +123,12 @@ function render() {
   let timer = time * 0.0002 * 0.8; // Hack given in Cloth Assignment
   let speed = 50; // Speed of the whirlpool.
   waterMesh.rotation.y = timer * speed;
+
+  // Move cloud?
+  let cloudVector = sun.position.clone().sub(cloudBase.position).normalize();
+  let cloudSpeed = 1;
+  cloudBase.translateX(cloudSpeed);
+  if (cloudBase.position.x >= 100) {cloudBase.translateX(-100 - Math.random() * 50);}
 
   // Apply all relevant forces to the water's particles
    water.applyWaterForce(randomParticles, timer);
