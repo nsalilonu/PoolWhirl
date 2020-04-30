@@ -27,12 +27,20 @@ function plane(width, height) {
 
 const scene = new THREE.Scene();
 scene.fog = new THREE.Fog(0xcce0ff, clothSize, clothSize);
+scene.add(camera);
+
+// Background scene:
+var sceneColor = new THREE.Color(0xff6666);
+scene.background = sceneColor;
+let sunGeometry = new THREE.SphereGeometry(20);
+let sunMaterial = new THREE.MeshBasicMaterial({color: 0xffa51b});
+let sun = new THREE.Mesh(sunGeometry, sunMaterial);
 
 // Water texture:
 const material =  new THREE.MeshPhongMaterial({color: 0x44aa88});
 material.shininess = 15;
 
-scene.add(camera);
+
 // Meshes:
 
 // Water
@@ -49,15 +57,31 @@ scene.add(waterMesh);
 // Lighting:
 const color = 0xFFFFFF;
 const intensity = 1;
+const sunColor = 0xffa51b;
 const light = new THREE.DirectionalLight(color, intensity);
 light.position.set(camera.position.x, camera.position.y, camera.position.z);
+const sunLight = new THREE.PointLight(sunColor, 1, 400, 2);
+sunLight.position.set(0, 100, -100);
+// const sunLightHelper = new THREE.PointLightHelper(sunLight, 20, sunColor);
 const ambient = new this.THREE.AmbientLight(color, intensity);
 scene.add(light);
+scene.add(sunLight);
 scene.add(ambient);
 
 
 // Animation:
 var time = 0;
+
+function getRandomParticles(length, particleNum) {
+  let randomParticles = [];
+  for (i = 0; i < particleNum; i++) {
+  let random = Math.round(length * Math.random());
+    randomParticles.push(random);
+  }
+    return randomParticles;
+}
+let particleNum = 500; // Number of moving particles.
+const randomParticles = getRandomParticles(water.particles.length, particleNum);
 animate();
 
 function animate(){
@@ -72,7 +96,7 @@ function render() {
   waterMesh.rotation.y = timer * speed;
 
   // Apply all relevant forces to the water's particles
-   water.applyWaterForce();
+   water.applyWaterForce(randomParticles);
 
   // For each particle, perform Verlet integration to compute its new position
    water.update();
