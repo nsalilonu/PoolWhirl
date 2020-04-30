@@ -80,7 +80,7 @@ function getRandomParticles(length, particleNum) {
   }
     return randomParticles;
 }
-let particleNum = 500; // Number of moving particles.
+let particleNum = 800; // Number of moving particles.
 const randomParticles = getRandomParticles(water.particles.length, particleNum);
 animate();
 
@@ -96,7 +96,7 @@ function render() {
   waterMesh.rotation.y = timer * speed;
 
   // Apply all relevant forces to the water's particles
-   water.applyWaterForce(randomParticles);
+   water.applyWaterForce(randomParticles, timer);
 
   // For each particle, perform Verlet integration to compute its new position
    water.update();

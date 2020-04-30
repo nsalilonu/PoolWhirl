@@ -177,19 +177,18 @@ for (let x = minx; x <= maxx; x++) {
 }
 
 // Applies an impulse force in the y direction to a given number of particles evenly distributed throughout the mesh.
-waterParticles.prototype.applyWaterForce = function(randomParticles) {
+waterParticles.prototype.applyWaterForce = function(randomParticles, timer) {
   let particles = this.particles;
-  let force = 2;
-  let offset = 3;
+  let scale = 2;
+  let offset = 0;
 
   for (let i = 0; i < randomParticles.length; i++) {
-    if (randomParticles[i] > particles.length/2) {
+    let random = Math.round(Math.random());
+    let force = scale * Math.sin(timer * 100);
+    // if (random > 0) {force = scale;}
+    // else {force = -scale;}
     moveParticles(particles, randomParticles[i], offset, force, this.w, this.h);
   }
-  if (randomParticles[i] < particles.length/2) {
-    moveParticles(particles, randomParticles[i], offset, -force, this.w, this.h);
-  }
-}
 
 };
 
