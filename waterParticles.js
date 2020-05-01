@@ -156,65 +156,31 @@ function waterParticles(w, h) {
 
 }
 
-// Helper function for applyWaterForce. Will move a given number of particles surrounding the given particle together.
-function moveParticles (particles, i, offset, yVal, w, h) {
-let particle_xy = indexReverse(i, w); // Find x and y coordinate for this particle in the list of particles.
-let pos_x = particle_xy[0];
-let pos_y = particle_xy[1];
 
-// Get bounding box for the pixels.
-let minx = Math.max(pos_x - offset, 0);
-let miny = Math.max(pos_y - offset, 0);
-let maxx = Math.min(pos_x + offset, w);
-let maxy = Math.min(pos_y + offset, h);
-
-// Move the bounding box by the given y value.
-for (let x = minx; x <= maxx; x++) {
-  for (let y = miny; y <= maxy; y++) {
-    particles[indexParticles(x, y, w)].position.setY(yVal);
-    }
-  }
-}
-
-// Applies an impulse force in the y direction to a given number of particles evenly distributed throughout the mesh.
+// Applies an impulse force in the y direction to the given random water particles.
 waterParticles.prototype.applyWaterForce = function(randomParticles, timer) {
   let particles = this.particles;
-  let scale = 2;
-  let offset = 0;
+  let scale = 2; // "Experimentally" determined to be the best scale for water motion.
 
   for (let i = 0; i < randomParticles.length; i++) {
-    let random = Math.round(Math.random());
     let force = scale * Math.sin(timer * 100);
-    // if (random > 0) {force = scale;}
-    // else {force = -scale;}
-    moveParticles(particles, randomParticles[i], offset, force, this.w, this.h);
+   particles[randomParticles[i]].position.setY(force);
   }
-
 };
 
-  // Don't let the particle fall out of the window. Floor is the -scale - 3 of the water force (because EPS is 3).
-waterParticles.prototype.handleCollisions = function() {
-let particles = this.particles;
-let floorPosition = (0,-8,0);
-let ceilingPosition = (0,8,0);
-for (let i = 0; i < particles.length; i++) {
-    particles[i].handleFloorCollision(floorPosition);
-    particles[i].handleCeilingCollision(ceilingPosition);
-}
-};
 
-waterParticles.prototype.handleBorders = function() {
-  // Constrain the border of the water.
+waterParticles.prototype.applyFakeCentripetalForce = function(timer) {
   let particles = this.particles;
-  for (let x = 0; x <= this.w; x++) {
-    particles[indexParticles(x, 0, this.w)].lockToOriginal();
-    particles[indexParticles(x, this.h, this.w)].lockToOriginal();
-  }
-  for (let y = 0; y <= this.h; y++) {
-    particles[indexParticles(0, y, this.w)].lockToOriginal();
-    particles[indexParticles(this.w, y, this.w)].lockToOriginal();
+  for (let i = 0; i < particles.length; i++) {
+    let radius = particles[i].position.length(); // Distance of particle from the center.
+    radius = Math.max(radius, 0.5); // Don't let the radius go to 0 to avoid infinite time.
+    let x = particles[i].position.x * Math.cos(timer/radius) - particles[i].position.z * Math.sin(timer/radius);
+    let z = particles[i].position.x * Math.sin(timer/radius) + particles[i].position.z * Math.cos(timer/radius);
+    particles[i].addForce(new THREE.Vector3(x - particles[i].position.x, 0, 0));
+    particles[i].addForce(new THREE.Vector3(0, 0, z - particles[i].position.z));
   }
 }
+
 
 
 waterParticles.prototype.enforceConstraints = function() {
