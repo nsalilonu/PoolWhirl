@@ -85,7 +85,7 @@ var texture = new THREE.TextureLoader().load( "water.png" ); // Just a water tex
 texture.wrapS = THREE.RepeatWrapping;
 texture.wrapT = THREE.RepeatWrapping;
 texture.repeat.set( 4, 4 );
-material.map = texture;
+//material.map = texture;
 const waterMaterial = material;
 const waterMesh = new THREE.Mesh(waterGeometry, waterMaterial);
 waterMesh.geometry.dynamic = true;
