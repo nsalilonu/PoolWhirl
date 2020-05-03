@@ -23,7 +23,7 @@
 <canvas id="canvas"></canvas>
 
 <script type= "module">
-    import {teddyMesh, teddyMunch, teddyInit} from "./teddyMesh.js";
+    import {teddyMesh, teddyMunch, teddyInit, bounce, handleCollisions} from "./teddyMesh.js";
     import {duckMesh} from "./rubberDuckMesh.js";
     
 // Camera controls:
@@ -43,7 +43,7 @@ var camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHei
 // Orbit Controls:
 
 const controls = new THREE.OrbitControls(camera, canvas);
-controls.target.set(0,0,0);
+controls.target.set(0,10, 175);
 controls.update(); 
 
 const scene = new THREE.Scene();
@@ -112,9 +112,9 @@ let teddyPosition = teddyMesh.localToWorld(teddyMesh.position.clone());
 camera.position.set(teddyPosition.x, teddyPosition.y, teddyPosition.z);
 camera.translateZ(300);
 camera.translateY(130);
-camera.translateX(20);
+camera.translateX(10);
 
-camera.lookAt(teddyPosition);
+// camera.lookAt(teddyPosition);
 
 // Lighting:
 const color = 0xFFFFFF;
@@ -152,7 +152,7 @@ function render() {
   // get teddy's position before
   let teddyOldPosition = teddyMesh.localToWorld(teddyMesh.position.clone());
   let cameraOldPosition = camera.localToWorld(camera.position.clone());
-  cone.rotation.y = timer * 10;
+  //cone.rotation.y = timer * 10;
     let v = (count / 3) % 3;
 
     // only use randomranges like once
@@ -179,8 +179,12 @@ function render() {
     cone.geometry.normalsNeedUpdate = true;
     cone.geometry.verticesNeedUpdate = true;
 
-    // teddyInit(); 
+
+    handleCollisions(cone.geometry.vertices);
     teddyMunch();
+    bounce(timer);
+    
+  
 
    // Render! (by golly I hope this works!)
   renderer.render(scene, camera);

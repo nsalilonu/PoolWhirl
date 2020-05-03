@@ -141,14 +141,34 @@ timer+= Math.PI/4 /10;
 if (timer > 0 && timer <= Math.PI/4) {
     teddyRightArm.rotateX(Math.PI/4 / 10);
 }
-else if (timer > 0 && timer > Math.PI/4 && timer < Math.PI/2)
-{
-teddyRightArm.rotateX(-Math.PI/4 / 10);
-} 
+else if (timer > 0 && timer > Math.PI/4 && timer < Math.PI/2) {
+    teddyRightArm.rotateX(-Math.PI/4 / 10);
+}
+}
+
+function bounce(time) {
+let earBounce = Math.sin(time*50) * 3;
+let bodyBounce = Math.sin(time*70) * 0.25
+teddyLeftEarMesh.translateY(earBounce/10);
+teddyRightEarMesh.translateY(earBounce/10);
+teddyBody.translateY(bodyBounce/10);
+}
+
+function handleCollisions(vertices) {
+    let EPS = 3;
+    let teddyMin_y = Math.min(teddyRightLeg.position.y, teddyLeftLeg.position.y);
+    let teddyPos_y = teddyMin_y - 2.5;
+    let length = vertices.length;
+    for (let i = 0; i < length; i++) {
+        if (teddyPos_y < vertices[i].y) {
+            let offset = vertices[i].y - teddyMesh.position.y;
+            teddyMesh.position.setY(teddyMesh.position.y + offset + EPS);
+        }
+    }
 }
 
 
 
 
 
-export {teddyMesh, teddyMunch, teddyInit};
+export {teddyMesh, teddyMunch, teddyInit, bounce, handleCollisions};
