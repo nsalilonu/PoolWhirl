@@ -1,6 +1,4 @@
-
-// Pseudocode source: http://drilian.com/2009/02/25/lightning-bolts/
-// Work-in-progress
+// just the animated lightning
 
 window.onload = function () {
     const canvas = document.getElementById('canvas');
@@ -27,14 +25,14 @@ window.onload = function () {
     let points = [];
     points.push(startPoint);
     points.push(endPoint);
-    let geometry = new THREE.BufferGeometry().setFromPoints(points);
+    let geometry = new THREE.Geometry().setFromPoints(points);
 
-    let material = new THREE.LineBasicMaterial({
-        color: 0xCCCC00,
-        linewidth: 30,
-    });
+    let line = new MeshLine();
+    line.setGeometry(geometry);
 
-    let segMesh = new THREE.Line(geometry, material);
+    let material = new MeshLineMaterial({color: new THREE.Color(0xCCCC00)});
+
+    let segMesh = new THREE.Mesh(line.geometry, material);
 
     let segmentInfo = [];
     segmentInfo.push(segMesh);
@@ -46,7 +44,7 @@ window.onload = function () {
     // the maximum amount to offset a lightning bolt
     let maxOffset = 45;
 
-    const NUM_GENERATIONS = 10;
+    const NUM_GENERATIONS = 9;
 
     let division_count = 0;
     let lengthScale = 0.7;
@@ -92,8 +90,11 @@ window.onload = function () {
             let points1 = [];
             points1.push(startPoint);
             points1.push(midPoint);
-            let geometry1 = new THREE.BufferGeometry().setFromPoints(points1);
-            let segMesh1 = new THREE.Line(geometry1, material);
+            let geometry1 = new THREE.Geometry().setFromPoints(points1);
+
+            let line1 = new MeshLine();
+            line1.setGeometry(geometry1);
+            let segMesh1 = new THREE.Mesh(line1.geometry, material);
 
             let segmentInfo1 = [];
             segmentInfo1.push(segMesh1);
@@ -103,8 +104,10 @@ window.onload = function () {
             let points2 = [];
             points2.push(midPoint);
             points2.push(endPoint);
-            let geometry2 = new THREE.BufferGeometry().setFromPoints(points2);
-            let segMesh2 = new THREE.Line(geometry2, material);
+            let geometry2 = new THREE.Geometry().setFromPoints(points2);
+            let line2 = new MeshLine();
+            line2.setGeometry(geometry2);
+            let segMesh2 = new THREE.Mesh(line2.geometry, material);
 
             let segmentInfo2 = [];
             segmentInfo2.push(segMesh2);
@@ -134,8 +137,10 @@ window.onload = function () {
                 let points_div = [];
                 points_div.push(midPoint);
                 points_div.push(splitEnd);
-                let geometry_div = new THREE.BufferGeometry().setFromPoints(points_div);
-                let segMesh_div = new THREE.Line(geometry_div, material);
+                let geometry_div = new THREE.Geometry().setFromPoints(points_div);
+                let line_div = new MeshLine();
+                line_div.setGeometry(geometry_div);
+                let segMesh_div = new THREE.Mesh(line_div.geometry, material);
 
                 let segmentInfo_div = [];
                 segmentInfo_div.push(segMesh_div);
@@ -151,9 +156,25 @@ window.onload = function () {
         maxOffset /= 2;
     }
     // add every line segment in the array to the scene
-    for (segment of segmentList) {
+    for (let segment of segmentList) {
         scene.add(segment[0]);
     }
-
-    renderer.render(scene, camera);
+    
+    let time = 0; 
+    function animate() {
+        if (time % 3 == 0) {
+            for (let segment of segmentList) {
+                segment[0].visible = false;
+            }
+        } 
+        else {
+            for (let segment of segmentList) {
+                segment[0].visible = true;
+            }  
+        }
+        time = time + 1; 
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate);
+    }
+    animate();
 }
