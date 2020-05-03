@@ -1,74 +1,70 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <!-- the next three lines try to discourage browser from keeping page in cache -->
-        <meta http-equiv="Pragma" content="no-cache">
-        <meta http-equiv="Expires" content="-1">
-        <meta http-equiv="cache-control" content="no-store">
-      
-        <title> COS426 Final Project &mdash; Pool Whirl</title>
-      </head>
-<script src= "teddyMesh.js" type= "module"></script>
-<script src = "rubberDuckMesh.js" type = "module"></script>
 
-<body style = "background-color: rgb(226, 113, 147);">
-    <h1 id = "h1", style="color: white;">Pool Whirl</h1>
-    <p style="color:rgb(248, 248, 248)">By: Sean-Wyn Ng, Nsomma Alilonu, Rachel Lee, and Emily Yin</p>
-    <p style="color:rgb(5, 146, 99)">Save your teddy bear from an untimely demise!</p>
-    <script src= "three.min.js"></script>
-    <script src= "OrbitControls.js"></script>
-   
+<head>
+  <!-- the next three lines try to discourage browser from keeping page in cache -->
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="-1">
+  <meta http-equiv="cache-control" content="no-store">
+
+  <title> COS426 Final Project &mdash; Pool Whirl</title>
+</head>
+<script src="teddyMesh.js" type="module"></script>
+<script src="rubberDuckMesh.js" type="module"></script>
+
+<body style="background-color: rgb(226, 113, 147);">
+  <h1 id="h1" , style="color: white;">Pool Whirl</h1>
+  <p style="color:rgb(248, 248, 248)">By: Sean-Wyn Ng, Nsomma Alilonu, Rachel Lee, and Emily Yin</p>
+  <p style="color:rgb(5, 146, 99)">Save your teddy bear from an untimely demise!</p>
+  <script src="three.min.js"></script>
+  <script src="OrbitControls.js"></script>
 
 
-<canvas id="canvas"></canvas>
 
-<script type= "module">
-    import {teddyMesh, teddyMunch, teddyInit, bounce, handleCollisions} from "./teddyMesh.js";
-    import {duckMesh} from "./rubberDuckMesh.js";
-    
-// Camera controls:
-const canvas = document.getElementById('canvas');
-const renderer = new THREE.WebGLRenderer({canvas});
-renderer.setSize(window.innerWidth, window.innerHeight);
-var camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 1, 10000);
+  <canvas id="canvas"></canvas>
 
-  /*camera.rotateX(Math.PI * 1.5);
-  camera.translateY(100);
-  camera.translateX(500);
-  camera.translateZ(300);*/
+  <script type="module">
+    import { teddyMesh, teddyMunch, teddyInit, bounce, handleCollisions } from "./teddyMesh.js";
+    import { duckMesh } from "./rubberDuckMesh.js";
 
-/*camera.position.y = 200; 
-  camera.position.z =  50; 
-  camera.rotation.x = Math.PI / 4;*/
-// Orbit Controls:
+    // Camera controls:
+    const canvas = document.getElementById('canvas');
+    const renderer = new THREE.WebGLRenderer({ canvas });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    var camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 1, 10000);
 
-const controls = new THREE.OrbitControls(camera, canvas);
-controls.target.set(0,10, 175);
-controls.update(); 
+    /*camera.rotateX(Math.PI * 1.5);
+    camera.translateY(100);
+    camera.translateX(500);
+    camera.translateZ(300);*/
 
-const scene = new THREE.Scene();
+    /*camera.position.y = 200; 
+      camera.position.z =  50; 
+      camera.rotation.x = Math.PI / 4;*/
+    // Orbit Controls:
 
-// Background scene:
-var sceneColor = new THREE.Color(0xff6666);
-scene.background = sceneColor;
+    const controls = new THREE.OrbitControls(camera, canvas);
+    controls.target.set(0, 10, 175);
+    controls.update();
 
-// Cone:
-let coneGeometry = new THREE.ConeGeometry(10, 4, 10, 10, true);
-coneGeometry.elementsNeedUpdate = true;  
-let coneMaterial = new THREE.MeshPhongMaterial({color:0x00ccff});
-coneMaterial.side = THREE.DoubleSide;
-coneGeometry.scale(50.0, 50.0, 50.0);
-let cone = new THREE.Mesh(coneGeometry, coneMaterial);
-cone.castShadow = true;
-cone.dynamic = true;
-scene.add(cone);
-cone.rotation.x = - Math.PI * 1.25;
+    const scene = new THREE.Scene();
 
-scene.add(teddyMesh);
-scene.add(duckMesh);
+    // Background scene:
+    var sceneColor = new THREE.Color(0xff6666);
+    scene.background = sceneColor;
 
-// only use this function once to determine overall range
-function getRandomRanges(particleNum) {
+    // Cone:
+    let coneGeometry = new THREE.ConeGeometry(10, 4, 10, 10, true);
+    coneGeometry.elementsNeedUpdate = true;
+    let coneMaterial = new THREE.MeshPhongMaterial({ color: 0x00ccff });
+    coneMaterial.side = THREE.DoubleSide;
+    coneGeometry.scale(50.0, 50.0, 50.0);
+    let cone = new THREE.Mesh(coneGeometry, coneMaterial);
+    cone.castShadow = true;
+    cone.dynamic = true;
+    scene.add(cone);
+    cone.rotation.x = - Math.PI * 1.25;
+
     let vertices = coneGeometry.vertices;
     let length = particleNum;
     let totParticles = coneGeometry.vertices.length - 1;
@@ -84,8 +80,6 @@ function getRandomRanges(particleNum) {
       // keep track of original position
       randomRanges.push({vertex: randomVertex, time: randomTime, scale: randomScale});
     }
-    return randomRanges;
-}
 
 // for each time step, increment vertex only if it is in a certain modulo group (just use index within array)
 // direction can also be determined maybe?
@@ -205,4 +199,5 @@ function render() {
 </script>
 
 </body>
+
 </html>
