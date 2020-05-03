@@ -9,6 +9,7 @@
         <title> COS426 Final Project &mdash; Pool Whirl</title>
       </head>
 <script src= "teddyMesh.js" type= "module"></script>
+<script src = "rubberDuckMesh.js" type = "module"></script>
 
 <body style = "background-color: rgb(226, 113, 147);">
     <h1 id = "h1", style="color: white;">Pool Whirl</h1>
@@ -22,31 +23,37 @@
 <canvas id="canvas"></canvas>
 
 <script type= "module">
-    import {teddyMesh} from "./teddyMesh.js";
+    import {teddyMesh, teddyMunch, teddyInit} from "./teddyMesh.js";
+    import {duckMesh} from "./rubberDuckMesh.js";
     
 // Camera controls:
 const canvas = document.getElementById('canvas');
 const renderer = new THREE.WebGLRenderer({canvas});
 renderer.setSize(window.innerWidth, window.innerHeight);
-let camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 1, 1000);
-  camera.position.y = 200; 
-  camera.position.z =  50; 
-  camera.rotation.x = Math.PI / 4;
-// Orbit Controls:
-const controls = new THREE.OrbitControls(camera, canvas);
-controls.target.set(0, 0, 0);
-controls.update();  
+var camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 1, 10000);
 
+  /*camera.rotateX(Math.PI * 1.5);
+  camera.translateY(100);
+  camera.translateX(500);
+  camera.translateZ(300);*/
+
+/*camera.position.y = 200; 
+  camera.position.z =  50; 
+  camera.rotation.x = Math.PI / 4;*/
+// Orbit Controls:
+
+const controls = new THREE.OrbitControls(camera, canvas);
+controls.target.set(0,0,0);
+controls.update(); 
 
 const scene = new THREE.Scene();
-scene.add(camera);
 
 // Background scene:
 var sceneColor = new THREE.Color(0xff6666);
 scene.background = sceneColor;
 
 // Cone:
-let coneGeometry = new THREE.ConeGeometry(10, 4, 50, 10, true);
+let coneGeometry = new THREE.ConeGeometry(10, 4, 10, 10, true);
 coneGeometry.elementsNeedUpdate = true;  
 let coneMaterial = new THREE.MeshPhongMaterial({color:0x00ccff});
 coneMaterial.side = THREE.DoubleSide;
@@ -58,19 +65,7 @@ scene.add(cone);
 cone.rotation.x = - Math.PI * 1.25;
 
 scene.add(teddyMesh);
-
-
-// Lighting:
-const color = 0xFFFFFF;
-const sunColor = 0xffa51b;
-const light = new THREE.DirectionalLight(color, 1);
-light.position.set(camera.position.x, camera.position.y, camera.position.z-20);
-const sunLight = new THREE.DirectionalLight(sunColor, 0, 1, 0);
-sunLight.position.set(0, 0, 0);
-const ambient = new THREE.AmbientLight(0x404040, 1);
-scene.add(light);
-scene.add(sunLight);
-scene.add(ambient);
+scene.add(duckMesh);
 
 // only use this function once to determine overall range
 function getRandomRanges(particleNum) {
@@ -95,24 +90,56 @@ function getRandomRanges(particleNum) {
 function moveVertices(timer, randomRanges, mod) {
     let length = randomRanges.length;
     let vertices = coneGeometry.vertices;
-    let faces = coneGeometry.faces;
     // for example if i = 1 then 1, 4, 7 time steps will increment
     for (let i = mod; i < length; i += 3) {
-        let scale = (Math.sin(timer*100)) * randomRanges[i].scale;
+        let scale = (Math.sin(timer * 100)) * randomRanges[i].scale;
         let currentVertex = randomRanges[i].vertex;
         // just add 1 for now
         vertices[currentVertex].setY(vertices[currentVertex].y - scale);
     }
 }
 
+let yAxis = new THREE.Vector3(0, 1, 0);
+teddyMesh.rotateOnAxis(yAxis, Math.PI);
+
+teddyMesh.translateZ(175);
+teddyMesh.translateY(10);
+teddyMesh.rotateX(Math.PI);
+teddyMesh.rotateY(Math.PI / 2);
+
+cone.add(teddyMesh);
+let teddyPosition = teddyMesh.localToWorld(teddyMesh.position.clone());
+camera.position.set(teddyPosition.x, teddyPosition.y, teddyPosition.z);
+camera.translateZ(300);
+camera.translateY(130);
+camera.translateX(20);
+
+camera.lookAt(teddyPosition);
+
+// Lighting:
+const color = 0xFFFFFF;
+const sunColor = 0xffa51b;
+const light = new THREE.DirectionalLight(color, 1);
+light.position.set(camera.position.x, camera.position.y, camera.position.z-20);
+const sunLight = new THREE.DirectionalLight(sunColor, 0, 1, 0);
+sunLight.position.set(0, 0, 0);
+const ambient = new THREE.AmbientLight(0x404040, 1);
+scene.add(light);
+scene.add(sunLight);
+scene.add(ambient);
+
+var axesHelper = new THREE.AxesHelper( 100 );
+scene.add( axesHelper );
+
 // Animation:
 var time = 0;
 let randomRanges = getRandomRanges(300);
 let count = 0;
 let timer;
+let timer2;
+let timer3;
+let timer4;
 animate();
-
-
 
 function animate(){
   time += 30;
@@ -120,28 +147,29 @@ function animate(){
   render();
 }
 
-
-
-
 function render() {
-  //console.log(timer)
+  timer = time * 0.0002 * 0.8;
+  // get teddy's position before
+  let teddyOldPosition = teddyMesh.localToWorld(teddyMesh.position.clone());
+  let cameraOldPosition = camera.localToWorld(camera.position.clone());
   cone.rotation.y = timer * 10;
-
     let v = (count / 3) % 3;
 
     // only use randomranges like once
     // a condition like this, can change later
     if (v == 0){
-      timer = time * 0.0002 * 0.8;
-      moveVertices(timer, randomRanges, 0);
+      timer2 = time * 0.0002 * 0.8;
+      moveVertices(timer2, randomRanges, 0);
     }
+
     else if (v == 1) {
       //timer = -0.4 + time * 0.0002 * 0.8;
-      moveVertices(timer, randomRanges, 1);
+      moveVertices(timer2, randomRanges, 1);
     } 
+
     else if (v == 2) {
       //timer = 0.2 + time * 0.0002 * 0.8;
-      moveVertices(timer, randomRanges, 2);
+      moveVertices(timer2, randomRanges, 2);
     } 
 
     count++;
@@ -151,8 +179,18 @@ function render() {
     cone.geometry.normalsNeedUpdate = true;
     cone.geometry.verticesNeedUpdate = true;
 
+    // teddyInit(); 
+    teddyMunch();
+
    // Render! (by golly I hope this works!)
   renderer.render(scene, camera);
+
+  teddyPosition = teddyMesh.localToWorld(teddyMesh.position.clone());
+  // new - old
+  let changeTeddy = teddyPosition.clone().sub(teddyOldPosition.clone());
+  // camera's old position plus the change in teddy's position
+  //camera.position.set(cameraOldPosition.x + changeTeddy.x, cameraOldPosition.y + changeTeddy.y, cameraOldPosition.z + changeTeddy.z);
+  camera.lookAt(teddyPosition);
   }
 </script>
 
