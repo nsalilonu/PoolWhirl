@@ -148,7 +148,7 @@ else if (timer > 0 && timer > Math.PI/4 && timer < Math.PI/2) {
 
 function bounce(time) {
 let earBounce = Math.sin(time*50) * 3;
-let bodyBounce = Math.sin(time*70) * 0.25
+let bodyBounce = Math.sin(time*70) * 0.25;
 teddyLeftEarMesh.translateY(earBounce/10);
 teddyRightEarMesh.translateY(earBounce/10);
 teddyBody.translateY(bodyBounce/10);

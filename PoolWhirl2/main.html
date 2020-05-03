@@ -73,29 +73,35 @@ function getRandomRanges(particleNum) {
     let length = particleNum;
     let totParticles = coneGeometry.vertices.length - 1;
     let randomRanges = [];
-    let scale = 30;
+    let scale = 20;
+    let timeScale = 100;
     // selecting random particles
     for (let i = 0; i < length; i++) {
       let randomVertex = Math.round(Math.random() * totParticles);
-      let randomScale = Math.random() * scale;
+      let randomTime = Math.random() * timeScale; 
+      let randomScale = Math.round(Math.random() * scale) + 20; // Random number between 20 and 40.
       // added direction to keep track
       // keep track of original position
-      randomRanges.push({vertex: randomVertex, scale: randomScale});
+      randomRanges.push({vertex: randomVertex, time: randomTime, scale: randomScale});
     }
     return randomRanges;
 }
 
 // for each time step, increment vertex only if it is in a certain modulo group (just use index within array)
 // direction can also be determined maybe?
-function moveVertices(timer, randomRanges, mod) {
+function moveVertices(timer, randomRanges) {
     let length = randomRanges.length;
     let vertices = coneGeometry.vertices;
-    // for example if i = 1 then 1, 4, 7 time steps will increment
-    for (let i = mod; i < length; i += 3) {
-        let scale = (Math.sin(timer * 100)) * randomRanges[i].scale;
-        let currentVertex = randomRanges[i].vertex;
-        // just add 1 for now
-        vertices[currentVertex].setY(vertices[currentVertex].y - scale);
+    for (let i = 0; i < length; i ++) {
+        let scale = (Math.sin(randomRanges[i].time)) * 0.5; // The increment you move the vertex each time
+        let currentVertex = randomRanges[i].vertex; // A random vertex in the list.
+        let specialTime = Math.sin(timer * randomRanges[i].scale); // Defines when to change the direction. Different for every vertex.
+        if (specialTime > 0) { // Indicates to change the direction of motion.
+        vertices[currentVertex].setY(vertices[currentVertex].y + scale);
+        }
+        else {
+        vertices[currentVertex].setY(vertices[currentVertex].y + (-scale));
+        }
     }
 }
 
@@ -153,24 +159,24 @@ function render() {
   let teddyOldPosition = teddyMesh.localToWorld(teddyMesh.position.clone());
   let cameraOldPosition = camera.localToWorld(camera.position.clone());
   //cone.rotation.y = timer * 10;
-    let v = (count / 3) % 3;
+    let v = Math.round((count / 3) % 3);
 
     // only use randomranges like once
     // a condition like this, can change later
-    if (v == 0){
-      timer2 = time * 0.0002 * 0.8;
-      moveVertices(timer2, randomRanges, 0);
-    }
+    //if (v == 0){
+      //timer2 = time * 0.0002 * 0.8;
+      moveVertices(timer, randomRanges);
+    //}
 
-    else if (v == 1) {
-      //timer = -0.4 + time * 0.0002 * 0.8;
-      moveVertices(timer2, randomRanges, 1);
-    } 
+    // //else if (v == 1) {
+    //   //timer = -0.4 + time * 0.0002 * 0.8;
+    //   moveVertices(timer, randomRanges, v);
+    // //} 
 
-    else if (v == 2) {
-      //timer = 0.2 + time * 0.0002 * 0.8;
-      moveVertices(timer2, randomRanges, 2);
-    } 
+    // //else if (v == 2) {
+    //   //timer = 0.2 + time * 0.0002 * 0.8;
+    //   moveVertices(timer, randomRanges, v);
+    //} 
 
     count++;
         
