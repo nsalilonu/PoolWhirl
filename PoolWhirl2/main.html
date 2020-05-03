@@ -65,6 +65,7 @@
     scene.add(cone);
     cone.rotation.x = - Math.PI * 1.25;
 
+    function getRandomRanges(particleNum) {
     let vertices = coneGeometry.vertices;
     let length = particleNum;
     let totParticles = coneGeometry.vertices.length - 1;
@@ -80,6 +81,8 @@
       // keep track of original position
       randomRanges.push({vertex: randomVertex, time: randomTime, scale: randomScale});
     }
+    return randomRanges;
+  }
 
 // for each time step, increment vertex only if it is in a certain modulo group (just use index within array)
 // direction can also be determined maybe?
