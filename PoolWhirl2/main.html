@@ -11,12 +11,17 @@
 </head>
 <script src="teddyMesh.js" type="module"></script>
 <script src="rubberDuckMesh.js" type="module"></script>
+<script src="Lightning/main.js" type="module"></script>
+
+
 
 <body style="background-color: rgb(226, 113, 147);">
   <h1 id="h1" , style="color: white;">Pool Whirl</h1>
   <p style="color:rgb(248, 248, 248)">By: Sean-Wyn Ng, Nsomma Alilonu, Rachel Lee, and Emily Yin</p>
   <p style="color:rgb(5, 146, 99)">Save your teddy bear from an untimely demise!</p>
   <script src="three.min.js"></script>
+  <script src="Lightning/postprocessing.min.js"></script>
+<script src="Lightning/THREE.MeshLine.js"></script>
   <script src="OrbitControls.js"></script>
 
 
@@ -26,6 +31,7 @@
   <script type="module">
     import { teddyMesh, teddyMunch, teddyInit, bounce, handleCollisions } from "./teddyMesh.js";
     import { duckMesh } from "./rubberDuckMesh.js";
+    import { scene  as scene2 } from "./Lightning/main.js"; 
 
     // Camera controls:
     const canvas = document.getElementById('canvas');
@@ -33,14 +39,6 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
     var camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 1, 10000);
 
-    /*camera.rotateX(Math.PI * 1.5);
-    camera.translateY(100);
-    camera.translateX(500);
-    camera.translateZ(300);*/
-
-    /*camera.position.y = 200; 
-      camera.position.z =  50; 
-      camera.rotation.x = Math.PI / 4;*/
     // Orbit Controls:
 
     const controls = new THREE.OrbitControls(camera, canvas);
@@ -56,7 +54,7 @@
     // Cone:
     let coneGeometry = new THREE.ConeGeometry(10, 4, 10, 10, true);
     coneGeometry.elementsNeedUpdate = true;
-    let coneMaterial = new THREE.MeshPhongMaterial({ color: 0x00ccff });
+    let coneMaterial = new THREE.MeshToonMaterial({ color: 0x00ccff });
     coneMaterial.side = THREE.DoubleSide;
     coneGeometry.scale(50.0, 50.0, 50.0);
     let cone = new THREE.Mesh(coneGeometry, coneMaterial);
@@ -114,10 +112,8 @@ cone.add(teddyMesh);
 let teddyPosition = teddyMesh.localToWorld(teddyMesh.position.clone());
 camera.position.set(43, 110, 125);
 controls.target.set(teddyPosition.x, teddyPosition.y, teddyPosition.z);
-    controls.update();
-// camera.translateZ(200);
-// camera.translateY(30);
-// camera.translateX(200);
+controls.update();
+
 camera.rotateY(Math.PI/2);
 // controls.update();
 cone.add(duckMesh);
@@ -126,17 +122,55 @@ duckMesh.scale.set(3,3,3);
 
 // camera.lookAt(teddyPosition);
 
+
+
+function moveObject() {
+const DOWN = 40;
+const UP = 38;
+const LEFT = 37;
+const RIGHT = 39;
+const BACK = 188;
+const FRONT = 190;
+const key = event.keyCode;
+
+console.log(object.position);
+if (event.keyCode == DOWN) {
+object.translateY(-1);
+}
+else if (event.keyCode == UP ) {
+  object.translateY(1);
+} 
+else if (event.keyCode == LEFT ) {
+  object.translateX(-1);
+}
+else if (event.keyCode == RIGHT ) {
+  object.translateX(1);
+}
+else if (event.keyCode == FRONT ) {
+  object.translateZ(1);
+}
+else if (event.keyCode == BACK ) {
+  object.translateZ(-1);
+}
+}
+
 // Lighting:
 const color = 0xFFFFFF;
+const color2 = 0xffb400;
 const sunColor = 0xffa51b;
-const light = new THREE.DirectionalLight(color, 1);
-light.position.set(camera.position.x, camera.position.y, camera.position.z-20);
-const sunLight = new THREE.DirectionalLight(sunColor, 0, 1, 0);
-sunLight.position.set(0, 30, 50);
+const light = new THREE.DirectionalLight(color, 0.25);
+ light.position.set(-329, -81, -260);
+const teddyLight = new THREE.DirectionalLight(color2, 0.15);
+teddyLight.position.set( 9, 10, -1);
+//teddyLight.target = teddyMesh.position;
 const ambient = new THREE.AmbientLight(0x404040, 1);
 scene.add(light);
-scene.add(sunLight);
+scene.add(teddyLight);
 scene.add(ambient);
+
+let object = teddyLight;
+window.addEventListener('keydown', moveObject, false );
+
 
 var axesHelper = new THREE.AxesHelper( 100 );
 teddyMesh.add( axesHelper );
@@ -158,7 +192,7 @@ function render() {
   timer = time * 0.0002 * 0.8;
   // get teddy's position before
   let teddyOldPosition = teddyMesh.localToWorld(teddyMesh.position.clone());
-  let cameraOldPosition = camera.localToWorld(camera.position.clone());
+  let cameraOldPosition = camera.position.clone();
   //cone.rotation.y = timer * 10;
     let v = Math.round((count / 3) % 3);
 
@@ -196,11 +230,17 @@ function render() {
   
 
    // Render! (by golly I hope this works!)
-  renderer.render(scene, camera);
+  
+  //if (timer > 5) {
+  renderer.render(scene2, camera);
+  //}
+  // else {
+  // renderer.render(scene, camera);
+  // }
 
   teddyPosition = teddyMesh.localToWorld(teddyMesh.position.clone());
   // new - old
-  let changeTeddy = teddyPosition.clone().sub(teddyOldPosition.clone());
+  let changeTeddy = teddyMesh.position.clone().sub(teddyOldPosition.clone());
   // camera's old position plus the change in teddy's position
   //camera.position.set(cameraOldPosition.x + changeTeddy.x, cameraOldPosition.y + changeTeddy.y, cameraOldPosition.z + changeTeddy.z);
   //camera.lookAt(teddyPosition);

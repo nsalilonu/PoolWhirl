@@ -1,4 +1,4 @@
-window.onload = function () {
+//window.onload = function () {
     let scene = new THREE.Scene();
 
     let camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
@@ -59,7 +59,7 @@ window.onload = function () {
 
     let cloudParticles = [];
     let loader = new THREE.TextureLoader();
-    loader.load("smoke.png", function (texture) {
+    loader.load("./Lightning/smoke.png", function (texture) {
 
         let cloudGeo = new THREE.PlaneBufferGeometry(500, 500);
         let cloudMaterial = new THREE.MeshLambertMaterial({
@@ -267,5 +267,7 @@ window.onload = function () {
             requestAnimationFrame(animate);
         }
         animate();
+       
     });
-}
+    export {scene}; 
+//}
