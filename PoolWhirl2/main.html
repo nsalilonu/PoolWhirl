@@ -44,7 +44,7 @@
     // Orbit Controls:
 
     const controls = new THREE.OrbitControls(camera, canvas);
-    controls.target.set(0, 10, 175);
+    controls.target.set(0, 0, 0);
     controls.update();
 
     const scene = new THREE.Scene();
@@ -90,7 +90,7 @@ function moveVertices(timer, randomRanges) {
     let length = randomRanges.length;
     let vertices = coneGeometry.vertices;
     for (let i = 0; i < length; i ++) {
-        let scale = (Math.sin(randomRanges[i].time)) * 0.5; // The increment you move the vertex each time
+        let scale = (Math.sin(randomRanges[i].time)) * 0.35; // The increment you move the vertex each time
         let currentVertex = randomRanges[i].vertex; // A random vertex in the list.
         let specialTime = Math.sin(timer * randomRanges[i].scale); // Defines when to change the direction. Different for every vertex.
         if (specialTime > 0) { // Indicates to change the direction of motion.
@@ -112,10 +112,17 @@ teddyMesh.rotateY(Math.PI / 2);
 
 cone.add(teddyMesh);
 let teddyPosition = teddyMesh.localToWorld(teddyMesh.position.clone());
-camera.position.set(teddyPosition.x, teddyPosition.y, teddyPosition.z);
-camera.translateZ(300);
-camera.translateY(130);
-camera.translateX(10);
+camera.position.set(43, 110, 125);
+controls.target.set(teddyPosition.x, teddyPosition.y, teddyPosition.z);
+    controls.update();
+// camera.translateZ(200);
+// camera.translateY(30);
+// camera.translateX(200);
+camera.rotateY(Math.PI/2);
+// controls.update();
+cone.add(duckMesh);
+duckMesh.rotateX(Math.PI);
+duckMesh.scale.set(3,3,3);
 
 // camera.lookAt(teddyPosition);
 
@@ -125,23 +132,20 @@ const sunColor = 0xffa51b;
 const light = new THREE.DirectionalLight(color, 1);
 light.position.set(camera.position.x, camera.position.y, camera.position.z-20);
 const sunLight = new THREE.DirectionalLight(sunColor, 0, 1, 0);
-sunLight.position.set(0, 0, 0);
+sunLight.position.set(0, 30, 50);
 const ambient = new THREE.AmbientLight(0x404040, 1);
 scene.add(light);
 scene.add(sunLight);
 scene.add(ambient);
 
 var axesHelper = new THREE.AxesHelper( 100 );
-scene.add( axesHelper );
+teddyMesh.add( axesHelper );
 
 // Animation:
 var time = 0;
 let randomRanges = getRandomRanges(300);
 let count = 0;
 let timer;
-let timer2;
-let timer3;
-let timer4;
 animate();
 
 function animate(){
@@ -176,6 +180,8 @@ function render() {
     //} 
 
     count++;
+
+    handleCollisions(cone.geometry.vertices);
         
     cone.geometry.computeFaceNormals();
     cone.geometry.computeVertexNormals();
@@ -197,7 +203,7 @@ function render() {
   let changeTeddy = teddyPosition.clone().sub(teddyOldPosition.clone());
   // camera's old position plus the change in teddy's position
   //camera.position.set(cameraOldPosition.x + changeTeddy.x, cameraOldPosition.y + changeTeddy.y, cameraOldPosition.z + changeTeddy.z);
-  camera.lookAt(teddyPosition);
+  //camera.lookAt(teddyPosition);
   }
 </script>
 
