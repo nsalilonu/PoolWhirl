@@ -25,7 +25,7 @@ let billGeometry = new THREE.BoxGeometry(10, 2, 5);
 let billMaterial = new THREE.MeshPhongMaterial({color: 0xFF7919});
 let bill = new THREE.Mesh(billGeometry, billMaterial);
 bill.translateY(-2);
-bill.translateZ(-10);
+bill.translateZ(-8);
 duckMesh.add(bill);
 
 // create the duck's body
@@ -39,15 +39,15 @@ duckMesh.add(body);
 let tailGeometry = new THREE.BoxGeometry(2, 2, 2);
 let tail = new THREE.Mesh(tailGeometry, duckMaterial);
 tail.translateZ(18);
-tail.translateY(-2);
+tail.translateY(-5);
 duckMesh.add(tail);
 
 // create the wings
-let wingGeometry = new THREE.BoxGeometry(2, 9, 12);
+let wingGeometry = new THREE.BoxGeometry(2, 9, 8);
 let rightWing = new THREE.Mesh(wingGeometry, duckMaterial);
 rightWing.translateY(-10);
 rightWing.translateX(7);
-rightWing.translateZ(18);
+rightWing.translateZ(14);
 duckMesh.add(rightWing);
 
 let leftWing = rightWing.clone();

@@ -1,4 +1,4 @@
-//window.onload = function () {
+//function generate_lightning () {
     let scene = new THREE.Scene();
 
     let camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
@@ -268,6 +268,7 @@
         }
         animate();
        
-    });
-    export {scene}; 
+    }); 
 //}
+
+// export {generate_lightning};
