@@ -132,8 +132,17 @@ teddyTail.translateZ(8);
 teddyBody.add(teddyTail);
 
 var timer = 0;
-function teddyInit() {
+function teddyInit(randomRanges) {
     timer = 0;
+    teddyMesh.computeBoundingBox();
+    let boundingBox = teddyMesh.boundingBox;
+    let length = randomRanges.length;
+    for (let i = 0; i < length; i++) {
+        if (boundingBox.containsPoint(randomRanges[i])) {
+            
+        }
+    }
+
 }
 
 function teddyMunch() {
