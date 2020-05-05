@@ -366,8 +366,8 @@ controls.update();
         let segmentList = [];
 
 
-        let startPoint = new THREE.Vector3(-400, 500, -2);
-        let endPoint = new THREE.Vector3(-100, -5, -2);
+        let startPoint = new THREE.Vector3(300, 500, -2);
+        let endPoint = new THREE.Vector3(200, -5, -2);
 
 
         let points = [];
@@ -535,7 +535,9 @@ controls.update();
                 deactivate_lightning();
                 return;
             }
+            else {
             requestAnimationFrame(animate_lightning);
+            }
         }
 
 
