@@ -2,54 +2,53 @@
 <html>
 
 <head>
-  <!-- the next three lines try to discourage browser from keeping page in cache -->
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="-1">
-  <meta http-equiv="cache-control" content="no-store">
+    <!-- the next three lines try to discourage browser from keeping page in cache -->
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="-1">
+    <meta http-equiv="cache-control" content="no-store">
 
-  <title> COS426 Final Project &mdash; Pool Whirl</title>
+    <title> COS426 Final Project &mdash; Pool Whirl</title>
 </head>
 <script src="teddyMesh.js" type="module"></script>
 <script src="rubberDuckMesh.js" type="module"></script>
-<!-- <script src="Lightning/main.js" type="module"></script> -->
-
-
 
 <body style="background-color: rgb(226, 113, 147);">
-  <h1 id="h1" , style="color: white;">Pool Whirl</h1>
-  <p style="color:rgb(248, 248, 248)">By: Sean-Wyn Ng, Nsomma Alilonu, Rachel Lee, and Emily Yin</p>
-  <p style="color:rgb(5, 146, 99)">Save your teddy bear from an untimely demise!</p>
-  <script src="three.min.js"></script>
-  <script src="Lightning/postprocessing.min.js"></script>
-  <script src="Lightning/THREE.MeshLine.js"></script>
-  <script src="OrbitControls.js"></script>
+    <h1 id="h1" , style="color: white;">Pool Whirl</h1>
+    <p style="color:rgb(248, 248, 248)">By: Sean-Wyn Ng, Nsomma Alilonu, Rachel Lee, and Emily Yin</p>
+    <p style="color:rgb(5, 146, 99)">Save your teddy bear from an untimely demise!</p>
+    <script src="three.min.js"></script>
+    <script src="Lightning/postprocessing.min.js"></script>
+    <script src="Lightning/THREE.MeshLine.js"></script>
+    <script src="OrbitControls.js"></script>
 
 
 
-  <canvas id="canvas"></canvas>
+    <canvas id="canvas"></canvas>
 
-  <script type="module">
-    import { teddyMesh, teddyMunch, teddyInit, bounce } from "./teddyMesh.js";
-    import { duckMesh } from "./rubberDuckMesh.js";
+    <script type="module">
+        import { teddyMesh, teddyMunch, teddyInit, bounce} from "./teddyMesh.js";
+        import { duckMesh } from "./rubberDuckMesh.js";
 
-    // Camera controls:
-    const canvas = document.getElementById('canvas');
-    const renderer = new THREE.WebGLRenderer({ canvas });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    var camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 1, 10000);
+        // Camera controls:
+        const canvas = document.getElementById('canvas');
+        const renderer = new THREE.WebGLRenderer({ canvas });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        var camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 1, 10000);
 
-    // Orbit Controls:
+        // Orbit Controls:
 
-    const controls = new THREE.OrbitControls(camera, canvas);
+        const controls = new THREE.OrbitControls(camera, canvas);
+        controls.target.set(0, 0, 0);
+        controls.update();
 
-    const scene = new THREE.Scene();
+        const scene = new THREE.Scene();
 
-    // Background scene:
-    var sceneColor = new THREE.Color(0xff6666);
-    scene.background = sceneColor;
+        // Background scene:
+        var sceneColor = new THREE.Color(0xff6666);
+        scene.background = sceneColor;
 
-    // Cone:
-    let coneGeometry = new THREE.ConeGeometry(10, 4, 10, 10, true);
+// Cone:
+let coneGeometry = new THREE.ConeGeometry(10, 4, 10, 10, true);
     coneGeometry.elementsNeedUpdate = true;
     let coneScale = 50;
     coneGeometry.scale(coneScale, coneScale, coneScale);
@@ -85,301 +84,290 @@
     torus.position.set(0, -17.000000000000007, -1.0000000000000142);
     teddyMesh.add(torus);
 
-    function getRandomRanges(particleNum) {
-    let vertices = coneGeometry.vertices;
-    let length = particleNum;
-    let totParticles = coneGeometry.vertices.length - 1;
-    let randomRanges = [];
-    let scale = 40;
-    let timeScale = 50;
-    // selecting random particles
-    for (let i = 0; i < length; i++) {
-      let randomVertex = Math.round(Math.random() *  totParticles);
-      let vertexY = vertices[randomVertex].y;
-      let randomTime = Math.random() * timeScale; // [0,50] 
-      let randomScale = Math.round(Math.random() * scale); // Random number between 0 and 20.
-      randomRanges.push({vertex: randomVertex, originalY: vertexY, time: randomTime, scale: randomScale});
-    }
-    return randomRanges;
-  }
+        function getRandomRanges(particleNum) {
+            let vertices = coneGeometry.vertices;
+            let length = particleNum;
+            let totParticles = coneGeometry.vertices.length - 1;
+            let randomRanges = [];
+            let scale = 40;
+            let timeScale = 50;
+            // selecting random particles
+            for (let i = 0; i < length; i++) {
+                let randomVertex = Math.round(Math.random() * totParticles);
+                let vertexY = vertices[randomVertex].y;
+                let randomTime = Math.random() * timeScale; // [0,50] 
+                let randomScale = Math.round(Math.random() * scale); // Random number between 0 and 20.
+                // added direction to keep track
+                // keep track of original position
+                randomRanges.push({ vertex: randomVertex, originalY: vertexY, time: randomTime, scale: randomScale });
+            }
+            return randomRanges;
+        }
 
 
-function moveVertices(timer, randomRanges) {
-    let length = randomRanges.length;
-    let vertices = coneGeometry.vertices;
-    for (let i = 0; i < length; i ++) {
-        let scale = Math.sin(timer*randomRanges[i].time) * randomRanges[i].scale;
-        let currentVertex = randomRanges[i].vertex; // A random vertex in the list.
-        vertices[currentVertex].setY(randomRanges[i].originalY + scale);
-    }
-}
+        function moveVertices(timer, randomRanges) {
+            let length = randomRanges.length;
+            let vertices = coneGeometry.vertices;
+            for (let i = 0; i < length; i++) {
+                let scale = Math.sin(timer * randomRanges[i].time) * randomRanges[i].scale;
+                let currentVertex = randomRanges[i].vertex; // A random vertex in the list.
+                vertices[currentVertex].setY(randomRanges[i].originalY + scale);
+            }
+        }
 
-let yAxis = new THREE.Vector3(0, 1, 0);
-// teddyMesh.rotateOnAxis(yAxis, Math);
+        let yAxis = new THREE.Vector3(0, 1, 0);
 
 teddyMesh.translateZ(175);
 teddyMesh.translateY(10);
 teddyMesh.rotateY(Math.PI / 2);
 
+
 scene.add(teddyMesh);
 let teddyPosition = teddyMesh.localToWorld(teddyMesh.position.clone());
 camera.position.set( -219.61429616527784,  60.79054134136912, 154.64688761281252);
-
-// this is what you add to the new teddy's position to get the new camera position
-// let directionVector = camera.position.clone().sub(teddy.position.clone());
-
 controls.target.set(teddyPosition.x, teddyPosition.y, teddyPosition.z);
 controls.update();
 
 
-// place ducks at various points in the scene
-let ducks = [];
-let closestVertex = [];
-function ducksInit() {
-    let coneRadius = 10 * 50;
-    // find the axis of the cone
-    let axis = new THREE.Vector3(0, 1, 0);
-    let x_axis = new THREE.Vector3(1, 0, 0);
-    axis.applyAxisAngle(axis, -Math.PI * 1.25);
-    axis.normalize();
-    // find the height of the cone
-    let coneHeight = 4 * 50;
-    let noMotherDuck = true;
-    let motherDuck;
-    for (let i = 0; i < coneHeight; i+=20) {
-      for (let j = -coneRadius; j < coneRadius; j+=20) {
-        for (let k = -coneRadius; k < coneRadius; k += 20) {
-          let position = new THREE.Vector3(j, i, k);
-          // check to see if the position is within the cone
-          // method found at this website: https://stackoverflow.com/questions/12826117/how-can-i-detect-if-a-point-is-inside-a-cone-or-not-in-3d-space
-          // first, find points distance along the axis
-          let dist = position.dot(axis);
-          if (dist > coneHeight) {
-            continue;
-          }
-          // calculate cone radius at that position of the axis
-          let rad = (dist / coneHeight) * coneRadius;
-          // calculate the point's orthogonal distance
-          let orthoDist = position.sub(axis.clone().multiplyScalar(dist)).length();
-          // is the position on the cone?
-          if (orthoDist == rad) {
-            // if so, place an invisible rubber duck there
-            let newDuck = duckMesh.clone();
-            if (noMotherDuck) {
-              motherDuck = newDuck;
-              motherDuck.translateY(92);
+        // place ducks at various points in the scene
+        let ducks = [];
+        let closestVertex = [];
+        function ducksInit() {
+            let coneRadius = 10 * 50;
+            // find the axis of the cone
+            let axis = new THREE.Vector3(0, 1, 0);
+            let x_axis = new THREE.Vector3(1, 0, 0);
+            axis.applyAxisAngle(axis, -Math.PI * 1.25);
+            axis.normalize();
+            // find the height of the cone
+            let coneHeight = 4 * 50;
+            let noMotherDuck = true;
+            let motherDuck;
+            for (let i = 0; i < coneHeight; i += 20) {
+                for (let j = -coneRadius; j < coneRadius; j += 20) {
+                    for (let k = -coneRadius; k < coneRadius; k += 20) {
+                        let position = new THREE.Vector3(j, i, k);
+                        // check to see if the position is within the cone
+                        // method found at this website: https://stackoverflow.com/questions/12826117/how-can-i-detect-if-a-point-is-inside-a-cone-or-not-in-3d-space
+                        // first, find points distance along the axis
+                        let dist = position.dot(axis);
+                        if (dist > coneHeight) {
+                            continue;
+                        }
+                        // calculate cone radius at that position of the axis
+                        let rad = (dist / coneHeight) * coneRadius;
+                        // calculate the point's orthogonal distance
+                        let orthoDist = position.sub(axis.clone().multiplyScalar(dist)).length();
+                        // is the position on the cone?
+                        if (orthoDist == rad) {
+                            // if so, place an invisible rubber duck there
+                            let newDuck = duckMesh.clone();
+                            if (noMotherDuck) {
+                                motherDuck = newDuck;
+                                motherDuck.translateY(92);
+                            }
+                            newDuck.translateX(j);
+                            newDuck.translateY(-i);
+                            newDuck.translateZ(k);
+                            newDuck.scale.set(0.8, 0.8, 0.8);
+                            let random = Math.random() * Math.PI * 2;
+                            newDuck.rotateY(random);
+
+                            ducks.push(newDuck);
+                            newDuck.visible = false;
+
+                            if (noMotherDuck) {
+                                cone.add(motherDuck);
+                                noMotherDuck = false;
+                            }
+                            else {
+                                newDuck.rotateZ(Math.PI);
+                                motherDuck.add(newDuck);
+                            }
+                        }
+                    }
+                }
             }
-          newDuck.translateX(j);
-          newDuck.translateY(-i);
-          newDuck.translateZ(k);
-          newDuck.scale.set(0.8,0.8,0.8);
-          let random = Math.random() * Math.PI * 2;
-          newDuck.rotateY(random);
-          
-          ducks.push(newDuck);
-          newDuck.visible = false;
-          
-          if (noMotherDuck) {
-            cone.add(motherDuck);
-            noMotherDuck = false;
-          }
-          else {
-            newDuck.rotateZ(Math.PI);
-            motherDuck.add(newDuck);
-          }
+
+
+
+            // find the closest vertex to each duck and store the index of the that vertex in an array
+            // access the corresponding vertex for each duck to update it's y position to be
+            // that vertex's y position + EPS
+            let duck_length = ducks.length;
+            let vertices = coneGeometry.vertices;
+            let vertices_length = coneGeometry.vertices.length;
+            // stores the index of the closest vertex to each duck
+            for (let i = 0; i < duck_length; i++) {
+                let minVertex = new THREE.Vector3(600, 600, 600);
+                let minLength = minVertex.length();
+                // look through all the vertices to find the closest one
+                for (let j = 0; j < vertices_length; j++) {
+                    let currLength = coneGeometry.vertices[j].clone().sub(ducks[i].position).length();
+                    if (currLength <= minLength) {
+                        minLength = currLength;
+                        minVertex = coneGeometry.vertices[j];
+                    }
+                }
+                closestVertex.push(minVertex);
+            }
         }
-      }
-    }
-  }
 
-  // find the closest vertex to each duck and store the index of the that vertex in an array
-  // access the corresponding vertex for each duck to update it's y position to be
-  // that vertex's y position + EPS
-  let duck_length = ducks.length;
-  let vertices = coneGeometry.vertices;
-  let vertices_length = coneGeometry.vertices.length;
-   // stores the index of the closest vertex to each duck
-  for (let i = 0; i < duck_length; i++) {
-    let minVertex = new THREE.Vector3(600, 600, 600);
-    let minLength = minVertex.length();
-    // look through all the vertices to find the closest one
-    for (let j = 0; j < vertices_length; j++) {
-      let currLength = coneGeometry.vertices[j].clone().sub(ducks[i].position).length();
-      if (currLength <= minLength) {
-        minLength = currLength;
-        minVertex = coneGeometry.vertices[j];
-      }
-    }
-    closestVertex.push(minVertex);
-  }
-}
-
-function stickyDuck() {
-  const length = closestVertex.length;
-  const EPS = 2 - 92/2 - 10;
-  for (let i = 0; i < length; i++) {
-    // ducks[i].position.setX(closestVertex[i].x + EPS);
-    ducks[i].position.setY(closestVertex[i].y + EPS);
-    // ducks[i].position.setZ(closestVertex[i].z + EPS);
-  }
-}
+        function stickyDuck() {
+            const length = closestVertex.length;
+            const EPS = 2 - 92 / 2 - 10;
+            for (let i = 0; i < length; i++) {
+                
+                ducks[i].position.setY(closestVertex[i].y + EPS);
+               
+            }
+        }
 
 
-// run a for loop where if the selected random duck is not 
-// currently seen by the camera, make it visible
-let randomDuck = Math.floor(ducks.length * Math.random());
-// if (!ducks[randomDuck].visible && /* not in camera's view but I don't know how to code it*/) {
-//   ducks[randomDuck].visible = true;
-// }
+        // run a for loop where if the selected random duck is not 
+        // currently seen by the camera, make it visible
+        let randomDuck = Math.floor(ducks.length * Math.random());
+        let object = teddyMesh;
+        function moveObject() {
+            const DOWN = 40;
+            const UP = 38;
+            const LEFT = 37;
+            const RIGHT = 39;
+            const BACK = 188;
+            const FRONT = 190;
+            const key = event.keyCode;
 
-// have an if statement that gets rid of ducks that the bear avoids
-// 
+            if (event.keyCode == DOWN) {
+                object.translateY(-1);
+            }
+            else if (event.keyCode == UP) {
+                object.translateY(1);
+            }
+            else if (event.keyCode == LEFT) {
+                object.translateX(-1);
+            }
+            else if (event.keyCode == RIGHT) {
+                object.translateX(1);
+            }
+            else if (event.keyCode == FRONT) {
+                object.translateZ(1);
+            }
+            else if (event.keyCode == BACK) {
+                object.translateZ(-1);
+            }
+        }
 
+        // Lighting:
+        const color = 0xFFFFFF;
+        const color2 = 0xffb400;
+        const sunColor = 0xffa51b;
+        const light = new THREE.DirectionalLight(color, 0.25);
+        light.position.set(-329, -81, -260);
+        const teddyLight = new THREE.DirectionalLight(color2, 0.5);
+        teddyLight.position.set(9, 10, -1);
+        const ambient = new THREE.AmbientLight(0x404040, 1);
+        scene.add(light);
+        scene.add(teddyLight);
+        scene.add(ambient);
 
-let offset = new THREE.Vector3();
-let object = teddyMesh;
-function moveObject() {
-  const DOWN = 40;
-  const UP = 38;
-  const LEFT = 37;
-  const RIGHT = 39;
-  const BACK = 188;
-  const FRONT = 190;
-  const key = event.keyCode;
-
-  console.log(teddyMesh.position);
-  if (event.keyCode == DOWN) {
-  object.translateY(-1);
-
-  }
-  else if (event.keyCode == UP ) {
-    object.translateY(1);
-
-  } 
-  else if (event.keyCode == LEFT ) {
-    object.translateX(-1);
-  }
-  else if (event.keyCode == RIGHT ) {
-    object.translateX(1);
-  }
-  else if (event.keyCode == FRONT ) {
-    object.translateZ(1);
-  }
-  else if (event.keyCode == BACK ) {
-    object.translateZ(-1);
-  }
-}
-
-// Lighting:
-const color = 0xFFFFFF;
-const color2 = 0xffb400;
-const sunColor = 0xffa51b;
-const light = new THREE.DirectionalLight(color, 0.25);
- light.position.set(-329, -81, -260);
-const teddyLight = new THREE.DirectionalLight(color2, 0.5);
-teddyLight.position.set( 9, 10, -1);
-const ambient = new THREE.AmbientLight(0x404040, 1);
-scene.add(light);
-scene.add(teddyLight);
-scene.add(ambient);
-
-window.addEventListener('keydown', moveObject, false );
+        window.addEventListener('keydown', moveObject, false);
 
 
-var axesHelper = new THREE.AxesHelper( 100 );
-teddyMesh.add( axesHelper );
+        var axesHelper = new THREE.AxesHelper(100);
+        teddyMesh.add(axesHelper);
 
+        
+        function activate_lightning() {
+            cloud_dlight.visible = true;
+            cloud_ambient.visible = true;
+            scene.fog = new THREE.FogExp2(0x11111f, 0.002);
+            
+            for (let cloud of cloudParticles) {
+                cloud.visible = true;
+            }
 
+            for (let lightning_segment of segmentList) {
+                lightning_segment[0].visible = true;
+            }
+            
+            animate_lightning();
+        }
 
+        function deactivate_lightning() {
+            console.log("Function called");
+            cloud_dlight.visible = false;
+            cloud_ambient.visible = false;
+            scene.fog.density = 0;
+           
+            for (let cloud of cloudParticles) {
+                cloud.visible = false;
+            }
+            for (let lightning_segment of segmentList) {
+                lightning_segment[0].visible = false;
+            }
 
-// Lightning!
-let lightningScene = new THREE.Scene();
+            // deactivate glow 
+            composer.renderToScreen = false;
+            composer.render();
+            return;
+        }
+       
+        // add lights for the clouds 
+        const cloud_dlight = new THREE.DirectionalLight(0xffffff, 0.7);
+        cloud_dlight.position.set(1, 1, 0).normalize();
+        scene.add(cloud_dlight);
+        cloud_dlight.visible = false;
+        const cloud_ambient = new THREE.AmbientLight(0xffffff, 0.3);
+        scene.add(cloud_ambient);
+        cloud_ambient.visible = false;
 
-    // let camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
-    // camera.position.z = 1;
-    // camera.rotation.x = 1.16;
-    // camera.rotation.y = -0.12;
-    // camera.rotation.z = 0.27;
+        let cloudParticles = [];
+        let loader = new THREE.TextureLoader();
+        loader.load("./Lightning/smoke.png", function (texture) {
 
-    let ambient_lightning = new THREE.AmbientLight(0x555555);
-    lightningScene.add(ambient_lightning);
+            let cloudGeo = new THREE.PlaneBufferGeometry(500, 500);
+            let cloudMaterial = new THREE.MeshLambertMaterial({
+                map: texture,
+                transparent: true
+            });
 
-    let directionalLight = new THREE.DirectionalLight(0xffeedd);
-    directionalLight.position.set(0, 0, 1);
-    lightningScene.add(directionalLight);
-
-    lightningScene.fog = new THREE.FogExp2(0x11111f, 0.002);
-    renderer.setClearColor(lightningScene.fog.color);
-    
-    document.body.appendChild(renderer.domElement);
-
-    // create an EffectComposer
-    const composer = new POSTPROCESSING.EffectComposer(renderer);
-    // as the first pass, add a RenderPass that will render the scene
-    // with the camera into the first render target 
-    composer.addPass(new POSTPROCESSING.RenderPass(lightningScene, camera));
-    // next, add a BloomPass, which renders its input to a smaller 
-    // render target and blurs the result, then adds it on top 
-    // of the original input
-    const effectPass = new POSTPROCESSING.EffectPass(
-        camera,
-        new POSTPROCESSING.BloomEffect({intensity: 2})
-      );
-      effectPass.renderToScreen = true;
-      composer.addPass(effectPass);
-
-    let rainGeo = new THREE.Geometry();
-    let rainCount = 15000;
-    // randomly generate and push vertices onto the geometry 
-    for (let i = 0; i < rainCount; i++) {
-        let rainDrop = new THREE.Vector3(
-            Math.random() * 400 - 200,
-            Math.random() * 500 - 250,
-            Math.random() * 400 - 200
-        );
-        rainDrop.velocity = {};
-        rainDrop.velocity = 0;
-        rainGeo.vertices.push(rainDrop);
-    }
-    // create the rain material using PointMaterial class
-    let rainMaterial = new THREE.PointsMaterial({
-        color: 0xaaaaaa,
-        size: 0.1,
-        transparent: true
-    });
-    let rain = new THREE.Points(rainGeo, rainMaterial);
-    lightningScene.add(rain);
-
-    let cloudParticles = [];
-    let loader = new THREE.TextureLoader();
-    //loader.load("./Lightning/smoke.png", function (texture) {
-
-        let cloudGeo = new THREE.PlaneBufferGeometry(500, 500);
-        let cloudMaterial = new THREE.MeshLambertMaterial({
-            //map: texture,
-            transparent: true
+            for (let p = 0; p < 100; p++) {
+                let cloud = new THREE.Mesh(cloudGeo, cloudMaterial);
+                cloud.position.set(
+                    Math.random() * 800 - 500,
+                    Math.random() * 400 - 200,
+                    100
+                );
+                cloud.rotation.x = 1.16;
+                cloud.rotation.y = -0.12;
+                cloud.rotation.z = Math.random() * 360;
+                cloud.material.opacity = 0.6;
+                scene.add(cloud);
+                cloud.visible = false;
+                cloudParticles.push(cloud);
+            }
         });
 
-        for (let p = 0; p < 25; p++) {
-            let cloud = new THREE.Mesh(cloudGeo, cloudMaterial);
-            cloud.position.set(
-                Math.random() * 800 - 500,
-                500,
-                Math.random() * 800 - 450
-            );
-            cloud.rotation.x = 1.16;
-            cloud.rotation.y = -0.12;
-            cloud.rotation.z = Math.random() * 360;
-            cloud.material.opacity = 0.6;
-            lightningScene.add(cloud);
-            cloudParticles.push(cloud);
-        }
-      //})
+        // create an EffectComposer
+        const composer = new POSTPROCESSING.EffectComposer(renderer);
+        // as the first pass, add a RenderPass that will render the scene
+        // with the camera into the first render target 
+        composer.addPass(new POSTPROCESSING.RenderPass(scene, camera));
+        // next, add a BloomPass, which renders its input to a smaller 
+        // render target and blurs the result, then adds it on top 
+        // of the original input
+        const effectPass = new POSTPROCESSING.EffectPass(
+            camera,
+            new POSTPROCESSING.BloomEffect({ intensity: 2.5 })
+        );
+        effectPass.renderToScreen = true;
+        composer.addPass(effectPass);
 
         let segmentList = [];
 
-        let startPoint = new THREE.Vector3(-150, 300, -2);
-        let endPoint = new THREE.Vector3(50, 30, -2);
+
+        let startPoint = new THREE.Vector3(-400, 500, -2);
+        let endPoint = new THREE.Vector3(-100, -5, -2);
 
 
         let points = [];
@@ -437,9 +425,9 @@ let lightningScene = new THREE.Scene();
 
                 // get three random floats between -MAX_OFFSET and MAX_OFFSET 
                 // to form the random offset 
-                let n1 = (2 * maxOffset) *  Math.random() - maxOffset;
-                let n2 = (2 * maxOffset) *  Math.random() - maxOffset;
-                let n3 = (2 * maxOffset) *  Math.random() - maxOffset;
+                let n1 = (2 * maxOffset) * Math.random() - maxOffset;
+                let n2 = (2 * maxOffset) * Math.random() - maxOffset;
+                let n3 = (2 * maxOffset) * Math.random() - maxOffset;
                 let randOffset = new THREE.Vector3(n1, n2, n3);
 
                 norm.multiply(randOffset);
@@ -485,9 +473,9 @@ let lightningScene = new THREE.Scene();
                     let direction = new THREE.Vector3();
                     direction.subVectors(midPoint, startPoint);
                     // generate a random angle between 0 and 2 * pi radians 
-                    let x_angle =  Math.random() * Math.PI / 2;
-                    let y_angle =  Math.random() * Math.PI / 2;
-                    let z_angle =  Math.random() * Math.PI / 2;
+                    let x_angle = Math.random() * Math.PI / 2;
+                    let y_angle = Math.random() * Math.PI / 2;
+                    let z_angle = Math.random() * Math.PI / 2;
                     let rotation = new THREE.Euler(x_angle, y_angle, z_angle);
                     let rotated_vec = new THREE.Vector3();
                     rotated_vec.copy(direction.applyEuler(rotation));
@@ -517,38 +505,20 @@ let lightningScene = new THREE.Scene();
         }
         // add every line segment in the array to the scene
         for (let segment of segmentList) {
-            lightningScene.add(segment[0]);   
-      }
-      // lightningScene.add(cone);
-      // lightningScene.add(duckMesh);
-
+            scene.add(segment[0]);
+            segment[0].visible = false;
+        }
+         
         let time = 0;
-        function animate_lightning() {
-            cloudParticles.forEach(p => {
-                p.rotation.z -= 0.002;
-            });
-            rainGeo.vertices.forEach(p => {
-                p.velocity -= 0.1 +  Math.random() * 0.1;
-                p.y += p.velocity;
-                if (p.y < -200) {
-                    p.y = 200;
-                    p.velocity = 0;
-                }
-            });
-            rainGeo.verticesNeedUpdate = true;
-            rain.rotation.y += 0.002;
-            let flash = new THREE.PointLight(0x062d89, 30, 500, 1.7);
-            flash.position.set(200, 300, 100);
-            lightningScene.add(flash);
-            if ( Math.random() > 0.93 || flash.power > 100) {
-                if (flash.power < 100)
-                    flash.position.set(
-                        Math.random() * 400,
-                        300 +  Math.random() * 200,
-                        100
-                    );
-                flash.power = 50 +  Math.random() * 500;
-            }
+        let then = 0;
+
+        // requestAnimationFrame passes the time since the page was loaded to the callback (in ms) 
+        function animate_lightning(now) {
+            // convert to seconds
+            now *= 0.001;
+            const deltaTime = now - then;
+            then = now;
+
             if (time % 2 == 0) {
                 for (let segment of segmentList) {
                     segment[0].visible = false;
@@ -558,64 +528,63 @@ let lightningScene = new THREE.Scene();
                 for (let segment of segmentList) {
                     segment[0].visible = true;
                 }
-            }
+            } 
             time = time + 1;
-            composer.render();
-            // requestAnimationFrame(animate);
+            composer.render(deltaTime);
+            if (now > 5) {
+                deactivate_lightning();
+                return;
+            }
+            requestAnimationFrame(animate_lightning);
         }
-        // animate_lightning();      
-        
-// Animation:
-var whirlTime = 0;
-let count = 0;
-let timer;
 
-// Populate Scene:
-let randomRanges = getRandomRanges(300);
-ducksInit();
-scene.add(camera);
-animate();
 
-function animate(){
-  whirlTime += 30;
-  requestAnimationFrame(animate);
-  render();
-}
+        // Animation:
+        var whirlTime = 0;
+        let count = 0;
+        let timer;
 
-function render() {
-  timer = whirlTime * 0.0002 * 0.8;
-  // get teddy's position before
-  cone.rotation.y = timer * 10;
+        // Populate Scene:
+        let randomRanges = getRandomRanges(300);
+        ducksInit();
 
-      moveVertices(timer, randomRanges);
+        animate();
 
-        
-    cone.geometry.computeFaceNormals();
-    cone.geometry.computeVertexNormals();
-    cone.geometry.normalsNeedUpdate = true;
-    cone.geometry.verticesNeedUpdate = true;
+        function animate() {
+            whirlTime += 30;
+            requestAnimationFrame(animate);
+            render();
+        }
 
-    let coneHeight = cone.geometry.parameters.height * coneScale;
-    let coneRadius = cone.geometry.parameters.radius * coneScale;
-    let theta = Math.atan(coneHeight/coneRadius);
-    teddyMunch();
-    bounce(theta, teddyMesh.position.z, -coneHeight/2, timer);
-    stickyDuck();
-    
-   // Render! (by golly I hope this works!)
-   renderer.autoClear = true;
+        function render() {
+            timer = whirlTime * 0.0002 * 0.8;
 
-    //render scene1
-    renderer.render(scene, camera);
 
-    //prevent canvas from being erased with next .render call
-    // renderer.autoClear = false;
+            moveVertices(timer, randomRanges);
 
-    //just render scene2 on top of scene1
-    // renderer.render(lightningScene, camera);
-    // animate_lightning();
-  }
-</script>
+
+            cone.geometry.computeFaceNormals();
+            cone.geometry.computeVertexNormals();
+            cone.geometry.normalsNeedUpdate = true;
+            cone.geometry.verticesNeedUpdate = true;
+
+
+            let coneHeight = cone.geometry.parameters.height * coneScale;
+            let coneRadius = cone.geometry.parameters.radius * coneScale;
+            let theta = Math.atan(coneHeight/coneRadius);
+            teddyMunch();
+            bounce(theta, teddyMesh.position.z, -coneHeight/2, timer);
+            stickyDuck();
+
+            // Render! (by golly I hope this works!)
+            renderer.autoClear = true;
+
+            //render scene1
+            renderer.render(scene, camera);
+
+            activate_lightning();
+        }
+    </script>
 
 </body>
 
