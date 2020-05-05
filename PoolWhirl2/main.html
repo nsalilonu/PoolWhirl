@@ -61,7 +61,23 @@
     cone.castShadow = true;
     cone.dynamic = true;
     scene.add(cone);
-    cone.rotation.x = - Math.PI * 1.25;
+    cone.rotation.x = - Math.PI;
+
+    // Tube:
+    var tubeGeometry = new THREE.TorusGeometry(10, 3, 16, 100);
+
+    for (var i = 0; i < tubeGeometry.faces.length; i++) {
+      let hue = Math.random(); //* 0.166 (if red/orange/yellow);
+      // setting lightness to higher value will make it more pastel
+      tubeGeometry.faces[i].color.setHSL(hue, 1.0, 0.8);
+    }
+
+    var tubeMaterial = new THREE.MeshToonMaterial({ color: 0xffffff, vertexColors: true, shininess: 60 });
+    tubeGeometry.scale(2.0, 2.0, 2.0);
+
+    var torus = new THREE.Mesh(tubeGeometry, tubeMaterial);
+    torus.rotateX(Math.PI);
+    teddyMesh.add(torus);
 
     function getRandomRanges(particleNum) {
     let vertices = coneGeometry.vertices;
@@ -91,10 +107,6 @@ function moveVertices(timer, randomRanges) {
         let scale = Math.sin(timer*randomRanges[i].time) * randomRanges[i].scale;
         let currentVertex = randomRanges[i].vertex; // A random vertex in the list.
         vertices[currentVertex].setY(randomRanges[i].originalY + scale);
-        
-        if (i == 0) {
-          console.log(vertices[currentVertex].y);
-        }
     }
 }
 
@@ -108,10 +120,13 @@ teddyMesh.rotateY(Math.PI / 2);
 
 cone.add(teddyMesh);
 let teddyPosition = teddyMesh.localToWorld(teddyMesh.position.clone());
-camera.position.set(43, 110, 125);
+camera.position.set(27.34462357343885, 10.820792984254041, -169.5697322073045);
+
 controls.target.set(teddyPosition.x, teddyPosition.y, teddyPosition.z);
 controls.update();
 camera.rotateY(Math.PI/2);
+camera.rotateZ(Math.PI);
+camera.rotateY(1.490742345130971);
 
 
 // place ducks at various points in the scene
@@ -222,8 +237,11 @@ let randomDuck = Math.floor(ducks.length * Math.random());
 // camera.lookAt(teddyPosition);
 
 
-
+//let lookAtVector = new THREE.Vector3(0, 0,0);
+//let offset = lookAtVector.clone();
+let offset = new THREE.Vector3();
 function moveObject() {
+
 const DOWN = 40;
 const UP = 38;
 const LEFT = 37;
@@ -232,25 +250,44 @@ const BACK = 188;
 const FRONT = 190;
 const key = event.keyCode;
 
-console.log(object.position);
+console.log("Camera Position: ", camera.position);
+console.log("Teddy Position:", teddyMesh.position);
+
+let teddyOldPosition = teddyMesh.position.clone();
+let cameraPosition = camera.position.clone();
 if (event.keyCode == DOWN) {
-object.translateY(-1);
+ object.translateY(-1);
+//offset.setY(offset.y - 1);
 }
 else if (event.keyCode == UP ) {
   object.translateY(1);
+  //offset.setY(offset.y + 1);
 } 
 else if (event.keyCode == LEFT ) {
+//  teddyMesh.translateX(1);
+//  let teddyOffset = teddyMesh.position.clone().sub(teddyOldPosition);
+//  console.log("Teddy Offset:", teddyOffset);
+//  camera.position.set(cameraPosition.x - teddyOffset.x, cameraPosition.y - teddyOffset.y, cameraPosition.z - teddyOffset.z);
+  //offset.setX(offset.x - 1);
   object.translateX(-1);
 }
 else if (event.keyCode == RIGHT ) {
-  object.translateX(1);
+//   teddyMesh.translateX(-1);
+//   let teddyOffset = teddyMesh.position.clone().sub(teddyOldPosition);
+//   console.log("Teddy Offset:", teddyOffset);
+//  camera.position.set(cameraPosition.x + teddyOffset.x, cameraPosition.y + teddyOffset.y, cameraPosition.z + teddyOffset.z);
+  camera.translateX(1);
 }
 else if (event.keyCode == FRONT ) {
   object.translateZ(1);
+  //offset.setZ(offset.z + 1);
 }
 else if (event.keyCode == BACK ) {
   object.translateZ(-1);
+  //offset.setZ(offset.z - 1);
 }
+
+//camera.lookAt(lookAtVector);
 }
 
 // Lighting:
@@ -267,7 +304,7 @@ scene.add(light);
 scene.add(teddyLight);
 scene.add(ambient);
 
-// let object = motherDuck;
+ let object = teddyMesh;
 window.addEventListener('keydown', moveObject, false );
 
 
@@ -565,7 +602,7 @@ let timer;
 // Populate Scene:
 let randomRanges = getRandomRanges(300);
 ducksInit();
-
+cone.add(camera)
 animate();
 
 function animate(){
@@ -579,11 +616,11 @@ function render() {
   // get teddy's position before
   let teddyOldPosition = teddyMesh.localToWorld(teddyMesh.position.clone());
   let cameraOldPosition = camera.position.clone();
-  //cone.rotation.y = timer * 10;
+  cone.rotation.y = timer * 10;
 
-      moveVertices(timer, randomRanges);
+      //moveVertices(timer, randomRanges);
 
-    handleCollisions(cone.geometry.vertices);
+    // handleCollisions(cone.geometry.vertices);
         
     cone.geometry.computeFaceNormals();
     cone.geometry.computeVertexNormals();
@@ -591,7 +628,7 @@ function render() {
     cone.geometry.verticesNeedUpdate = true;
 
 
-    handleCollisions(cone.geometry.vertices);
+    //handleCollisions(cone.geometry.vertices);
     teddyMunch();
     bounce(timer);
     stickyDuck();
@@ -610,11 +647,8 @@ function render() {
     // animate_lightning();
 
   teddyPosition = teddyMesh.localToWorld(teddyMesh.position.clone());
-  // new - old
-  let changeTeddy = teddyMesh.position.clone().sub(teddyOldPosition.clone());
-  // camera's old position plus the change in teddy's position
-  //camera.position.set(cameraOldPosition.x + changeTeddy.x, cameraOldPosition.y + changeTeddy.y, cameraOldPosition.z + changeTeddy.z);
-  //camera.lookAt(teddyPosition);
+
+  let changeTeddy = teddyPosition.clone().sub(teddyOldPosition.clone());
   }
 </script>
 

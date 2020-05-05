@@ -154,17 +154,34 @@ teddyRightEarMesh.translateY(earBounce/10);
 teddyBody.translateY(bodyBounce/10);
 }
 
+var closestVertex;
+var closestVertexFound = false;
 function handleCollisions(vertices) {
-    let EPS = 3;
-    let teddyMin_y = Math.min(teddyRightLeg.position.y, teddyLeftLeg.position.y);
-    let teddyPos_y = teddyMin_y - 2.5;
+    let EPS = 5;
+    let teddyMin_y = Math.min(teddyRightLeg.position.y, teddyLeftLeg.position.y) - 2.5;
+    let teddyOffset = teddyMesh.position.y - teddyMin_y;
+    let minVertex = new THREE.Vector3(1000,1000,1000);
+    let minVertexLength = minVertex.length();
     let length = vertices.length;
-    for (let i = 0; i < length; i++) {
-        if (teddyPos_y < vertices[i].y) {
-            let offset = vertices[i].y - teddyMesh.position.y;
-            teddyMesh.position.setY(teddyMesh.position.y + offset + EPS);
-        }
+
+    if (closestVertexFound) {
+        minVertex = closestVertex.clone();
     }
+    else {
+        // Find closest vertex.
+        for (let i = 0; i < length; i++) {
+            let currLength = vertices[i].clone().sub(teddyMesh.position).length();
+            if (currLength < minVertexLength) {
+                minVertexLength = currLength;
+                minVertex = vertices[i].clone();
+            }           
+        }
+        closestVertex = minVertex.clone();
+        closestVertexFound = true;
+    }
+        let offset = minVertex.y - teddyMesh.position.y - teddyOffset;
+    teddyMesh.position.setY(teddyMesh.position.y + offset + EPS);
+    console.log(minVertex.y);
 }
 
 
