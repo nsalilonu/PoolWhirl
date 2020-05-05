@@ -132,17 +132,8 @@ teddyTail.translateZ(8);
 teddyBody.add(teddyTail);
 
 var timer = 0;
-function teddyInit(randomRanges) {
+function teddyInit() {
     timer = 0;
-    teddyMesh.computeBoundingBox();
-    let boundingBox = teddyMesh.boundingBox;
-    let length = randomRanges.length;
-    for (let i = 0; i < length; i++) {
-        if (boundingBox.containsPoint(randomRanges[i])) {
-            
-        }
-    }
-
 }
 
 function teddyMunch() {
@@ -155,46 +146,19 @@ else if (timer > 0 && timer > Math.PI/4 && timer < Math.PI/2) {
 }
 }
 
-function bounce(time) {
-let earBounce = Math.sin(time*50) * 3;
-let bodyBounce = Math.sin(time*70) * 0.25;
+function bounce(theta, z, minY, timer) {
+let earBounce = Math.sin(timer*50) * 3;
+let bodyBounce = Math.sin(timer*70) * 0.25;
 teddyLeftEarMesh.translateY(earBounce/10);
 teddyRightEarMesh.translateY(earBounce/10);
 teddyBody.translateY(bodyBounce/10);
+
+// Move the teddy along the cone in correspondance to the cone position.
+let EPS = 35;
+let y = z * Math.tan(theta);
+teddyMesh.position.setY(y + minY + EPS);
+let buoyancy = Math.sin(timer*25) * 20;
+teddyMesh.translateY(buoyancy/10);
 }
 
-var closestVertex;
-var closestVertexFound = false;
-function handleCollisions(vertices) {
-    let EPS = 5;
-    let teddyMin_y = Math.min(teddyRightLeg.position.y, teddyLeftLeg.position.y) - 2.5;
-    let teddyOffset = teddyMesh.position.y - teddyMin_y;
-    let minVertex = new THREE.Vector3(1000,1000,1000);
-    let minVertexLength = minVertex.length();
-    let length = vertices.length;
-
-    if (closestVertexFound) {
-        minVertex = closestVertex.clone();
-    }
-    else {
-        // Find closest vertex.
-        for (let i = 0; i < length; i++) {
-            let currLength = vertices[i].clone().sub(teddyMesh.position).length();
-            if (currLength < minVertexLength) {
-                minVertexLength = currLength;
-                minVertex = vertices[i].clone();
-            }           
-        }
-        closestVertex = minVertex.clone();
-        closestVertexFound = true;
-    }
-        let offset = minVertex.y - teddyMesh.position.y - teddyOffset;
-    teddyMesh.position.setY(teddyMesh.position.y + offset + EPS);
-    console.log(minVertex.y);
-}
-
-
-
-
-
-export {teddyMesh, teddyMunch, teddyInit, bounce, handleCollisions};
+export {teddyMesh, teddyMunch, teddyInit, bounce};
