@@ -17,15 +17,23 @@
     <h1 id="h1" , style="color: white;">Pool Whirl</h1>
     <p style="color:rgb(248, 248, 248)">By: Sean-Wyn Ng, Nsomma Alilonu, Rachel Lee, and Emily Yin</p>
     <p style="color:rgb(5, 146, 99)">Save your teddy bear from an untimely demise!</p>
-    <p id="lost">You lose!</p>
     <script src="three.min.js"></script>
     <script src="Lightning/postprocessing.min.js"></script>
     <script src="Lightning/THREE.MeshLine.js"></script>
     <script src="OrbitControls.js"></script>
-    <div class="popup" onclick="reset()">Reset?
-      <span class="popuptext" id="myPopup">You lose!</span>
+
+    <div id="points" class="points">
+      <div class="points-content">
+        <p id="pointsText">Points: 0</p>
+      </div>
     </div>
 
+    <div id="LostGame" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <p>You lost! Close this box or click off the box to play again!</p>
+      </div>
+    </div>
 
     <canvas id="canvas"></canvas>
 
@@ -253,6 +261,7 @@ controls.update();
         
 
         // Code taken from https://github.com/stemkoski/stemkoski.github.com/blob/master/Three.js/Collision-Detection.html.
+        let gamePoints = 0;
         function handleDuckCollision() {
           var originPoint = teddyMesh.position.clone();
           for (var vertexIndex = 0; vertexIndex < torus.geometry.vertices.length; vertexIndex++) {		
@@ -261,14 +270,41 @@ controls.update();
             var directionVector = globalVertex.sub( torus.position );
             var ray = new THREE.Raycaster( originPoint, directionVector.clone().normalize() );
             var collisionResults = ray.intersectObjects( ducks );
-            if ( collisionResults.length > 0 && collisionResults[0].distance < directionVector.length() ) 
+            if ( collisionResults.length > 0 && collisionResults[0].distance < directionVector.length() ) {
               teddyMesh.position.setZ(teddyMesh.position.z - 1); // Pushes you further into the whirlpool.
+              gamePoints--;
+              let string = "Points: " + gamePoints;
+              document.getElementById("pointsText").innerHTML = string;
+            }
           }	
           controls.update();
         }
 
         function checkGameStatus() {
           let lostGame = false;
+          if (teddyMesh.position.z <= 50) {
+            lostGame = true;
+          }
+
+          if (lostGame) {
+            var modal = document.getElementById("LostGame");
+            var span = document.getElementsByClassName("close")[0];
+            modal.style.display = "block";
+
+            // When the user clicks on <span> (x), close the modal and refresh the page
+            span.onclick = function() {
+              modal.style.display = "none";
+              window.location.reload();
+            }
+
+            // When the user clicks anywhere outside of the modal, close it and refresh the page.
+            window.onclick = function(event) {
+              if (event.target == modal) {
+                modal.style.display = "none";
+                window.location.reload();
+              }
+            }
+          }
           return lostGame;
         }
 
@@ -281,6 +317,7 @@ controls.update();
         // currently seen by the camera, make it visible
         let randomDuck = Math.floor(ducks.length * Math.random());
         let offsetVector = new THREE.Vector3(0, -10, 0);
+        let object = teddyMesh;
         function moveObject() {
             const DOWN = 40;
             const UP = 38;
@@ -301,12 +338,12 @@ controls.update();
             }
             else if (event.keyCode == LEFT) {
                 object.translateX(1);
-                offsetVector.setY(offsetVector.y - 0.4);
+
                
             }
             else if (event.keyCode == RIGHT) {
                 object.translateX(-1);
-                offsetVector.setY(offsetVector.y + 0.4);
+              
                
             }
             else if (event.keyCode == FRONT) {
@@ -317,7 +354,7 @@ controls.update();
                 object.translateZ(-1);
              
             }
-            //console.log(offsetVector);
+
         }
 
         // Lighting:
@@ -617,13 +654,13 @@ controls.update();
         function animate() {
             whirlTime += 30;
             let lostGame = checkGameStatus();
-            // if (lostGame) {
-            //   renderer.render(scene, camera);
-            // }
-            //else {
+             if (lostGame) {
+               renderer.render(scene, camera);
+             }
+            else {
               requestAnimationFrame(animate);
               render();
-            //}
+            }
         }
 
         function render() {
