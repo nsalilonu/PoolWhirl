@@ -11,7 +11,6 @@
 </head>
 <script src="teddyMesh.js" type="module"></script>
 <script src="rubberDuckMesh.js" type="module"></script>
-<link href="style.css" type="text/css" rel="stylesheet"/>
 
 <body style="background-color: rgb(226, 113, 147);">
     <h1 id="h1" , style="color: white;">Pool Whirl</h1>
@@ -22,24 +21,14 @@
     <script src="Lightning/THREE.MeshLine.js"></script>
     <script src="OrbitControls.js"></script>
 
-    <div id="points" class="points">
-      <div class="points-content">
-        <p id="pointsText">Points: 0</p>
-      </div>
-    </div>
 
-    <div id="LostGame" class="modal">
-      <div class="modal-content">
-        <span class="close">&times;</span>
-        <p>You lost! Close this box or click off the box to play again!</p>
-      </div>
-    </div>
 
     <canvas id="canvas"></canvas>
 
     <script type="module">
         import { teddyMesh, teddyMunch, teddyInit, bounce} from "./teddyMesh.js";
         import { duckMesh } from "./rubberDuckMesh.js";
+        // import {fish} from "./experimentalFish.js";
 
         // Camera controls:
         const canvas = document.getElementById('canvas');
@@ -62,42 +51,16 @@
 // Cone:
 let coneGeometry = new THREE.ConeGeometry(10, 4, 10, 10, true);
     coneGeometry.elementsNeedUpdate = true;
-    coneGeometry.verticesNeedUpdate = true;
-    coneGeometry.colorsNeedUpdate = true;
     let coneScale = 50;
     coneGeometry.scale(coneScale, coneScale, coneScale);
 
-    let vertColors = new Array(coneGeometry.vertices.length);
-
-    // assign colors to vertices first, and then iterate through faces and assign the colors 
-    // to the faces array
-
-    let lightBlue = [30, 99, 101, 57, 62, 90, 81, 17, 24, 84, 43, 97]
-
-    for (let i = 0; i < vertColors.length; i++) {
-      let color;
-      if ((i < 6) || (lightBlue.includes(i))) {
-        color = new THREE.Color(0x66fff5);
-      } 
-      else if ((i % 3) == 0) {
-        // darker lines
-        //color = new THREE.Color(0x00c2b5);
-        color = new THREE.Color(0x00f0e0);
-      } 
-      else {
-        color = new THREE.Color(0x00ffff);
-      }
-      vertColors[i] = color.clone();
+    for (var i = 0; i < coneGeometry.faces.length; i++) {
+      let hue = Math.random(); //* 0.166 (if red/orange/yellow);
+      // setting lightness to higher value will make it more pastel
+      coneGeometry.faces[i].color.setRGB(1, 0, 0);
     }
 
-    for (var faceIndex = 0; faceIndex < coneGeometry.faces.length; faceIndex++) {
-      let face = coneGeometry.faces[faceIndex];
-      face.vertexColors.push(vertColors[face.a].clone());
-      face.vertexColors.push(vertColors[face.b].clone());
-      face.vertexColors.push(vertColors[face.c].clone());
-    }
-
-    let coneMaterial = new THREE.MeshToonMaterial({ vertexColors: THREE.VertexColors });
+    let coneMaterial = new THREE.MeshToonMaterial({ color: 0x00ffff});
     coneMaterial.side = THREE.DoubleSide;
 
     let cone = new THREE.Mesh(coneGeometry, coneMaterial);
@@ -167,6 +130,7 @@ controls.target.set(teddyPosition.x, teddyPosition.y, teddyPosition.z);
 controls.update();
 
 
+// scene.add(fish);
         // place ducks at various points in the scene
         let ducks = [];
         let closestVertex = [];
@@ -212,7 +176,7 @@ controls.update();
                             newDuck.rotateY(random);
 
                             ducks.push(newDuck);
-                            newDuck.visible = true;
+                            newDuck.visible = false;
 
                             if (noMotherDuck) {
                                 cone.add(motherDuck);
@@ -252,71 +216,19 @@ controls.update();
         }
 
         function stickyDuck() {
-          const length = closestVertex.length;
-          const EPS = 2 - 92 / 2 - 10;
-          for (let i = 0; i < length; i++) {        
-            ducks[i].position.setY(closestVertex[i].y + EPS);
-          }
-        }
-        
-
-        // Code taken from https://github.com/stemkoski/stemkoski.github.com/blob/master/Three.js/Collision-Detection.html.
-        let gamePoints = 0;
-        function handleDuckCollision() {
-          var originPoint = teddyMesh.position.clone();
-          for (var vertexIndex = 0; vertexIndex < torus.geometry.vertices.length; vertexIndex++) {		
-            var localVertex = torus.geometry.vertices[vertexIndex].clone();
-            var globalVertex = localVertex.applyMatrix4( torus.matrix );
-            var directionVector = globalVertex.sub( torus.position );
-            var ray = new THREE.Raycaster( originPoint, directionVector.clone().normalize() );
-            var collisionResults = ray.intersectObjects( ducks );
-            if ( collisionResults.length > 0 && collisionResults[0].distance < directionVector.length() ) {
-              teddyMesh.position.setZ(teddyMesh.position.z - 1); // Pushes you further into the whirlpool.
-              gamePoints--;
-              let string = "Points: " + gamePoints;
-              document.getElementById("pointsText").innerHTML = string;
+            const length = closestVertex.length;
+            const EPS = 2 - 92 / 2 - 10;
+            for (let i = 0; i < length; i++) {
+                
+                ducks[i].position.setY(closestVertex[i].y + EPS);
+               
             }
-          }	
-          controls.update();
-        }
-
-        function checkGameStatus() {
-          let lostGame = false;
-          if (teddyMesh.position.z <= 50) {
-            lostGame = true;
-          }
-
-          if (lostGame) {
-            var modal = document.getElementById("LostGame");
-            var span = document.getElementsByClassName("close")[0];
-            modal.style.display = "block";
-
-            // When the user clicks on <span> (x), close the modal and refresh the page
-            span.onclick = function() {
-              modal.style.display = "none";
-              window.location.reload();
-            }
-
-            // When the user clicks anywhere outside of the modal, close it and refresh the page.
-            window.onclick = function(event) {
-              if (event.target == modal) {
-                modal.style.display = "none";
-                window.location.reload();
-              }
-            }
-          }
-          return lostGame;
-        }
-
-        function reset() {
-          teddyMesh.position.set(0,10,175);
         }
 
 
         // run a for loop where if the selected random duck is not 
         // currently seen by the camera, make it visible
         let randomDuck = Math.floor(ducks.length * Math.random());
-        let offsetVector = new THREE.Vector3(0, -10, 0);
         let object = teddyMesh;
         function moveObject() {
             const DOWN = 40;
@@ -327,34 +239,24 @@ controls.update();
             const FRONT = 190;
             const key = event.keyCode;
 
-            console.log(object.position);
             if (event.keyCode == DOWN) {
                 object.translateY(-1);
-              
             }
             else if (event.keyCode == UP) {
                 object.translateY(1);
-               
             }
             else if (event.keyCode == LEFT) {
-                object.translateX(1);
-
-               
+                object.translateX(-1);
             }
             else if (event.keyCode == RIGHT) {
-                object.translateX(-1);
-              
-               
+                object.translateX(1);
             }
             else if (event.keyCode == FRONT) {
                 object.translateZ(1);
-         
             }
             else if (event.keyCode == BACK) {
                 object.translateZ(-1);
-             
             }
-
         }
 
         // Lighting:
@@ -376,7 +278,7 @@ controls.update();
         var axesHelper = new THREE.AxesHelper(100);
         teddyMesh.add(axesHelper);
 
-        
+        let stopAnimate;
         function activate_lightning() {
             cloud_dlight.visible = true;
             cloud_ambient.visible = true;
@@ -389,8 +291,9 @@ controls.update();
             for (let lightning_segment of segmentList) {
                 lightning_segment[0].visible = true;
             }
-            
+            stopAnimate = false;
             animate_lightning();
+            return;
         }
 
         function deactivate_lightning() {
@@ -611,7 +514,7 @@ controls.update();
          
         let time = 0;
         let then = 0;
-
+        
         // requestAnimationFrame passes the time since the page was loaded to the callback (in ms) 
         function animate_lightning(now) {
             // convert to seconds
@@ -632,8 +535,11 @@ controls.update();
             time = time + 1;
             composer.render(deltaTime);
             if (now > 5) {
+                if (stopAnimate) {
+                    return;
+                }
                 deactivate_lightning();
-                return;
+                stopAnimate = true;
             }
             else {
             requestAnimationFrame(animate_lightning);
@@ -643,6 +549,7 @@ controls.update();
 
         // Animation:
         var whirlTime = 0;
+        let count = 0;
         let timer;
 
         // Populate Scene:
@@ -653,19 +560,13 @@ controls.update();
 
         function animate() {
             whirlTime += 30;
-            let lostGame = checkGameStatus();
-             if (lostGame) {
-               renderer.render(scene, camera);
-             }
-            else {
-              requestAnimationFrame(animate);
-              render();
-            }
+            requestAnimationFrame(animate);
+            render();
         }
 
         function render() {
             timer = whirlTime * 0.0002 * 0.8;
-            cone.rotation.y = timer * 5;
+
 
             moveVertices(timer, randomRanges);
 
@@ -683,14 +584,13 @@ controls.update();
             bounce(theta, teddyMesh.position.z, -coneHeight/2, timer);
             stickyDuck();
 
-            handleDuckCollision();
-
             // Render! (by golly I hope this works!)
             renderer.autoClear = true;
 
+            //render scene1
             renderer.render(scene, camera);
 
-            //activate_lightning();
+            activate_lightning();
         }
     </script>
 
