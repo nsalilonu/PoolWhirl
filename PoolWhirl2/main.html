@@ -54,16 +54,42 @@
 // Cone:
 let coneGeometry = new THREE.ConeGeometry(10, 4, 10, 10, true);
     coneGeometry.elementsNeedUpdate = true;
+    coneGeometry.verticesNeedUpdate = true;
+    coneGeometry.colorsNeedUpdate = true;
     let coneScale = 50;
     coneGeometry.scale(coneScale, coneScale, coneScale);
 
-    for (var i = 0; i < coneGeometry.faces.length; i++) {
-      let hue = Math.random(); //* 0.166 (if red/orange/yellow);
-      // setting lightness to higher value will make it more pastel
-      coneGeometry.faces[i].color.setRGB(1, 0, 0);
+    let vertColors = new Array(coneGeometry.vertices.length);
+
+    // assign colors to vertices first, and then iterate through faces and assign the colors 
+    // to the faces array
+
+    let lightBlue = [30, 99, 101, 57, 62, 90, 81, 17, 24, 84, 43, 97]
+
+    for (let i = 0; i < vertColors.length; i++) {
+      let color;
+      if ((i < 6) || (lightBlue.includes(i))) {
+        color = new THREE.Color(0x66fff5);
+      } 
+      else if ((i % 3) == 0) {
+        // darker lines
+        //color = new THREE.Color(0x00c2b5);
+        color = new THREE.Color(0x00f0e0);
+      } 
+      else {
+        color = new THREE.Color(0x00ffff);
+      }
+      vertColors[i] = color.clone();
     }
 
-    let coneMaterial = new THREE.MeshToonMaterial({ color: 0x00ffff});
+    for (var faceIndex = 0; faceIndex < coneGeometry.faces.length; faceIndex++) {
+      let face = coneGeometry.faces[faceIndex];
+      face.vertexColors.push(vertColors[face.a].clone());
+      face.vertexColors.push(vertColors[face.b].clone());
+      face.vertexColors.push(vertColors[face.c].clone());
+    }
+
+    let coneMaterial = new THREE.MeshToonMaterial({ vertexColors: THREE.VertexColors });
     coneMaterial.side = THREE.DoubleSide;
 
     let cone = new THREE.Mesh(coneGeometry, coneMaterial);
@@ -403,8 +429,8 @@ controls.update();
         let segmentList = [];
 
 
-        let startPoint = new THREE.Vector3(-400, 500, -2);
-        let endPoint = new THREE.Vector3(-100, -5, -2);
+        let startPoint = new THREE.Vector3(300, 500, -2);
+        let endPoint = new THREE.Vector3(200, -5, -2);
 
 
         let points = [];
@@ -572,7 +598,9 @@ controls.update();
                 deactivate_lightning();
                 return;
             }
+            else {
             requestAnimationFrame(animate_lightning);
+            }
         }
 
 
