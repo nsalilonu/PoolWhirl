@@ -2,6 +2,8 @@
 // https://codepen.io/Yakudoo/pen/BNNGBq
 // influenced by above
 
+// TO DO: make fish scales; fix the lips and irises  
+
 // A group that will contain each part of the fish
 let fish = new THREE.Group();
 // each part needs a geometry, a material, and a mesh
@@ -9,7 +11,7 @@ let fish = new THREE.Group();
 // Body 
 var bodyGeom = new THREE.BoxGeometry(120, 120, 120);
 var bodyMat = new THREE.MeshLambertMaterial({
-    color: 0x80f5fe,
+    color: 0xFF33E7,
     shading: THREE.FlatShading
 });
 let bodyFish = new THREE.Mesh(bodyGeom, bodyMat);
@@ -17,7 +19,7 @@ let bodyFish = new THREE.Mesh(bodyGeom, bodyMat);
 // Tail
 var tailGeom = new THREE.CylinderGeometry(0, 60, 60, 4, false);
 var tailMat = new THREE.MeshLambertMaterial({
-    color: 0xff00dc,
+    color: 0xF9FF33,
     shading: THREE.FlatShading
 });
 
@@ -61,26 +63,29 @@ sideLeftFish.position.y = -50;
 sideLeftFish.position.z = 60;
 
 // Eyes
-var eyeGeom = new THREE.BoxGeometry(40, 40, 5);
+var eyeGeom = new THREE.SphereBufferGeometry(20);
 var eyeMat = new THREE.MeshLambertMaterial({
     color: 0xffffff,
     shading: THREE.FlatShading
 });
+
 
 let rightEye = new THREE.Mesh(eyeGeom, eyeMat);
 rightEye.position.z = -60;
 rightEye.position.x = 25;
 rightEye.position.y = -10;
 
-var irisGeom = new THREE.BoxGeometry(10, 10, 3);
+var irisGeom = new THREE.SphereGeometry(5);
 var irisMat = new THREE.MeshLambertMaterial({
     color: 0x330000,
-    shading: THREE.FlatShading
+    shading: THREE.FlatShading,
+    depthTest: false
 });
 
+
 let rightIris = new THREE.Mesh(irisGeom, irisMat);
-rightIris.position.z = -65;
-rightIris.position.x = 35;
+rightIris.position.z = -55;
+rightIris.position.x = 30;
 rightIris.position.y = -10;
 
 let leftEye = new THREE.Mesh(eyeGeom, eyeMat);
@@ -89,9 +94,11 @@ leftEye.position.x = 25;
 leftEye.position.y = -10;
 
 let leftIris = new THREE.Mesh(irisGeom, irisMat);
-leftIris.position.z = 65;
-leftIris.position.x = 35;
+leftIris.position.z = 55;
+leftIris.position.x = 30;
 leftIris.position.y = -10;
+
+
 
 var toothGeom = new THREE.BoxGeometry(20, 4, 20);
 var toothMat = new THREE.MeshLambertMaterial({
