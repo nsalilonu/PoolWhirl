@@ -9,18 +9,50 @@ let fish = new THREE.Group();
 // each part needs a geometry, a material, and a mesh
 
 // Body 
-var bodyGeom = new THREE.BoxGeometry(120, 120, 120);
-var bodyMat = new THREE.MeshLambertMaterial({
-    color: 0xFF33E7,
-    shading: THREE.FlatShading
-});
-let bodyFish = new THREE.Mesh(bodyGeom, bodyMat);
+
+// code from http://darrendev.blogspot.com/2016/03/gradients-in-threejs.html
+function makeGradientCube(c1, c2, w, d, h, opacity){
+    if(typeof opacity === 'undefined')opacity = 1.0;
+    if(typeof c1 === 'number')c1 = new THREE.Color( c1 );
+    if(typeof c2 === 'number')c2 = new THREE.Color( c2 );
+    
+    var cubeGeometry = new THREE.BoxGeometry(w, h, d);
+    
+    var cubeMaterial = new THREE.MeshPhongMaterial({
+        vertexColors:THREE.VertexColors
+        });
+    
+    if(opacity < 1.0){
+        cubeMaterial.opacity = opacity;
+        cubeMaterial.transparent = true;
+        }
+    
+    for(var ix=0;ix<12;++ix){
+        if(ix==4 || ix==5){ //Top edge, all c2
+            cubeGeometry.faces[ix].vertexColors = [c2,c2,c2];
+            }
+        else if(ix==6 || ix==7){ //Bottom edge, all c1
+            cubeGeometry.faces[ix].vertexColors = [c1,c1,c1];
+            }
+        else if(ix%2 ==0){ //First triangle on each side edge
+            cubeGeometry.faces[ix].vertexColors = [c2,c1,c2];
+            }
+        else{ //Second triangle on each side edge
+            cubeGeometry.faces[ix].vertexColors = [c1,c1,c2];
+            }
+        }
+    
+    return new THREE.Mesh(cubeGeometry, cubeMaterial);
+    }
+
+let bodyFish = makeGradientCube(0xFFFF00, 0xFF0000, 120, 120, 120, 0.98);
+console.log(bodyFish);
 
 // Tail
 var tailGeom = new THREE.CylinderGeometry(0, 60, 60, 4, false);
-var tailMat = new THREE.MeshLambertMaterial({
-    color: 0xF9FF33,
-    shading: THREE.FlatShading
+var tailMat = new THREE.MeshPhongMaterial({
+    color: 0xb19cd9,
+    flatShading: true
 });
 
 let tailFish = new THREE.Mesh(tailGeom, tailMat);
@@ -30,9 +62,9 @@ tailFish.rotation.z = -Math.PI / 2;
 
 // Lips
 var lipsGeom = new THREE.BoxGeometry(25, 10, 120);
-var lipsMat = new THREE.MeshLambertMaterial({
+var lipsMat = new THREE.MeshPhongMaterial({
     color: 0x80f5fe,
-    shading: THREE.FlatShading
+    flatShading: true
 });
 let lipsFish = new THREE.Mesh(lipsGeom, lipsMat);
 lipsFish.position.x = 65;
@@ -64,11 +96,10 @@ sideLeftFish.position.z = 60;
 
 // Eyes
 var eyeGeom = new THREE.SphereBufferGeometry(20);
-var eyeMat = new THREE.MeshLambertMaterial({
+var eyeMat = new THREE.MeshPhongMaterial({
     color: 0xffffff,
-    shading: THREE.FlatShading
+    flatShading: false
 });
-
 
 let rightEye = new THREE.Mesh(eyeGeom, eyeMat);
 rightEye.position.z = -60;
@@ -76,10 +107,10 @@ rightEye.position.x = 25;
 rightEye.position.y = -10;
 
 var irisGeom = new THREE.SphereGeometry(5);
-var irisMat = new THREE.MeshLambertMaterial({
+var irisMat = new THREE.MeshPhongMaterial({
     color: 0x330000,
-    shading: THREE.FlatShading,
-    depthTest: false
+    flatShading: true,
+    depthTest: false,
 });
 
 
@@ -101,9 +132,9 @@ leftIris.position.y = -10;
 
 
 var toothGeom = new THREE.BoxGeometry(20, 4, 20);
-var toothMat = new THREE.MeshLambertMaterial({
+var toothMat = new THREE.MeshPhongMaterial({
     color: 0xffffff,
-    shading: THREE.FlatShading
+    flatShading: true
 });
 
 // Teeth
@@ -160,4 +191,4 @@ fish.add(lipsFish);
 
 fish.rotation.y = -Math.PI / 4;
 
-export {fish};
+export { fish };
