@@ -40,6 +40,7 @@
     <script type="module">
         import { teddyMesh, teddyMunch, teddyInit, bounce} from "./teddyMesh.js";
         import { duckMesh } from "./rubberDuckMesh.js";
+        import { fish } from "./fishMesh.js";
 
         // Camera controls:
         const canvas = document.getElementById('canvas');
@@ -48,7 +49,6 @@
         var camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 1, 10000);
 
         // Orbit Controls:
-
         const controls = new THREE.OrbitControls(camera, canvas);
         controls.target.set(0, 0, 0);
         controls.update();
@@ -59,68 +59,68 @@
         var sceneColor = new THREE.Color(0xff6666);
         scene.background = sceneColor;
 
-// Cone:
-let coneGeometry = new THREE.ConeGeometry(10, 4, 10, 10, true);
-    coneGeometry.elementsNeedUpdate = true;
-    coneGeometry.verticesNeedUpdate = true;
-    coneGeometry.colorsNeedUpdate = true;
-    let coneScale = 50;
-    coneGeometry.scale(coneScale, coneScale, coneScale);
+        // Cone:
+        let coneGeometry = new THREE.ConeGeometry(10, 4, 10, 10, true);
+        coneGeometry.elementsNeedUpdate = true;
+        coneGeometry.verticesNeedUpdate = true;
+        coneGeometry.colorsNeedUpdate = true;
+        let coneScale = 50;
+        coneGeometry.scale(coneScale, coneScale, coneScale);
 
-    let vertColors = new Array(coneGeometry.vertices.length);
+        let vertColors = new Array(coneGeometry.vertices.length);
 
-    // assign colors to vertices first, and then iterate through faces and assign the colors 
-    // to the faces array
+        // assign colors to vertices first, and then iterate through faces and assign the colors 
+        // to the faces array
 
-    let lightBlue = [30, 99, 101, 57, 62, 90, 81, 17, 24, 84, 43, 97]
+        let lightBlue = [30, 99, 101, 57, 62, 90, 81, 17, 24, 84, 43, 97]
 
-    for (let i = 0; i < vertColors.length; i++) {
-      let color;
-      if ((i < 6) || (lightBlue.includes(i))) {
-        color = new THREE.Color(0x66fff5);
-      } 
-      else if ((i % 3) == 0) {
-        // darker lines
-        //color = new THREE.Color(0x00c2b5);
-        color = new THREE.Color(0x00f0e0);
-      } 
-      else {
-        color = new THREE.Color(0x00ffff);
-      }
-      vertColors[i] = color.clone();
-    }
+        for (let i = 0; i < vertColors.length; i++) {
+        let color;
+        if ((i < 6) || (lightBlue.includes(i))) {
+            color = new THREE.Color(0x66fff5);
+        } 
+        else if ((i % 3) == 0) {
+            // darker lines
+            //color = new THREE.Color(0x00c2b5);
+            color = new THREE.Color(0x00f0e0);
+        } 
+        else {
+            color = new THREE.Color(0x00ffff);
+        }
+        vertColors[i] = color.clone();
+        }
 
-    for (var faceIndex = 0; faceIndex < coneGeometry.faces.length; faceIndex++) {
-      let face = coneGeometry.faces[faceIndex];
-      face.vertexColors.push(vertColors[face.a].clone());
-      face.vertexColors.push(vertColors[face.b].clone());
-      face.vertexColors.push(vertColors[face.c].clone());
-    }
+        for (var faceIndex = 0; faceIndex < coneGeometry.faces.length; faceIndex++) {
+        let face = coneGeometry.faces[faceIndex];
+        face.vertexColors.push(vertColors[face.a].clone());
+        face.vertexColors.push(vertColors[face.b].clone());
+        face.vertexColors.push(vertColors[face.c].clone());
+        }
 
-    let coneMaterial = new THREE.MeshToonMaterial({ vertexColors: THREE.VertexColors });
-    coneMaterial.side = THREE.DoubleSide;
+        let coneMaterial = new THREE.MeshToonMaterial({ vertexColors: THREE.VertexColors });
+        coneMaterial.side = THREE.DoubleSide;
 
-    let cone = new THREE.Mesh(coneGeometry, coneMaterial);
-    cone.castShadow = true;
-    cone.dynamic = true;
-    scene.add(cone);
-    cone.rotation.x = - Math.PI;
+        let cone = new THREE.Mesh(coneGeometry, coneMaterial);
+        cone.castShadow = true;
+        cone.dynamic = true;
+        scene.add(cone);
+        cone.rotation.x = - Math.PI;
 
-    // Tube:
-    var tubeGeometry = new THREE.TorusGeometry(10, 3, 16, 100);
+        // Tube:
+        var tubeGeometry = new THREE.TorusGeometry(10, 3, 16, 100);
 
-    for (var i = 0; i < tubeGeometry.faces.length; i++) {
-      let hue = Math.random(); //* 0.166 (if red/orange/yellow);
-      // setting lightness to higher value will make it more pastel
-      tubeGeometry.faces[i].color.setHSL(hue, 1.0, 0.8);
-    }
+        for (var i = 0; i < tubeGeometry.faces.length; i++) {
+        let hue = Math.random(); //* 0.166 (if red/orange/yellow);
+        // setting lightness to higher value will make it more pastel
+        tubeGeometry.faces[i].color.setHSL(hue, 1.0, 0.8);
+        }
 
-    var tubeMaterial = new THREE.MeshToonMaterial({ color: 0xffffff, vertexColors: true, shininess: 60 });
-    tubeGeometry.scale(1.7, 1.7, 1.7);
-    var torus = new THREE.Mesh(tubeGeometry, tubeMaterial);
-    torus.rotateX(Math.PI/2);
-    torus.position.set(0, -17.000000000000007, -1.0000000000000142);
-    teddyMesh.add(torus);
+        var tubeMaterial = new THREE.MeshToonMaterial({ color: 0xffffff, vertexColors: true, shininess: 60 });
+        tubeGeometry.scale(1.7, 1.7, 1.7);
+        var torus = new THREE.Mesh(tubeGeometry, tubeMaterial);
+        torus.rotateX(Math.PI/2);
+        torus.position.set(0, -17.000000000000007, -1.0000000000000142);
+        teddyMesh.add(torus);
 
         function getRandomRanges(particleNum) {
             let vertices = coneGeometry.vertices;
@@ -155,16 +155,16 @@ let coneGeometry = new THREE.ConeGeometry(10, 4, 10, 10, true);
 
         let yAxis = new THREE.Vector3(0, 1, 0);
 
-teddyMesh.translateZ(175);
-teddyMesh.translateY(10);
-teddyMesh.rotateY(Math.PI / 2);
+        teddyMesh.translateZ(175);
+        teddyMesh.translateY(10);
+        teddyMesh.rotateY(Math.PI / 2);
 
 
-scene.add(teddyMesh);
-let teddyPosition = teddyMesh.localToWorld(teddyMesh.position.clone());
-camera.position.set( -219.61429616527784,  60.79054134136912, 154.64688761281252);
-controls.target.set(teddyPosition.x, teddyPosition.y, teddyPosition.z);
-controls.update();
+        scene.add(teddyMesh);
+        let teddyPosition = teddyMesh.localToWorld(teddyMesh.position.clone());
+        camera.position.set( -219.61429616527784,  60.79054134136912, 154.64688761281252);
+        controls.target.set(teddyPosition.x, teddyPosition.y, teddyPosition.z);
+        controls.update();
 
 
         // place ducks at various points in the scene
@@ -262,8 +262,10 @@ controls.update();
 
         // Code taken from https://github.com/stemkoski/stemkoski.github.com/blob/master/Three.js/Collision-Detection.html.
         let gamePoints = 0;
+        let collision = false;
         function handleDuckCollision() {
           var originPoint = teddyMesh.position.clone();
+          collision = false;
           for (var vertexIndex = 0; vertexIndex < torus.geometry.vertices.length; vertexIndex++) {		
             var localVertex = torus.geometry.vertices[vertexIndex].clone();
             var globalVertex = localVertex.applyMatrix4( torus.matrix );
@@ -271,14 +273,20 @@ controls.update();
             var ray = new THREE.Raycaster( originPoint, directionVector.clone().normalize() );
             var collisionResults = ray.intersectObjects( ducks );
             if ( collisionResults.length > 0 && collisionResults[0].distance < directionVector.length() ) {
-              teddyMesh.position.setZ(teddyMesh.position.z - 1); // Pushes you further into the whirlpool.
-              gamePoints--;
-              let string = "Points: " + gamePoints;
-              document.getElementById("pointsText").innerHTML = string;
+                collision = true;
             }
+          }
+          if (collision) {
+            teddyMesh.position.setZ(teddyMesh.position.z - 10); // Pushes you further into the whirlpool.
+            gamePoints--;
+            let string = "Points: " + gamePoints;
+            document.getElementById("pointsText").innerHTML = string;
           }	
           controls.update();
         }
+
+        // Add fish:
+        scene.add(fish);
 
         function checkGameStatus() {
           let lostGame = false;
@@ -318,16 +326,17 @@ controls.update();
         let randomDuck = Math.floor(ducks.length * Math.random());
         let offsetVector = new THREE.Vector3(0, -10, 0);
         let object = teddyMesh;
+
+        // Move with WASD to avoid moving window by accident...
         function moveObject() {
-            const DOWN = 40;
-            const UP = 38;
-            const LEFT = 37;
-            const RIGHT = 39;
+            const DOWN = 83;
+            const UP = 87;
+            const LEFT = 65;
+            const RIGHT = 68;
             const BACK = 188;
             const FRONT = 190;
             const key = event.keyCode;
 
-            console.log(object.position);
             if (event.keyCode == DOWN) {
                 object.translateY(-1);
               
@@ -354,7 +363,6 @@ controls.update();
                 object.translateZ(-1);
              
             }
-
         }
 
         // Lighting:
@@ -394,7 +402,6 @@ controls.update();
         }
 
         function deactivate_lightning() {
-            console.log("Function called");
             cloud_dlight.visible = false;
             cloud_ambient.visible = false;
             scene.fog.density = 0;
@@ -424,7 +431,6 @@ controls.update();
         let cloudParticles = [];
         let loader = new THREE.TextureLoader();
         loader.load("./Lightning/smoke.png", function (texture) {
-
             let cloudGeo = new THREE.PlaneBufferGeometry(500, 500);
             let cloudMaterial = new THREE.MeshLambertMaterial({
                 map: texture,
@@ -610,14 +616,17 @@ controls.update();
         }
          
         let time = 0;
-        let then = 0;
+        //let then = 0;
 
         // requestAnimationFrame passes the time since the page was loaded to the callback (in ms) 
         function animate_lightning(now) {
             // convert to seconds
-            now *= 0.001;
+             now *= 0.001;
             const deltaTime = now - then;
-            then = now;
+            console.log("Delta Time:", deltaTime);
+            
+            const then = now;
+            console.log("Then:", then);
 
             if (time % 2 == 0) {
                 for (let segment of segmentList) {
@@ -644,6 +653,9 @@ controls.update();
         // Animation:
         var whirlTime = 0;
         let timer;
+        let coneSpeed = 5;
+        let lightningDelay = 100; // Starts off generating lightning every 5 seconds.
+        let ticker = 0; // When ticker = 20, 1 second has gone by
 
         // Populate Scene:
         let randomRanges = getRandomRanges(300);
@@ -665,7 +677,14 @@ controls.update();
 
         function render() {
             timer = whirlTime * 0.0002 * 0.8;
-            cone.rotation.y = timer * 5;
+            cone.rotation.y = timer * coneSpeed;
+            
+            // Increase the cone speed and lightning frequency every 15 seconds.
+            if (ticker % 300 == 0) {
+                coneSpeed++;
+                if (lightningDelay > 40) // Lightning frequency must be at least 2 seconds to avoid modulus 0;
+                lightningDelay--;
+            }
 
             moveVertices(timer, randomRanges);
 
@@ -683,14 +702,18 @@ controls.update();
             bounce(theta, teddyMesh.position.z, -coneHeight/2, timer);
             stickyDuck();
 
+            // Ignore duck collisions for 3 seconds so that the player has time to mentally prepare.
+            if (ticker > 60) {
             handleDuckCollision();
+            }
 
             // Render! (by golly I hope this works!)
-            renderer.autoClear = true;
-
+            ticker++;
             renderer.render(scene, camera);
-
-            //activate_lightning();
+            // Activates lightning every 100 / 20 seconds. 
+            if (ticker % lightningDelay == 0) {
+            activate_lightning();
+            }
         }
     </script>
 
