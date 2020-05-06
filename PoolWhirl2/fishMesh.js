@@ -2,7 +2,7 @@
 // https://codepen.io/Yakudoo/pen/BNNGBq
 // influenced by above
 
-// TO DO: make fish scales; fix the lips and irises  
+// TO DO: make fish scales 
 
 // A group that will contain each part of the fish
 let fish = new THREE.Group();
@@ -45,7 +45,7 @@ function makeGradientCube(c1, c2, w, d, h, opacity){
     return new THREE.Mesh(cubeGeometry, cubeMaterial);
     }
 
-let bodyFish = makeGradientCube(0xFFFF00, 0xFF0000, 120, 120, 120, 0.98);
+let bodyFish = makeGradientCube(0xFFFF00, 0xFF0000, 120, 120, 120, 1);
 console.log(bodyFish);
 
 // Tail
@@ -61,15 +61,17 @@ tailFish.position.x = -60;
 tailFish.rotation.z = -Math.PI / 2;
 
 // Lips
-var lipsGeom = new THREE.BoxGeometry(25, 10, 120);
+var lipsGeom = new THREE.TorusGeometry(20, 10, 16, 100);
 var lipsMat = new THREE.MeshPhongMaterial({
-    color: 0x80f5fe,
+    color: 0xb83f3f,
     flatShading: true
 });
 let lipsFish = new THREE.Mesh(lipsGeom, lipsMat);
 lipsFish.position.x = 65;
 lipsFish.position.y = -47;
-lipsFish.rotation.z = Math.PI / 2;
+lipsFish.translateY(20);
+lipsFish.rotation.x = Math.PI / 2;
+lipsFish.rotation.y = Math.PI / 2; 
 
 // Fins
 let topFish = new THREE.Mesh(tailGeom, tailMat);
@@ -110,14 +112,14 @@ var irisGeom = new THREE.SphereGeometry(5);
 var irisMat = new THREE.MeshPhongMaterial({
     color: 0x330000,
     flatShading: true,
-    depthTest: false,
 });
 
 
 let rightIris = new THREE.Mesh(irisGeom, irisMat);
-rightIris.position.z = -55;
-rightIris.position.x = 30;
+rightIris.position.z = -65;
+rightIris.position.x = 35;
 rightIris.position.y = -10;
+rightIris.translateZ(-10);
 
 let leftEye = new THREE.Mesh(eyeGeom, eyeMat);
 leftEye.position.z = 60;
@@ -125,53 +127,10 @@ leftEye.position.x = 25;
 leftEye.position.y = -10;
 
 let leftIris = new THREE.Mesh(irisGeom, irisMat);
-leftIris.position.z = 55;
-leftIris.position.x = 30;
+leftIris.position.z = 65;
+leftIris.position.x = 35;
 leftIris.position.y = -10;
-
-
-
-var toothGeom = new THREE.BoxGeometry(20, 4, 20);
-var toothMat = new THREE.MeshPhongMaterial({
-    color: 0xffffff,
-    flatShading: true
-});
-
-// Teeth
-let tooth1 = new THREE.Mesh(toothGeom, toothMat);
-tooth1.position.x = 65;
-tooth1.position.y = -35;
-tooth1.position.z = -50;
-tooth1.rotation.z = Math.PI / 2;
-tooth1.rotation.x = -Math.PI / 2;
-
-let tooth2 = new THREE.Mesh(toothGeom, toothMat);
-tooth2.position.x = 65;
-tooth2.position.y = -30;
-tooth2.position.z = -25;
-tooth2.rotation.z = Math.PI / 2;
-tooth2.rotation.x = -Math.PI / 12;
-
-let tooth3 = new THREE.Mesh(toothGeom, toothMat);
-tooth3.position.x = 65;
-tooth3.position.y = -25;
-tooth3.position.z = 0;
-tooth3.rotation.z = Math.PI / 2;
-
-let tooth4 = new THREE.Mesh(toothGeom, toothMat);
-tooth4.position.x = 65;
-tooth4.position.y = -30;
-tooth4.position.z = 25;
-tooth4.rotation.z = Math.PI / 2;
-tooth4.rotation.x = Math.PI / 12;
-
-let tooth5 = new THREE.Mesh(toothGeom, toothMat);
-tooth5.position.x = 65;
-tooth5.position.y = -35;
-tooth5.position.z = 50;
-tooth5.rotation.z = Math.PI / 2;
-tooth5.rotation.x = Math.PI / 8;
-
+leftIris.translateZ(10);
 
 fish.add(bodyFish);
 fish.add(tailFish);
@@ -182,11 +141,6 @@ fish.add(rightEye);
 fish.add(rightIris);
 fish.add(leftEye);
 fish.add(leftIris);
-fish.add(tooth1);
-fish.add(tooth2);
-fish.add(tooth3);
-fish.add(tooth4);
-fish.add(tooth5);
 fish.add(lipsFish);
 
 fish.rotation.y = -Math.PI / 4;
