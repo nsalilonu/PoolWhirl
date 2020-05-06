@@ -384,7 +384,7 @@
         var axesHelper = new THREE.AxesHelper(100);
         teddyMesh.add(axesHelper);
 
-        
+        let stopAnimate;
         function activate_lightning() {
             cloud_dlight.visible = true;
             cloud_ambient.visible = true;
@@ -397,7 +397,7 @@
             for (let lightning_segment of segmentList) {
                 lightning_segment[0].visible = true;
             }
-            
+            stopAnimate = false;
             animate_lightning();
         }
 
@@ -641,8 +641,11 @@
             time = time + 1;
             composer.render(deltaTime);
             if (now > 5) {
+                if (stopAnimate) {
+                    return;
+                }
                 deactivate_lightning();
-                return;
+                stopAnimate = true;
             }
             else {
             requestAnimationFrame(animate_lightning);
