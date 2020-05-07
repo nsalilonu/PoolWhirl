@@ -65,3 +65,31 @@
     width: 20%; /* Could be more or less, depending on screen size */
   }
 
+  .intro-content {
+    display: none;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-size: medium;
+    text-align: center;
+    z-index: 1;
+    right: 20px;
+    top: 20px;
+    float: center;
+    overflow: auto; /* Enable scroll if needed */
+    background-color: #fff675;
+    margin: 0% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+  }
+
+  .intro-picture {
+    display: none;
+    margin-left: auto;
+    margin-right: auto;
+    margin: 0% auto; /* 15% from the top and centered */
+    width: 50%;
+    float: center;
+  }
+
+
+
+

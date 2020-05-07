@@ -35,6 +35,25 @@
         </div>
     </div>
 
+        <div id="intro1Pic" class="intro-picture">
+            <img src= "teddyImage.PNG">
+        </div>
+        <div id="intro1" class="intro-content">
+            <p>You are a teddy bear on a tube in a whirlpool! How did you get here? Who knows? But you must stay away from the center! Move around with WASD keys</p>
+        </div>
+        <div id="intro2Pic" class="intro-picture">
+            <img src= "duckImage.PNG">
+        </div>
+        <div id= "intro2" class="intro-content">
+            <p>Avoid the ducks, they will knock you closer to the center!</p>
+        </div>
+        <div id= "intro3Pic" class="intro-picture">
+            <img src= "fishImage.PNG">
+        </div>
+        <div id= "intro3" class="intro-content">
+            <p>Grab the fish! They will increase your points!</p>
+        </div>
+
     <canvas id="canvas"></canvas>
 
     <script type="module">
@@ -296,13 +315,13 @@
         
         let fishCollision = false;
         // create an AudioListener and add it to the camera
-var listener = new THREE.AudioListener();
-camera.add( listener );
+        var listener = new THREE.AudioListener();
+        camera.add( listener );
 
-// create a global audio source
-var sound = new THREE.Audio( listener );
+        // create a global audio source
+        var sound = new THREE.Audio( listener );
 
-     function handleFishCollision() {
+        function handleFishCollision() {
             for (let i = 0; i < fishies.length; i++) {
                 if (fishies[i].visible == false) {continue;}
                 var originPoint = teddyMesh.position.clone();
@@ -369,11 +388,6 @@ var sound = new THREE.Audio( listener );
             return lostGame;
         }
 
-        function reset() {
-            teddyMesh.position.set(0, 10, 175);
-        }
-
-
         // run a for loop where if the selected random duck is not 
         // currently seen by the camera, make it visible
         let randomDuck = Math.floor(ducks.length * Math.random());
@@ -433,9 +447,6 @@ var sound = new THREE.Audio( listener );
 
         window.addEventListener('keydown', moveObject, false);
 
-
-        var axesHelper = new THREE.AxesHelper(100);
-        teddyMesh.add(axesHelper);
 
         // create an EffectComposer
         const composer = new POSTPROCESSING.EffectComposer(renderer);
@@ -739,6 +750,36 @@ var sound = new THREE.Audio( listener );
             }
         }
 
+        function intro() {
+            var intro1Pic = document.getElementById("intro1Pic");
+            var intro1 = document.getElementById("intro1");
+            var intro2Pic = document.getElementById("intro2Pic");
+            var intro2 = document.getElementById("intro2");
+            var intro3Pic = document.getElementById("intro3Pic");
+            var intro3 = document.getElementById("intro3");
+            
+            intro1Pic.style.display = "block";
+            intro1.style.display = "block";
+
+            setTimeout(function () {
+                intro1Pic.style.display = "none";
+                intro1.style.display = "none";
+                intro2Pic.style.display = "block";
+                intro2.style.display = "block";
+            }, 8000);
+            setTimeout(function () {
+                intro2Pic.style.display = "none";
+                intro2.style.display = "none";
+                intro3Pic.style.display = "block";
+                intro3.style.display = "block";
+            }, 11000);
+            setTimeout(function () {
+                intro3Pic.style.display = "none";
+                intro3.style.display = "none";
+            }, 15000);
+        }
+           
+
 
         // Animation:
         var whirlTime = 0;
@@ -752,7 +793,7 @@ var sound = new THREE.Audio( listener );
         // Populate Scene:
         let randomRanges = getRandomRanges(300);
         ducksInit();
-
+        intro();
         animate();
 
         function animate() {
@@ -794,8 +835,8 @@ var sound = new THREE.Audio( listener );
             bounce(theta, teddyMesh.position.z, -coneHeight/2, timer);
             stickyDuck();
 
-            // Ignore duck collisions for 3 seconds so that the player has time to mentally prepare.
-            if (ticker > 60) {
+            // Ignore duck collisions for 12 seconds so that the intro can run and the player has time to mentally prepare.
+            if (ticker > 240) {
             handleDuckCollision();
             }
 
@@ -813,7 +854,6 @@ var sound = new THREE.Audio( listener );
             renderer.render(scene, camera);
             if (ticker % 100 == 0) //Activates lightning every 5 seconds.
             activate_lightning();
-
         }
     </script>
 
