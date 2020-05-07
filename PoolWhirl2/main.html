@@ -392,7 +392,12 @@ controls.update();
         composer.addPass(effectPass);
 
         let lightningTimer;
+        let lightningInProgress = false;
         function activate_lightning() {
+            if (lightningInProgress) {
+                return;
+            }
+            lightningInProgress = true;
             cloud_dlight.visible = true;
             cloud_ambient.visible = true;
             scene.fog = new THREE.FogExp2(0x11111f, 0.002);
@@ -614,14 +619,19 @@ controls.update();
 
         let l_origin = startPoint;
         let l_direction = new THREE.Vector3();
-        l_direction.subVectors(startPoint, endPoint).normalize();
-        let l_raycaster = new THREE.Raycaster(l_origin, l_direction);
+        l_direction.subVectors(endPoint, startPoint).normalize();
+        let l_raycaster = new THREE.Raycaster(l_origin, l_direction, true);
         let l_intersect = l_raycaster.intersectObject(cone);
         console.log(l_intersect); 
         // get the closest point of intersection 
         if (l_intersect.length > 0) {
             let lightning_intersect = l_intersect[0].point; 
-            console.log(lightning_intersect);
+            let l_geom = new THREE.SphereGeometry(10, 32, 32);
+            let l_material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+            let l_sphere = new THREE.Mesh(l_geom, l_material);
+            console.log(l_sphere);
+            l_sphere.position.copy(lightning_intersect);
+            scene.add(l_sphere);
         }
          
         let time = 0;
@@ -629,6 +639,7 @@ controls.update();
 
         // requestAnimationFrame passes the time since the page was loaded to the callback (in ms) 
         function animate_lightning(now) {
+            console.log(lightningTimer);
             lightningTimer--;
             // convert to seconds
             now *= 0.001;
@@ -648,6 +659,7 @@ controls.update();
             time = time + 1;
             composer.render(deltaTime);
             if (lightningTimer == 0) {
+                lightningInProgress = false;
                 deactivate_lightning();
             }
             else {
@@ -678,7 +690,7 @@ controls.update();
             }
         }
 
-        
+
         function render() {
             timer = whirlTime * 0.0002 * 0.8;
             cone.rotation.y = timer * 5;
@@ -705,8 +717,8 @@ controls.update();
             renderer.autoClear = true;
 
             renderer.render(scene, camera);
-
             activate_lightning();
+            
         }
     </script>
 
