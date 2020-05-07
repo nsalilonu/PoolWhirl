@@ -467,9 +467,21 @@ var sound = new THREE.Audio( listener );
                 cloud.visible = true;
             }
 
-            for (let lightning_segment of segmentList) {
-                lightning_segment[0].visible = true;
+            lightning.visible = true;
+            // generate random position within circle centered at teddy
+            let a = Math.random() * 2 * Math.PI;
+            let radius = 1.5;
+            let r = radius * Math.sqrt(Math.random());
+            let x = r * Math.cos(a);
+            let y = r * Math.sin(a);
+            let z = -2;
+            let newPosition = new THREE.Vector3(x, y, z);
+            lightning.position.copy(newPosition); 
+            console.log(newPosition);
+            for (let segment of segmentList) {
+                segment[0].geometry.verticesNeedUpdate = true;
             }
+            // console.log(lightning);
             // activate glow 
             composer.renderToScreen = true;
 
@@ -676,34 +688,13 @@ var sound = new THREE.Audio( listener );
             maxOffset /= 2;
         }
 
+        let lightning = new THREE.Group();
         // add every line segment in the array to the group
         for (let segment of segmentList) {
-            scene.add(segment[0]);
-            segment[0].visible = false;
+            lightning.add(segment[0]);
         }
-
-        /* let l_origin = startPoint;
-        let l_direction = new THREE.Vector3();
-        l_direction.subVectors(endPoint, startPoint).normalize();
-        let l_raycaster = new THREE.Raycaster(l_origin, l_direction, true);
-        let l_intersect = l_raycaster.intersectObject(cone); 
- 
-        // get the closest point of intersection 
-        if (l_intersect.length > 0) {
-            let lightning_intersect = l_intersect[0].point; 
-            let l_geom = new THREE.SphereGeometry(10, 32, 32);
-            let l_material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-            let l_sphere = new THREE.Mesh(l_geom, l_material);
-            console.log(l_sphere);
-            l_sphere.position.copy(lightning_intersect);
-            scene.add(l_sphere);
-        } */
-
-        let l_geom = new THREE.SphereGeometry(10, 32, 32);
-        let l_material = new THREE.MeshBasicMaterial({ color: 0xffff00 });
-        let l_sphere = new THREE.Mesh(l_geom, l_material);
-        l_sphere.position.copy(endPoint);
-        scene.add(l_sphere);
+        scene.add(lightning);
+        lightning.visible = false;
 
         let time = 0;
         let then = 0;
