@@ -376,7 +376,22 @@ controls.update();
         var axesHelper = new THREE.AxesHelper(100);
         teddyMesh.add(axesHelper);
 
-        let stopAnimate;
+        // create an EffectComposer
+        const composer = new POSTPROCESSING.EffectComposer(renderer);
+        // as the first pass, add a RenderPass that will render the scene
+        // with the camera into the first render target 
+        composer.addPass(new POSTPROCESSING.RenderPass(scene, camera));
+        // next, add a BloomPass, which renders its input to a smaller 
+        // render target and blurs the result, then adds it on top 
+        // of the original input
+        const effectPass = new POSTPROCESSING.EffectPass(
+            camera,
+            new POSTPROCESSING.BloomEffect({ intensity: 2.5 })
+        );
+        effectPass.renderToScreen = true;
+        composer.addPass(effectPass);
+
+        let lightningTimer;
         function activate_lightning() {
             cloud_dlight.visible = true;
             cloud_ambient.visible = true;
@@ -389,8 +404,12 @@ controls.update();
             for (let lightning_segment of segmentList) {
                 lightning_segment[0].visible = true;
             }
-            stopAnimate = false;
-            animate_lightning();
+            // activate glow 
+            composer.renderToScreen = true;
+            
+            lightningTimer = 20;
+            requestAnimationFrame(animate_lightning);
+            return;
         }
 
         function deactivate_lightning() {
@@ -448,27 +467,11 @@ controls.update();
             }
         });
 
-        // create an EffectComposer
-        const composer = new POSTPROCESSING.EffectComposer(renderer);
-        // as the first pass, add a RenderPass that will render the scene
-        // with the camera into the first render target 
-        composer.addPass(new POSTPROCESSING.RenderPass(scene, camera));
-        // next, add a BloomPass, which renders its input to a smaller 
-        // render target and blurs the result, then adds it on top 
-        // of the original input
-        const effectPass = new POSTPROCESSING.EffectPass(
-            camera,
-            new POSTPROCESSING.BloomEffect({ intensity: 2.5 })
-        );
-        effectPass.renderToScreen = true;
-        composer.addPass(effectPass);
-
         let segmentList = [];
 
 
         let startPoint = new THREE.Vector3(300, 500, -2);
         let endPoint = new THREE.Vector3(200, -5, -2);
-
 
         let points = [];
         points.push(startPoint);
@@ -608,12 +611,25 @@ controls.update();
             scene.add(segment[0]);
             segment[0].visible = false;
         }
+
+        let l_origin = startPoint;
+        let l_direction = new THREE.Vector3();
+        l_direction.subVectors(startPoint, endPoint).normalize();
+        let l_raycaster = new THREE.Raycaster(l_origin, l_direction);
+        let l_intersect = l_raycaster.intersectObject(cone);
+        console.log(l_intersect); 
+        // get the closest point of intersection 
+        if (l_intersect.length > 0) {
+            let lightning_intersect = l_intersect[0].point; 
+            console.log(lightning_intersect);
+        }
          
         let time = 0;
         let then = 0;
 
         // requestAnimationFrame passes the time since the page was loaded to the callback (in ms) 
         function animate_lightning(now) {
+            lightningTimer--;
             // convert to seconds
             now *= 0.001;
             const deltaTime = now - then;
@@ -631,15 +647,11 @@ controls.update();
             } 
             time = time + 1;
             composer.render(deltaTime);
-            if (now > 5) {
-                if (stopAnimate) {
-                    return;
-                }
+            if (lightningTimer == 0) {
                 deactivate_lightning();
-                stopAnimate = true;
             }
             else {
-            requestAnimationFrame(animate_lightning);
+                requestAnimationFrame(animate_lightning);
             }
         }
 
@@ -666,6 +678,7 @@ controls.update();
             }
         }
 
+        
         function render() {
             timer = whirlTime * 0.0002 * 0.8;
             cone.rotation.y = timer * 5;
@@ -693,7 +706,7 @@ controls.update();
 
             renderer.render(scene, camera);
 
-            //activate_lightning();
+            activate_lightning();
         }
     </script>
 
