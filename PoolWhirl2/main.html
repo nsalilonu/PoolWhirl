@@ -11,7 +11,7 @@
 </head>
 <script src="teddyMesh.js" type="module"></script>
 <script src="rubberDuckMesh.js" type="module"></script>
-<link href="style.css" type="text/css" rel="stylesheet"/>
+<link href="style.css" type="text/css" rel="stylesheet" />
 
 <body style="background-color: rgb(226, 113, 147);">
     <h1 id="h1" , style="color: white;">Pool Whirl</h1>
@@ -23,22 +23,22 @@
     <script src="OrbitControls.js"></script>
 
     <div id="points" class="points">
-      <div class="points-content">
-        <p id="pointsText">Points: 0</p>
-      </div>
+        <div class="points-content">
+            <p id="pointsText">Points: 0</p>
+        </div>
     </div>
 
     <div id="LostGame" class="modal">
-      <div class="modal-content">
-        <span class="close">&times;</span>
-        <p>You lost! Close this box or click off the box to play again!</p>
-      </div>
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p>You lost! Close this box or click off the box to play again!</p>
+        </div>
     </div>
 
     <canvas id="canvas"></canvas>
 
     <script type="module">
-        import { teddyMesh, teddyMunch, teddyInit, bounce} from "./teddyMesh.js";
+        import { teddyMesh, teddyMunch, teddyInit, bounce } from "./teddyMesh.js";
         import { duckMesh } from "./rubberDuckMesh.js";
         import { fish } from "./fishMesh.js";
 
@@ -75,26 +75,26 @@
         let lightBlue = [30, 99, 101, 57, 62, 90, 81, 17, 24, 84, 43, 97]
 
         for (let i = 0; i < vertColors.length; i++) {
-        let color;
-        if ((i < 6) || (lightBlue.includes(i))) {
-            color = new THREE.Color(0x66fff5);
-        } 
-        else if ((i % 3) == 0) {
-            // darker lines
-            //color = new THREE.Color(0x00c2b5);
-            color = new THREE.Color(0x00f0e0);
-        } 
-        else {
-            color = new THREE.Color(0x00ffff);
-        }
-        vertColors[i] = color.clone();
+            let color;
+            if ((i < 6) || (lightBlue.includes(i))) {
+                color = new THREE.Color(0x66fff5);
+            }
+            else if ((i % 3) == 0) {
+                // darker lines
+                //color = new THREE.Color(0x00c2b5);
+                color = new THREE.Color(0x00f0e0);
+            }
+            else {
+                color = new THREE.Color(0x00ffff);
+            }
+            vertColors[i] = color.clone();
         }
 
         for (var faceIndex = 0; faceIndex < coneGeometry.faces.length; faceIndex++) {
-        let face = coneGeometry.faces[faceIndex];
-        face.vertexColors.push(vertColors[face.a].clone());
-        face.vertexColors.push(vertColors[face.b].clone());
-        face.vertexColors.push(vertColors[face.c].clone());
+            let face = coneGeometry.faces[faceIndex];
+            face.vertexColors.push(vertColors[face.a].clone());
+            face.vertexColors.push(vertColors[face.b].clone());
+            face.vertexColors.push(vertColors[face.c].clone());
         }
 
         let coneMaterial = new THREE.MeshToonMaterial({ vertexColors: THREE.VertexColors });
@@ -110,15 +110,15 @@
         var tubeGeometry = new THREE.TorusGeometry(10, 3, 16, 100);
 
         for (var i = 0; i < tubeGeometry.faces.length; i++) {
-        let hue = Math.random(); //* 0.166 (if red/orange/yellow);
-        // setting lightness to higher value will make it more pastel
-        tubeGeometry.faces[i].color.setHSL(hue, 1.0, 0.8);
+            let hue = Math.random(); //* 0.166 (if red/orange/yellow);
+            // setting lightness to higher value will make it more pastel
+            tubeGeometry.faces[i].color.setHSL(hue, 1.0, 0.8);
         }
 
         var tubeMaterial = new THREE.MeshToonMaterial({ color: 0xffffff, vertexColors: true, shininess: 60 });
         tubeGeometry.scale(1.7, 1.7, 1.7);
         var torus = new THREE.Mesh(tubeGeometry, tubeMaterial);
-        torus.rotateX(Math.PI/2);
+        torus.rotateX(Math.PI / 2);
         torus.position.set(0, -17.000000000000007, -1.0000000000000142);
         teddyMesh.add(torus);
 
@@ -155,14 +155,14 @@
 
         let yAxis = new THREE.Vector3(0, 1, 0);
 
-        teddyMesh.translateZ(250);
+        teddyMesh.translateZ(175);
         teddyMesh.translateY(10);
         teddyMesh.rotateY(Math.PI / 2);
 
 
         scene.add(teddyMesh);
         let teddyPosition = teddyMesh.localToWorld(teddyMesh.position.clone());
-        camera.position.set( -219.61429616527784,  60.79054134136912, 154.64688761281252);
+        camera.position.set(-219.61429616527784, 60.79054134136912, 154.64688761281252);
         controls.target.set(teddyPosition.x, teddyPosition.y, teddyPosition.z);
         controls.update();
 
@@ -252,13 +252,13 @@
         }
 
         function stickyDuck() {
-          const length = closestVertex.length;
-          const EPS = 2 - 92 / 2 - 10;
-          for (let i = 0; i < length; i++) {        
-            ducks[i].position.setY(closestVertex[i].y + EPS);
-          }
+            const length = closestVertex.length;
+            const EPS = 2 - 92 / 2 - 10;
+            for (let i = 0; i < length; i++) {
+                ducks[i].position.setY(closestVertex[i].y + EPS);
+            }
         }
-        
+
 
         // Code taken from https://github.com/stemkoski/stemkoski.github.com/blob/master/Three.js/Collision-Detection.html.
         let gamePoints = 0;
@@ -342,31 +342,35 @@ var sound = new THREE.Audio( listener );
 
 
         function checkGameStatus() {
-          let lostGame = false;
-          if (teddyMesh.position.z <= 50) {
-            lostGame = true;
-          }
-
-          if (lostGame) {
-            var modal = document.getElementById("LostGame");
-            var span = document.getElementsByClassName("close")[0];
-            modal.style.display = "block";
-
-            // When the user clicks on <span> (x), close the modal and refresh the page
-            span.onclick = function() {
-              modal.style.display = "none";
-              window.location.reload();
+            let lostGame = false;
+            if (teddyMesh.position.z <= 50) {
+                lostGame = true;
             }
 
-            // When the user clicks anywhere outside of the modal, close it and refresh the page.
-            window.onclick = function(event) {
-              if (event.target == modal) {
-                modal.style.display = "none";
-                window.location.reload();
-              }
+            if (lostGame) {
+                var modal = document.getElementById("LostGame");
+                var span = document.getElementsByClassName("close")[0];
+                modal.style.display = "block";
+
+                // When the user clicks on <span> (x), close the modal and refresh the page
+                span.onclick = function () {
+                    modal.style.display = "none";
+                    window.location.reload();
+                }
+
+                // When the user clicks anywhere outside of the modal, close it and refresh the page.
+                window.onclick = function (event) {
+                    if (event.target == modal) {
+                        modal.style.display = "none";
+                        window.location.reload();
+                    }
+                }
             }
-          }
-          return lostGame;
+            return lostGame;
+        }
+
+        function reset() {
+            teddyMesh.position.set(0, 10, 175);
         }
 
 
@@ -388,29 +392,29 @@ var sound = new THREE.Audio( listener );
 
             if (event.keyCode == DOWN) {
                 object.translateY(-1);
-              
+
             }
             else if (event.keyCode == UP) {
                 object.translateY(1);
-               
+
             }
             else if (event.keyCode == LEFT) {
                 object.translateX(1);
 
-               
+
             }
             else if (event.keyCode == RIGHT) {
                 object.translateX(-1);
-              
-               
+
+
             }
             else if (event.keyCode == FRONT) {
                 object.translateZ(1);
-         
+
             }
             else if (event.keyCode == BACK) {
                 object.translateZ(-1);
-             
+
             }
         }
 
@@ -433,13 +437,32 @@ var sound = new THREE.Audio( listener );
         var axesHelper = new THREE.AxesHelper(100);
         teddyMesh.add(axesHelper);
 
-        let stopAnimate;
-        let clock = new THREE.Clock();
+        // create an EffectComposer
+        const composer = new POSTPROCESSING.EffectComposer(renderer);
+        // as the first pass, add a RenderPass that will render the scene
+        // with the camera into the first render target 
+        composer.addPass(new POSTPROCESSING.RenderPass(scene, camera));
+        // next, add a BloomPass, which renders its input to a smaller 
+        // render target and blurs the result, then adds it on top 
+        // of the original input
+        const effectPass = new POSTPROCESSING.EffectPass(
+            camera,
+            new POSTPROCESSING.BloomEffect({ intensity: 2.5 })
+        );
+        effectPass.renderToScreen = true;
+        composer.addPass(effectPass);
+
+        let lightningTimer;
+        let lightningInProgress = false;
         function activate_lightning() {
+            if (lightningInProgress) {
+                return;
+            }
+            lightningInProgress = true;
             cloud_dlight.visible = true;
             cloud_ambient.visible = true;
             scene.fog = new THREE.FogExp2(0x11111f, 0.002);
-            
+
             for (let cloud of cloudParticles) {
                 cloud.visible = true;
             }
@@ -447,9 +470,12 @@ var sound = new THREE.Audio( listener );
             for (let lightning_segment of segmentList) {
                 lightning_segment[0].visible = true;
             }
-            stopAnimate = false;
-            clock.start();
-            animate_lightning();
+            // activate glow 
+            composer.renderToScreen = true;
+
+            lightningTimer = 20;
+            requestAnimationFrame(animate_lightning);
+            return;
         }
 
         let lightningOn = false;
@@ -457,7 +483,7 @@ var sound = new THREE.Audio( listener );
             cloud_dlight.visible = false;
             cloud_ambient.visible = false;
             scene.fog.density = 0;
-           
+
             for (let cloud of cloudParticles) {
                 cloud.visible = false;
             }
@@ -471,7 +497,7 @@ var sound = new THREE.Audio( listener );
             lightningOn = false;
             return;
         }
-       
+
         // add lights for the clouds 
         const cloud_dlight = new THREE.DirectionalLight(0xffffff, 0.7);
         cloud_dlight.position.set(1, 1, 0).normalize();
@@ -507,27 +533,14 @@ var sound = new THREE.Audio( listener );
             }
         });
 
-        // create an EffectComposer
-        const composer = new POSTPROCESSING.EffectComposer(renderer);
-        // as the first pass, add a RenderPass that will render the scene
-        // with the camera into the first render target 
-        composer.addPass(new POSTPROCESSING.RenderPass(scene, camera));
-        // next, add a BloomPass, which renders its input to a smaller 
-        // render target and blurs the result, then adds it on top 
-        // of the original input
-        const effectPass = new POSTPROCESSING.EffectPass(
-            camera,
-            new POSTPROCESSING.BloomEffect({ intensity: 2.5 })
-        );
-        effectPass.renderToScreen = true;
-        composer.addPass(effectPass);
-
         let segmentList = [];
 
 
         let startPoint = new THREE.Vector3(300, 500, -2);
-        let endPoint = new THREE.Vector3(200, -5, -2);
-
+        let vert_len = coneGeometry.vertices.length;
+        // let idx = Math.floor(Math.random() * vert_len);
+        let endPoint = cone.localToWorld(coneGeometry.vertices[0].clone());
+        console.log(endPoint);
 
         let points = [];
         points.push(startPoint);
@@ -662,22 +675,43 @@ var sound = new THREE.Audio( listener );
             // the previous generation
             maxOffset /= 2;
         }
-        // add every line segment in the array to the scene
+
+        // add every line segment in the array to the group
         for (let segment of segmentList) {
             scene.add(segment[0]);
             segment[0].visible = false;
         }
-         
+
+        /* let l_origin = startPoint;
+        let l_direction = new THREE.Vector3();
+        l_direction.subVectors(endPoint, startPoint).normalize();
+        let l_raycaster = new THREE.Raycaster(l_origin, l_direction, true);
+        let l_intersect = l_raycaster.intersectObject(cone); 
+ 
+        // get the closest point of intersection 
+        if (l_intersect.length > 0) {
+            let lightning_intersect = l_intersect[0].point; 
+            let l_geom = new THREE.SphereGeometry(10, 32, 32);
+            let l_material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+            let l_sphere = new THREE.Mesh(l_geom, l_material);
+            console.log(l_sphere);
+            l_sphere.position.copy(lightning_intersect);
+            scene.add(l_sphere);
+        } */
+
+        let l_geom = new THREE.SphereGeometry(10, 32, 32);
+        let l_material = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+        let l_sphere = new THREE.Mesh(l_geom, l_material);
+        l_sphere.position.copy(endPoint);
+        scene.add(l_sphere);
+
         let time = 0;
         let then = 0;
         let deltaTime = 0;
 
         // requestAnimationFrame passes the time since the page was loaded to the callback (in ms) 
         function animate_lightning(now) {
-            
-            now = clock.getElapsedTime();
-            deltaTime = clock.getDelta();
-            
+            lightningTimer--;
             // convert to seconds
             //  now *= 0.001;
             // const deltaTime = now - then;
@@ -693,21 +727,15 @@ var sound = new THREE.Audio( listener );
                 for (let segment of segmentList) {
                     segment[0].visible = true;
                 }
-            } 
+            }
             time = time + 1;
             composer.render(deltaTime);
-           
-            if (now > 0.5) {
-                if (stopAnimate) {
-                    return;
-                }
-                lightningOn = false;
+            if (lightningTimer == 0) {
+                lightningInProgress = false;
                 deactivate_lightning();
-                stopAnimate = true;
-                
             }
             else {
-            requestAnimationFrame(animate_lightning);
+                requestAnimationFrame(animate_lightning);
             }
         }
 
@@ -730,14 +758,15 @@ var sound = new THREE.Audio( listener );
         function animate() {
             whirlTime += 30;
             let lostGame = checkGameStatus();
-             if (lostGame) {
-               renderer.render(scene, camera);
-             }
+            if (lostGame) {
+                renderer.render(scene, camera);
+            }
             else {
-              requestAnimationFrame(animate);
-              render();
+                requestAnimationFrame(animate);
+                render();
             }
         }
+
 
         function render() {
             timer = whirlTime * 0.0002 * 0.8;
@@ -782,7 +811,9 @@ var sound = new THREE.Audio( listener );
             // Render! (by golly I hope this works!)
             ticker++;
             renderer.render(scene, camera);
-         
+            if (ticker % 100 == 0) //Activates lightning every 5 seconds.
+            activate_lightning();
+
         }
     </script>
 
