@@ -155,7 +155,7 @@
 
         let yAxis = new THREE.Vector3(0, 1, 0);
 
-        teddyMesh.translateZ(175);
+        teddyMesh.translateZ(250);
         teddyMesh.translateY(10);
         teddyMesh.rotateY(Math.PI / 2);
 
@@ -286,7 +286,60 @@
         }
 
         // Add fish:
+        fish.scale.set(0.083,0.083,0.083);
+        fish.translateZ(150);
+        fish.translateX(100);
         scene.add(fish);
+        let fishies = []; // All the fish both visible and invisible.
+        let guppy = fish.children[0];
+        fishies.push(fish);
+        
+        let fishCollision = false;
+        // create an AudioListener and add it to the camera
+var listener = new THREE.AudioListener();
+camera.add( listener );
+
+// create a global audio source
+var sound = new THREE.Audio( listener );
+
+     function handleFishCollision() {
+            for (let i = 0; i < fishies.length; i++) {
+                if (fishies[i].visible == false) {continue;}
+                var originPoint = teddyMesh.position.clone();
+                var fish = fishies[i];
+                fishCollision = false;
+                for (var vertexIndex = 0; vertexIndex < torus.geometry.vertices.length; vertexIndex++) {		
+                    var localVertex = torus.geometry.vertices[vertexIndex].clone();
+                    var globalVertex = localVertex.applyMatrix4( torus.matrix );
+                    var directionVector = globalVertex.sub( torus.position );
+                    var ray = new THREE.Raycaster( originPoint, directionVector.clone().normalize() );
+                    var collisionResults = ray.intersectObject( fish, true );
+                    if ( collisionResults.length > 0 && collisionResults[0].distance < directionVector.length() ) {
+                        fishCollision = true;
+                    }
+                }
+                if (fishCollision) {
+                    gamePoints++;
+                    let string = "Points: " + gamePoints;
+                    document.getElementById("pointsText").innerHTML = string;
+                    teddyInit();
+                    fishies[i].visible = false;
+                    // load a sound and set it as the Audio object's buffer
+                    var audioLoader = new THREE.AudioLoader();
+                    audioLoader.load( 'crunch.mp3', function( buffer ) {
+                        sound.setBuffer( buffer );
+                        sound.setLoop( false );
+                        sound.setVolume( 1.0 );
+                        sound.setPlaybackRate(3);
+                        sound.play();
+                        
+                    });
+                }	
+                controls.update();
+            }
+        }
+
+
 
         function checkGameStatus() {
           let lostGame = false;
@@ -314,10 +367,6 @@
             }
           }
           return lostGame;
-        }
-
-        function reset() {
-          teddyMesh.position.set(0,10,175);
         }
 
 
@@ -385,6 +434,7 @@
         teddyMesh.add(axesHelper);
 
         let stopAnimate;
+        let clock = new THREE.Clock();
         function activate_lightning() {
             cloud_dlight.visible = true;
             cloud_ambient.visible = true;
@@ -398,9 +448,11 @@
                 lightning_segment[0].visible = true;
             }
             stopAnimate = false;
+            clock.start();
             animate_lightning();
         }
 
+        let lightningOn = false;
         function deactivate_lightning() {
             cloud_dlight.visible = false;
             cloud_ambient.visible = false;
@@ -416,6 +468,7 @@
             // deactivate glow 
             composer.renderToScreen = false;
             composer.render();
+            lightningOn = false;
             return;
         }
        
@@ -616,17 +669,20 @@
         }
          
         let time = 0;
-        //let then = 0;
+        let then = 0;
+        let deltaTime = 0;
 
         // requestAnimationFrame passes the time since the page was loaded to the callback (in ms) 
         function animate_lightning(now) {
-            // convert to seconds
-             now *= 0.001;
-            const deltaTime = now - then;
-            console.log("Delta Time:", deltaTime);
             
-            const then = now;
-            console.log("Then:", then);
+            now = clock.getElapsedTime();
+            deltaTime = clock.getDelta();
+            
+            // convert to seconds
+            //  now *= 0.001;
+            // const deltaTime = now - then;
+            
+            // then = now;
 
             if (time % 2 == 0) {
                 for (let segment of segmentList) {
@@ -640,12 +696,15 @@
             } 
             time = time + 1;
             composer.render(deltaTime);
-            if (now > 5) {
+           
+            if (now > 0.5) {
                 if (stopAnimate) {
                     return;
                 }
+                lightningOn = false;
                 deactivate_lightning();
                 stopAnimate = true;
+                
             }
             else {
             requestAnimationFrame(animate_lightning);
@@ -659,6 +718,8 @@
         let coneSpeed = 5;
         let lightningDelay = 100; // Starts off generating lightning every 5 seconds.
         let ticker = 0; // When ticker = 20, 1 second has gone by
+        let teddyTime = false;
+        teddyInit();
 
         // Populate Scene:
         let randomRanges = getRandomRanges(300);
@@ -683,7 +744,7 @@
             cone.rotation.y = timer * coneSpeed;
             
             // Increase the cone speed and lightning frequency every 15 seconds.
-            if (ticker % 300 == 0) {
+            if (ticker % 300 == 0 && coneSpeed < 20) { // Cone speed cannot be higher than 20 to keep game playable.
                 coneSpeed++;
                 if (lightningDelay > 40) // Lightning frequency must be at least 2 seconds to avoid modulus 0;
                 lightningDelay--;
@@ -701,7 +762,6 @@
             let coneHeight = cone.geometry.parameters.height * coneScale;
             let coneRadius = cone.geometry.parameters.radius * coneScale;
             let theta = Math.atan(coneHeight/coneRadius);
-            teddyMunch();
             bounce(theta, teddyMesh.position.z, -coneHeight/2, timer);
             stickyDuck();
 
@@ -710,13 +770,19 @@
             handleDuckCollision();
             }
 
+             handleFishCollision();
+             if (fishCollision) { teddyInit(); }
+            
+            // When teddyMunch animation is done, it will set teddyTime to false.
+            if (fishCollision || teddyTime) {
+                teddyTime = teddyMunch();
+                fishCollision = false;
+            }
+
             // Render! (by golly I hope this works!)
             ticker++;
             renderer.render(scene, camera);
-            // Activates lightning every 100 / 20 seconds. 
-            if (ticker % lightningDelay == 0) {
-            activate_lightning();
-            }
+         
         }
     </script>
 
