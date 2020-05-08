@@ -831,7 +831,7 @@ function showDuck() {
             cone.add(target);
             target.visible = false;
             target.rotateX(0.4 * Math.PI);
-            target.translateY(70);
+            target.translateY(5);
         });
 
 
@@ -858,6 +858,23 @@ function showDuck() {
                 target.visible = true;
             }
             time = time + 1;
+
+            let vertices_length = coneGeometry.vertices.length;
+            // find the closest vertex to the target
+            // update target's y position to that vertex's y position + EPS
+            let minVertex = new THREE.Vector3(600, 600, 600);
+            let minLength = minVertex.length();
+            // look through all the vertices to find the closest one
+            for (let j = 0; j < vertices_length; j++) {
+                let currLength = coneGeometry.vertices[j].clone().sub(target.position).length();
+                if (currLength <= minLength) {
+                    minLength = currLength;
+                    minVertex = coneGeometry.vertices[j];
+                }
+            }
+            const EPS = 2 - 92 / 2 - 10;
+            target.position.setY(minVertex.y + EPS);
+            
             composer.render(deltaTime);
             if (lightningTimer == 0) {
                 lightningInProgress = false;
