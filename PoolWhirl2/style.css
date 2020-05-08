@@ -91,12 +91,11 @@
 
   .intro-picture {
     display: none;
-    margin-left: auto;
-    margin-right: auto;
-    margin-bottom: 10% auto;
     width: 500px;
     height: 500px;
-    object-fit: cover;
+    float: center;
+    margin: auto;
+    background-size: cover;
   }
 
 

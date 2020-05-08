@@ -36,43 +36,18 @@
     </div>
 
     <div id= "Intro" class="intro">
-
-        <div id="intro1Pic" class="intro-picture">
-
-            <img src= "teddyImage.PNG">
-
-        </div>
-
+        <div id="intro1Pic" class="intro-picture" style="background-image:url('teddyImage.PNG');"></div>
         <div id="intro1" class="intro-content">
-
             <p>You are a teddy bear on a tube in a whirlpool! How did you get here? Who knows? But you must stay away from the center! Move around with WASD keys</p>
-
         </div>
-
-        <div id="intro2Pic" class="intro-picture">
-
-            <img src= "duckImage.PNG">
-
-        </div>
-
+        <div id="intro2Pic" class="intro-picture" style="background-image:url('duckImage.PNG');"></div>
         <div id= "intro2" class="intro-content">
-
             <p>Avoid the ducks, they will knock you closer to the center!</p>
-
         </div>
-
-        <div id= "intro3Pic" class="intro-picture">
-
-            <img src= "fishImage.PNG">
-
-        </div>
-
+        <div id= "intro3Pic" class="intro-picture" style="background-image:url('fishImage.PNG');"></div>
         <div id= "intro3" class="intro-content">
-
             <p>Grab the fish! They will increase your points!</p>
-
         </div>
-
     </div>
 
     <canvas id="canvas"></canvas>
@@ -885,64 +860,35 @@
         }
 
         function intro() {
+            var intro= document.getElementById("Intro");
+            var intro1Pic = document.getElementById("intro1Pic");
+            var intro1 = document.getElementById("intro1");
+            var intro2Pic = document.getElementById("intro2Pic");
+            var intro2 = document.getElementById("intro2");
+            var intro3Pic = document.getElementById("intro3Pic");
+            var intro3 = document.getElementById("intro3");
 
-var intro= document.getElementById("Intro");
+            intro1Pic.style.display = "block";
+            intro1.style.display = "block";
 
-var intro1Pic = document.getElementById("intro1Pic");
-
-var intro1 = document.getElementById("intro1");
-
-var intro2Pic = document.getElementById("intro2Pic");
-
-var intro2 = document.getElementById("intro2");
-
-var intro3Pic = document.getElementById("intro3Pic");
-
-var intro3 = document.getElementById("intro3");
-
-
-
-intro1Pic.style.display = "block";
-
-intro1.style.display = "block";
-
-
-
-setTimeout(function () {
-
-    intro1Pic.style.display = "none";
-
-    intro1.style.display = "none";
-
-    intro2Pic.style.display = "block";
-
-    intro2.style.display = "block";
-
-}, 8000);
-
-setTimeout(function () {
-
-    intro2Pic.style.display = "none";
-
-    intro2.style.display = "none";
-
-    intro3Pic.style.display = "block";
-
-    intro3.style.display = "block";
-
-}, 11000);
-
-setTimeout(function () {
-
-    intro3Pic.style.display = "none";
-
-    intro3.style.display = "none";
-
-    intro.style.display = "none";
-
-}, 15000);
-
-}
+            setTimeout(function () {
+                intro1Pic.style.display = "none";
+                intro1.style.display = "none";
+                intro2Pic.style.display = "block";
+                intro2.style.display = "block";
+            }, 8000);
+            setTimeout(function () {
+                intro2Pic.style.display = "none";
+                intro2.style.display = "none";
+                intro3Pic.style.display = "block";
+                intro3.style.display = "block";
+            }, 11000);
+            setTimeout(function () {
+                intro3Pic.style.display = "none";
+                intro3.style.display = "none";
+                intro.style.display = "none";
+            }, 15000);
+        }
 
 
         // Animation:
@@ -1001,8 +947,8 @@ setTimeout(function () {
             stickyDuck();
             //stickyFish();
 
-            // Ignore duck collisions for 3 seconds so that the player has time to mentally prepare.
-            if (ticker > 60) {
+            // Ignore duck collisions for 10 seconds so that the player has time to mentally prepare.
+            if (ticker > 200) {
                 handleDuckCollision();
             }
 

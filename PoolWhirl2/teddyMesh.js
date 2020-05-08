@@ -155,7 +155,7 @@ function teddyMunch() {
     let previous;
     let firstBounce = true;
 
-    function bounce(theta, z, minY, timer, torus, cone) {
+    function bounce(theta, z, minY, timer) {
         let earBounce = Math.sin(timer*50) * 3;
         let bodyBounce = Math.sin(timer*70) * 0.25;
         teddyLeftEarMesh.translateY(earBounce/10);
