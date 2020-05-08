@@ -57,7 +57,7 @@
     <canvas id="canvas"></canvas>
 
     <script type="module">
-        import { teddyMesh, teddyMunch, teddyInit, bounce } from "./teddyMesh.js";
+        import { teddyMesh, teddyMunch, teddyInit, bounce, stickyTeddy } from "./teddyMesh.js";
         import { duckMesh } from "./rubberDuckMesh.js";
         import { fish } from "./fishMesh.js";
 
@@ -270,12 +270,24 @@
             }
         }
 
-        function stickyDuck() {
+        function stickyDuck(theta, minY, timer) {
             const length = closestVertex.length;
-            const EPS = 2 - 92 / 2 - 10;
+            const EPS = -44;
             for (let i = 0; i < length; i++) {
                 ducks[i].position.setY(closestVertex[i].y + EPS);
             }
+
+            // Move the ducks along the cone in correspondance to the cone position.
+            // for (let i = 0; i < ducks.length; i++) {
+            // let EPS =  100;
+            // let duckPos = ducks[i].localToWorld(ducks[i].position.clone());
+            // let y = duckPos.z * Math.tan(theta);  // Y of duck displacement from lowest point of cone.
+            // ducks[i].position.setY(y + minY +  EPS);
+            // let buoyancy = Math.sin(timer*25) * 3;
+            // console.log(buoyancy);
+            // ducks[i].translateY(buoyancy/10);
+            // }
+
         }
 
 
@@ -802,7 +814,7 @@
 
         function render() {
             timer = whirlTime * 0.0002 * 0.8;
-            cone.rotation.y = timer * coneSpeed;
+             cone.rotation.y = timer * coneSpeed;
             
             // Increase the cone speed and lightning frequency every 15 seconds.
             if (ticker % 300 == 0 && coneSpeed < 20) { // Cone speed cannot be higher than 20 to keep game playable.
@@ -823,12 +835,13 @@
             let coneHeight = cone.geometry.parameters.height * coneScale;
             let coneRadius = cone.geometry.parameters.radius * coneScale;
             let theta = Math.atan(coneHeight/coneRadius);
-            bounce(theta, teddyMesh.position.z, -coneHeight/2, timer);
-            stickyDuck();
+            bounce(theta, teddyMesh.position.z, -coneHeight/2, timer, torus, cone);
+            stickyDuck(theta, -coneHeight/2, timer);
+            // stickyTeddy(cone);
 
             // Ignore duck collisions for 12 seconds so that the intro can run and the player has time to mentally prepare.
             if (ticker > 240) {
-            handleDuckCollision();
+            //handleDuckCollision();
             }
 
              handleFishCollision();
@@ -843,8 +856,9 @@
             // Render! (by golly I hope this works!)
             ticker++;
             renderer.render(scene, camera);
-            if (ticker % 100 == 0) //Activates lightning every 5 seconds.
-            activate_lightning();
+            if (ticker % 100 == 0) { //Activates lightning every 5 seconds.
+            // activate_lightning();
+            }
         }
     </script>
 

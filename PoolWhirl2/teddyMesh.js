@@ -152,19 +152,100 @@ function teddyMunch() {
         }
 }
 
-function bounce(theta, z, minY, timer) {
-let earBounce = Math.sin(timer*50) * 3;
-let bodyBounce = Math.sin(timer*70) * 0.25;
-teddyLeftEarMesh.translateY(earBounce/10);
-teddyRightEarMesh.translateY(earBounce/10);
-teddyBody.translateY(bodyBounce/10);
+    let previous;
+    let firstBounce = true;
 
-// Move the teddy along the cone in correspondance to the cone position.
-let EPS = 35;
-let y = z * Math.tan(theta);
-teddyMesh.position.setY(y + minY + EPS);
-let buoyancy = Math.sin(timer*25) * 20;
-teddyMesh.translateY(buoyancy/10);
+    function bounce(theta, z, minY, timer, torus, cone) {
+        let earBounce = Math.sin(timer*50) * 3;
+        let bodyBounce = Math.sin(timer*70) * 0.25;
+        teddyLeftEarMesh.translateY(earBounce/10);
+        teddyRightEarMesh.translateY(earBounce/10);
+        teddyBody.translateY(bodyBounce/10);
+
+        // // Move the teddy along the cone in correspondance to the cone position.
+        // let EPS = 20;
+        let y = z * Math.tan(theta) + minY;  // Y of teddy displacement from lowest point of cone.
+        // teddyMesh.position.setY(y + minY + EPS);
+        // console.log(teddyMesh.position);
+        // let buoyancy = Math.sin(timer*25) * 20;
+        // teddyMesh.translateY(buoyancy/10);
+
+        // Find intersections of tube with cone.
+        var originPoint = torus.position.clone();
+        var lowestY = new THREE.Vector3(10000,10000,10000);
+
+        let collision = false;
+        for (var vertexIndex = 0; vertexIndex < torus.geometry.vertices.length; vertexIndex++) {		
+            var localVertex = torus.geometry.vertices[vertexIndex].clone();
+            var globalVertex = localVertex.applyMatrix4( torus.matrix );
+            var directionVector = globalVertex.sub( torus.position );
+            var ray = new THREE.Raycaster( originPoint, directionVector.clone().normalize() );
+            var collisionResults = ray.intersectObject( cone );
+            if ( collisionResults.length > 0 && collisionResults[0].distance < directionVector.length() ) {
+                // Go through the points of intersection and find the largest distance/smallest y value.
+                collision = true;
+                for (let i = 0; i < collisionResults.length; i++) {
+                    if (collisionResults[i].point.y < lowestY.y) {
+                        lowestY = collisionResults[i].point;
+                    }
+                }
+            }
+        }
+
+        console.log(collision);
+        if (!collision) { lowestY = new THREE.Vector3(0,y,0); }
+        // Subtract that distance from the y that was calculated earlier (tube sitting on top of the cone)
+        let volume_disp = y - teddyMesh.position.y;
+        let area = 10*Math.PI*2 * 3*Math.PI*2; //Torus area = 2*pi*R * 2*pi*r
+        volume_disp *= area; // Calculate area and multiply... this is your displaced volume!
+        const GRAVITY = -9.8 * 140; // Taken from Cloth Assignment 
+        const mass = 0.1;
+        // Multiply by density of water and acceleration due to gravity. Should be positive. This is your buoyancy force!
+        let buoyancy = volume_disp * GRAVITY;
+        // Get gravitational force vector and subtract the buoyancy force from it.
+        let gravity = GRAVITY * mass;
+        let force = gravity - buoyancy;
+        const DAMPING = 0.03;
+        const TIMESTEP = 8 / 1000;
+            
+        // Do Verlet integration on the bear?
+        if (firstBounce) {previous = teddyMesh.position.clone();}
+        let accelerationTerm = new THREE.Vector3();
+        accelerationTerm.setY(force);
+        accelerationTerm.divideScalar(mass);
+        accelerationTerm.multiplyScalar(Math.pow(TIMESTEP, 2));
+        let newPos = new THREE.Vector3();
+        newPos.subVectors(teddyMesh.position, previous);
+        newPos.multiplyScalar((1-DAMPING));
+        newPos.add(teddyMesh.position);
+        newPos.add(accelerationTerm);
+        previous = teddyMesh.position.clone();
+        teddyMesh.position.set(newPos.x, newPos.y, newPos.z);
+        console.log("Teddy: ", teddyMesh.position);  
+        // console.log("Previous: ", previous);
+        // console.log(teddyMesh.position);
 }
 
-export {teddyMesh, teddyMunch, teddyInit, bounce};
+    function stickyTeddy(cone) {
+        let vertices = cone.geometry.vertices;
+        let minVertex = new THREE.Vector3(600, 600, 600);
+        let minLength = minVertex.length();
+        // look through all the vertices to find the closest one
+        let teddyPosition = teddyMesh.localToWorld(teddyMesh.position.clone());
+        for (let i = 0; i < vertices.length; i++) {
+            let vertexPosition = cone.localToWorld(vertices[i].clone());
+            let currLength = vertexPosition.clone().sub(teddyPosition).length();
+            if (currLength <= minLength) {
+                minLength = currLength;
+                minVertex = vertexPosition;
+            }
+        }
+        //const EPS = 2 - 92 / 2 - 10;
+        const EPS = 1;
+        let y = minVertex.y;
+        teddyMesh.position.setY(y + EPS); 
+
+        
+    }
+
+export {teddyMesh, teddyMunch, teddyInit, bounce, stickyTeddy};
