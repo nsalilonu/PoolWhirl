@@ -35,6 +35,7 @@
         </div>
     </div>
 
+    <div id= "Intro" class="intro">
         <div id="intro1Pic" class="intro-picture">
             <img src= "teddyImage.PNG">
         </div>
@@ -53,6 +54,7 @@
         <div id= "intro3" class="intro-content">
             <p>Grab the fish! They will increase your points!</p>
         </div>
+    </div>
 
     <canvas id="canvas"></canvas>
 
@@ -867,6 +869,7 @@ function showDuck() {
         }
 
         function intro() {
+            var intro= document.getElementById("Intro");
             var intro1Pic = document.getElementById("intro1Pic");
             var intro1 = document.getElementById("intro1");
             var intro2Pic = document.getElementById("intro2Pic");
@@ -892,6 +895,7 @@ function showDuck() {
             setTimeout(function () {
                 intro3Pic.style.display = "none";
                 intro3.style.display = "none";
+                intro.style.display = "none";
             }, 15000);
         }
            
@@ -910,7 +914,7 @@ function showDuck() {
         let randomRanges = getRandomRanges(300);
         //ducksInit();
         //fishInit();
-
+        intro();
         animate();
 
         function animate() {
