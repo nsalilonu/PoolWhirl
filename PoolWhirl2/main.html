@@ -585,8 +585,8 @@ var sound = new THREE.Audio( listener );
         var axesHelper = new THREE.AxesHelper(100);
         teddyMesh.add(axesHelper);
 
-        // create an EffectComposer
-        const composer = new POSTPROCESSING.EffectComposer(renderer);
+         // create an EffectComposer
+         const composer = new POSTPROCESSING.EffectComposer(renderer);
         // as the first pass, add a RenderPass that will render the scene
         // with the camera into the first render target 
         composer.addPass(new POSTPROCESSING.RenderPass(scene, camera));
@@ -600,6 +600,7 @@ var sound = new THREE.Audio( listener );
         effectPass.renderToScreen = true;
         composer.addPass(effectPass);
 
+
         let lightningTimer;
         let lightningInProgress = false;
         function activate_lightning() {
@@ -607,29 +608,14 @@ var sound = new THREE.Audio( listener );
                 return;
             }
             lightningInProgress = true;
-            cloud_dlight.visible = true;
-            cloud_ambient.visible = true;
-            scene.fog = new THREE.FogExp2(0x11111f, 0.002);
-
-            for (let cloud of cloudParticles) {
-                cloud.visible = true;
-            }
-
+            storm_dlight.visible = true;
+            storm_ambient.visible = true;
             lightning.visible = true;
-            // generate random position within circle centered at teddy
-            let a = Math.random() * 2 * Math.PI;
-            let radius = 1.5;
-            let r = radius * Math.sqrt(Math.random());
-            let x = r * Math.cos(a);
-            let y = r * Math.sin(a);
-            let z = -2;
-            let newPosition = new THREE.Vector3(x, y, z);
-            lightning.position.copy(newPosition); 
-            console.log(newPosition);
-            for (let segment of segmentList) {
-                segment[0].geometry.verticesNeedUpdate = true;
-            }
-            // console.log(lightning);
+            target.visible = true;
+
+
+            scene.background = 'black';
+
             // activate glow 
             composer.renderToScreen = true;
 
@@ -638,211 +624,192 @@ var sound = new THREE.Audio( listener );
             return;
         }
 
-        let lightningOn = false;
         function deactivate_lightning() {
-            cloud_dlight.visible = false;
-            cloud_ambient.visible = false;
-            scene.fog.density = 0;
-
-            for (let cloud of cloudParticles) {
-                cloud.visible = false;
-            }
-            for (let lightning_segment of segmentList) {
-                lightning_segment[0].visible = false;
-            }
+            storm_dlight.visible = false;
+            storm_ambient.visible = false;
+            lightning.visible = false;
+            target.visible = false;
+            scene.background = sceneColor;
 
             // deactivate glow 
             composer.renderToScreen = false;
             composer.render();
-            lightningOn = false;
             return;
         }
 
-        // add lights for the clouds 
-        const cloud_dlight = new THREE.DirectionalLight(0xffffff, 0.7);
-        cloud_dlight.position.set(1, 1, 0).normalize();
-        scene.add(cloud_dlight);
-        cloud_dlight.visible = false;
-        const cloud_ambient = new THREE.AmbientLight(0xffffff, 0.3);
-        scene.add(cloud_ambient);
-        cloud_ambient.visible = false;
+        // add storm lights 
+        const storm_dlight = new THREE.DirectionalLight(0xffffff, 0.7);
+        storm_dlight.position.set(1, 1, 0).normalize();
+        scene.add(storm_dlight);
+        storm_dlight.visible = false;
+        const storm_ambient = new THREE.AmbientLight(0xffffff, 0.3);
+        scene.add(storm_ambient);
+        storm_ambient.visible = false;
 
-        let cloudParticles = [];
-        let loader = new THREE.TextureLoader();
-        loader.load("./Lightning/smoke.png", function (texture) {
-            let cloudGeo = new THREE.PlaneBufferGeometry(500, 500);
-            let cloudMaterial = new THREE.MeshLambertMaterial({
-                map: texture,
-                transparent: true
-            });
+        function lightning_init(startPoint, endPoint) {
+            let segmentList = [];
+            let points = [];
+            points.push(startPoint);
+            points.push(endPoint);
+            let geometry = new THREE.Geometry().setFromPoints(points);
 
-            for (let p = 0; p < 100; p++) {
-                let cloud = new THREE.Mesh(cloudGeo, cloudMaterial);
-                cloud.position.set(
-                    Math.random() * 800 - 500,
-                    Math.random() * 400 - 200,
-                    100
-                );
-                cloud.rotation.x = 1.16;
-                cloud.rotation.y = -0.12;
-                cloud.rotation.z = Math.random() * 360;
-                cloud.material.opacity = 0.6;
-                scene.add(cloud);
-                cloud.visible = false;
-                cloudParticles.push(cloud);
+            let line = new MeshLine();
+            line.setGeometry(geometry);
+
+            let material = new MeshLineMaterial({ color: new THREE.Color(0xFFFF99) });
+
+            let segMesh = new THREE.Mesh(line.geometry, material);
+
+            let segmentInfo = [];
+            segmentInfo.push(segMesh);
+            segmentInfo.push(startPoint);
+            segmentInfo.push(endPoint);
+
+            segmentList.push(segmentInfo);
+
+            // the maximum amount to offset a lightning bolt
+            let maxOffset = 45;
+
+            const NUM_GENERATIONS = 9;
+
+            let division_count = 0;
+            let lengthScale = 0.7;
+
+            // for each generation
+            for (let i = 0; i < NUM_GENERATIONS; i++) {
+                let array_len = segmentList.length;
+                // for each segment that was in segmentList when this generation started
+                for (let j = array_len - 1; j >= 0; j--) {
+                    let segmentInfo = segmentList[j];
+                    startPoint = segmentInfo[1];
+                    // this.console.log(startPoint);
+                    endPoint = segmentInfo[2];
+                    // this.console.log(endPoint);
+                    // remove it 
+                    segmentList.splice(j, 1);
+
+                    let temp = new THREE.Vector3();
+                    let midPoint = new THREE.Vector3();
+                    midPoint.copy(temp.addVectors(startPoint, endPoint).divideScalar(2));
+                    // offset the midpoint by a random amount along the normal
+                    // midPoint += Perpendicular(Normalize(endPoint-startPoint))*RandomFloat(-offset,offset)
+
+                    // compute the unit direction vector of the line segment
+                    temp.subVectors(endPoint, startPoint).normalize();
+                    // compute its normal
+                    let refVector = new THREE.Vector3(1, 0, 0);
+                    let norm = new THREE.Vector3();
+                    norm.crossVectors(temp, refVector).normalize();
+
+                    // get three random floats between -MAX_OFFSET and MAX_OFFSET 
+                    // to form the random offset 
+                    let n1 = (2 * maxOffset) * Math.random() - maxOffset;
+                    let n2 = (2 * maxOffset) * Math.random() - maxOffset;
+                    let n3 = (2 * maxOffset) * Math.random() - maxOffset;
+                    let randOffset = new THREE.Vector3(n1, n2, n3);
+
+                    norm.multiply(randOffset);
+                    midPoint.add(norm);
+
+                    // Create two new segments that span from the start point to the end point,
+                    // but with the new (randomly-offset) midpoint.
+                    let points1 = [];
+                    points1.push(startPoint);
+                    points1.push(midPoint);
+                    let geometry1 = new THREE.Geometry().setFromPoints(points1);
+
+                    let line1 = new MeshLine();
+                    line1.setGeometry(geometry1);
+                    let segMesh1 = new THREE.Mesh(line1.geometry, material);
+
+                    let segmentInfo1 = [];
+                    segmentInfo1.push(segMesh1);
+                    segmentInfo1.push(startPoint);
+                    segmentInfo1.push(midPoint);
+
+                    let points2 = [];
+                    points2.push(midPoint);
+                    points2.push(endPoint);
+                    let geometry2 = new THREE.Geometry().setFromPoints(points2);
+                    let line2 = new MeshLine();
+                    line2.setGeometry(geometry2);
+                    let segMesh2 = new THREE.Mesh(line2.geometry, material);
+
+                    let segmentInfo2 = [];
+                    segmentInfo2.push(segMesh2);
+                    segmentInfo2.push(midPoint);
+                    segmentInfo2.push(endPoint);
+
+                    segmentList.push(segmentInfo1);
+                    segmentList.push(segmentInfo2);
+
+                    // create branches every other division 
+                    // instead of just adding two segments (one for each side of the split), 
+                    // you add three. the third continues in the first segment’s direction 
+                    // (with some randomization thrown in)
+                    if (division_count % 2 == 0) {
+                        let direction = new THREE.Vector3();
+                        direction.subVectors(midPoint, startPoint);
+                        // generate a random angle between 0 and 2 * pi radians 
+                        let x_angle = Math.random() * Math.PI / 2;
+                        let y_angle = Math.random() * Math.PI / 2;
+                        let z_angle = Math.random() * Math.PI / 2;
+                        let rotation = new THREE.Euler(x_angle, y_angle, z_angle);
+                        let rotated_vec = new THREE.Vector3();
+                        rotated_vec.copy(direction.applyEuler(rotation));
+                        let splitEnd = new THREE.Vector3();
+                        splitEnd.copy(rotated_vec.multiplyScalar(lengthScale).add(midPoint));
+
+                        let points_div = [];
+                        points_div.push(midPoint);
+                        points_div.push(splitEnd);
+                        let geometry_div = new THREE.Geometry().setFromPoints(points_div);
+                        let line_div = new MeshLine();
+                        line_div.setGeometry(geometry_div);
+                        let segMesh_div = new THREE.Mesh(line_div.geometry, material);
+
+                        let segmentInfo_div = [];
+                        segmentInfo_div.push(segMesh_div);
+                        segmentInfo_div.push(midPoint);
+                        segmentInfo_div.push(splitEnd);
+                        segmentList.push(segmentInfo_div);
+                    }
+
+                    division_count++;
+                }
+                // each subsequent generation offsets at most half as much as 
+                // the previous generation
+                maxOffset /= 2;
             }
+
+            let lightning = new THREE.Group();
+            // add every line segment in the array to the group
+            for (let segment of segmentList) {
+                lightning.add(segment[0]);
+            }
+            scene.add(lightning);
+
+            lightning.visible = false;
+            return lightning;
+        }
+
+        let lightning = lightning_init(new THREE.Vector3(300, 500, -2), new THREE.Vector3(200, -5, -2));
+
+        let target;
+        let loader = new THREE.TextureLoader();
+        loader.load('lightning_water.jpg', function (texture) {
+            // add lightning target ring
+            let targetGeo = new THREE.CircleGeometry(10, 32);
+            targetGeo.scale(5, 5, 5);
+            let targetMaterial = new THREE.MeshPhongMaterial({ map: texture });
+            target = new THREE.Mesh(targetGeo, targetMaterial);
+            cone.add(target);
+            target.visible = false;
+            target.rotateX(0.4 * Math.PI);
+            target.translateY(70);
         });
 
-        let segmentList = [];
 
-
-        let startPoint = new THREE.Vector3(300, 500, -2);
-        let vert_len = coneGeometry.vertices.length;
-        // let idx = Math.floor(Math.random() * vert_len);
-        let endPoint = cone.localToWorld(coneGeometry.vertices[0].clone());
-        console.log(endPoint);
-
-        let points = [];
-        points.push(startPoint);
-        points.push(endPoint);
-        let geometry = new THREE.Geometry().setFromPoints(points);
-
-        let line = new MeshLine();
-        line.setGeometry(geometry);
-
-        let material = new MeshLineMaterial({ color: new THREE.Color(0xFFFF99) });
-
-        let segMesh = new THREE.Mesh(line.geometry, material);
-
-        let segmentInfo = [];
-        segmentInfo.push(segMesh);
-        segmentInfo.push(startPoint);
-        segmentInfo.push(endPoint);
-
-        segmentList.push(segmentInfo);
-
-        // the maximum amount to offset a lightning bolt
-        let maxOffset = 45;
-
-        const NUM_GENERATIONS = 9;
-
-        let division_count = 0;
-        let lengthScale = 0.7;
-
-        // for each generation
-        for (let i = 0; i < NUM_GENERATIONS; i++) {
-            let array_len = segmentList.length;
-            // for each segment that was in segmentList when this generation started
-            for (let j = array_len - 1; j >= 0; j--) {
-                let segmentInfo = segmentList[j];
-                startPoint = segmentInfo[1];
-                // this.console.log(startPoint);
-                endPoint = segmentInfo[2];
-                // this.console.log(endPoint);
-                // remove it 
-                segmentList.splice(j, 1);
-
-                let temp = new THREE.Vector3();
-                let midPoint = new THREE.Vector3();
-                midPoint.copy(temp.addVectors(startPoint, endPoint).divideScalar(2));
-                // offset the midpoint by a random amount along the normal
-                // midPoint += Perpendicular(Normalize(endPoint-startPoint))*RandomFloat(-offset,offset)
-
-                // compute the unit direction vector of the line segment
-                temp.subVectors(endPoint, startPoint).normalize();
-                // compute its normal
-                let refVector = new THREE.Vector3(1, 0, 0);
-                let norm = new THREE.Vector3();
-                norm.crossVectors(temp, refVector).normalize();
-
-                // get three random floats between -MAX_OFFSET and MAX_OFFSET 
-                // to form the random offset 
-                let n1 = (2 * maxOffset) * Math.random() - maxOffset;
-                let n2 = (2 * maxOffset) * Math.random() - maxOffset;
-                let n3 = (2 * maxOffset) * Math.random() - maxOffset;
-                let randOffset = new THREE.Vector3(n1, n2, n3);
-
-                norm.multiply(randOffset);
-                midPoint.add(norm);
-
-                // Create two new segments that span from the start point to the end point,
-                // but with the new (randomly-offset) midpoint.
-                let points1 = [];
-                points1.push(startPoint);
-                points1.push(midPoint);
-                let geometry1 = new THREE.Geometry().setFromPoints(points1);
-
-                let line1 = new MeshLine();
-                line1.setGeometry(geometry1);
-                let segMesh1 = new THREE.Mesh(line1.geometry, material);
-
-                let segmentInfo1 = [];
-                segmentInfo1.push(segMesh1);
-                segmentInfo1.push(startPoint);
-                segmentInfo1.push(midPoint);
-
-                let points2 = [];
-                points2.push(midPoint);
-                points2.push(endPoint);
-                let geometry2 = new THREE.Geometry().setFromPoints(points2);
-                let line2 = new MeshLine();
-                line2.setGeometry(geometry2);
-                let segMesh2 = new THREE.Mesh(line2.geometry, material);
-
-                let segmentInfo2 = [];
-                segmentInfo2.push(segMesh2);
-                segmentInfo2.push(midPoint);
-                segmentInfo2.push(endPoint);
-
-                segmentList.push(segmentInfo1);
-                segmentList.push(segmentInfo2);
-
-                // create branches every other division 
-                // instead of just adding two segments (one for each side of the split), 
-                // you add three. the third continues in the first segment’s direction 
-                // (with some randomization thrown in)
-                if (division_count % 2 == 0) {
-                    let direction = new THREE.Vector3();
-                    direction.subVectors(midPoint, startPoint);
-                    // generate a random angle between 0 and 2 * pi radians 
-                    let x_angle = Math.random() * Math.PI / 2;
-                    let y_angle = Math.random() * Math.PI / 2;
-                    let z_angle = Math.random() * Math.PI / 2;
-                    let rotation = new THREE.Euler(x_angle, y_angle, z_angle);
-                    let rotated_vec = new THREE.Vector3();
-                    rotated_vec.copy(direction.applyEuler(rotation));
-                    let splitEnd = new THREE.Vector3();
-                    splitEnd.copy(rotated_vec.multiplyScalar(lengthScale).add(midPoint));
-
-                    let points_div = [];
-                    points_div.push(midPoint);
-                    points_div.push(splitEnd);
-                    let geometry_div = new THREE.Geometry().setFromPoints(points_div);
-                    let line_div = new MeshLine();
-                    line_div.setGeometry(geometry_div);
-                    let segMesh_div = new THREE.Mesh(line_div.geometry, material);
-
-                    let segmentInfo_div = [];
-                    segmentInfo_div.push(segMesh_div);
-                    segmentInfo_div.push(midPoint);
-                    segmentInfo_div.push(splitEnd);
-                    segmentList.push(segmentInfo_div);
-                }
-
-                division_count++;
-            }
-            // each subsequent generation offsets at most half as much as 
-            // the previous generation
-            maxOffset /= 2;
-        }
-
-        let lightning = new THREE.Group();
-        // add every line segment in the array to the group
-        for (let segment of segmentList) {
-            lightning.add(segment[0]);
-        }
-        scene.add(lightning);
-        lightning.visible = false;
 
         let time = 0;
         let then = 0;
@@ -852,20 +819,18 @@ var sound = new THREE.Audio( listener );
         function animate_lightning(now) {
             lightningTimer--;
             // convert to seconds
-            //  now *= 0.001;
-            // const deltaTime = now - then;
-            
-            // then = now;
+            now *= 0.001;
+            const deltaTime = now - then;
+
+            then = now;
 
             if (time % 2 == 0) {
-                for (let segment of segmentList) {
-                    segment[0].visible = false;
-                }
+                lightning.visible = false;
+                target.visible = false;
             }
             else {
-                for (let segment of segmentList) {
-                    segment[0].visible = true;
-                }
+                lightning.visible = true;
+                target.visible = true;
             }
             time = time + 1;
             composer.render(deltaTime);
