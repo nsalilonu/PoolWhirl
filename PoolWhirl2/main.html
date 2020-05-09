@@ -472,9 +472,12 @@
                         sound.setPlaybackRate(3);
                         sound.play();
                     });
+                    controls.update();
+                    return true;
                 }
             }
             controls.update();
+            return false;
         }
 
 
@@ -894,7 +897,7 @@
 
         function render() {
             timer = whirlTime * 0.0002 * 0.8;
-            cone.rotation.y = timer * coneSpeed;
+            cone.rotation.y = timer * 5;
 
             // Increase the cone speed and lightning frequency every 15 seconds.
             if (ticker % 10 == 0 && coneSpeed < 20) { // Cone speed cannot be higher than 20 to keep game playable.
@@ -931,11 +934,10 @@
                 handleDuckCollision();
             }
 
-            handleFishCollision();
-            if (fishCollision) { teddyInit(); }
+            let fishCollided = handleFishCollision();
 
             // When teddyMunch animation is done, it will set teddyTime to false.
-            if (fishCollision || teddyTime) {
+            if (fishCollided || teddyTime) {
                 teddyTime = teddyMunch();
                 fishCollision = false;
             }
