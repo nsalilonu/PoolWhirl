@@ -99,6 +99,14 @@
     background-size: cover;
   }
 
+  #skip {
+    position: fixed;
+    display: none;
+    margin: auto;
+    z-index: 1;
+    background-color: plum;
+  }
+
 
 
 

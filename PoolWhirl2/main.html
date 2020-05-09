@@ -36,6 +36,7 @@
         </div>
     </div>
 
+    <button type="button" id="skip">Skip Intro</button>
     <div id= "Intro" class="intro">
         <div id="intro1Pic" class="intro-picture" style="background-image:url('teddyImage.PNG');"></div>
         <div id="intro1" class="intro-content">
@@ -854,10 +855,23 @@
             var intro2 = document.getElementById("intro2");
             var intro3Pic = document.getElementById("intro3Pic");
             var intro3 = document.getElementById("intro3");
+            var skip = document.getElementById("skip");
 
             intro.style.display = "block"
             intro1Pic.style.display = "block";
             intro1.style.display = "block";
+            skip.style.display = "block";
+
+            skip.onclick = function () {
+                intro.style.display = "none";
+                intro1.style.display = "none";
+                intro2.style.display = "none";
+                intro3.style.display = "none";
+                intro1Pic.style.display = "none";
+                intro2Pic.style.display = "none";
+                intro3Pic.style.display = "none";
+                skip.style.display = "none";
+            }
 
             setTimeout(function () {
                 intro1Pic.style.display = "none";
@@ -875,6 +889,7 @@
                 intro3Pic.style.display = "none";
                 intro3.style.display = "none";
                 intro.style.display = "none";
+                skip.style.display = "none";
             }, 15000);
         }
 
@@ -892,7 +907,7 @@
         let randomRanges = getRandomRanges(300);
         ducksInit();
         fishInit();
-        // intro();
+        intro();
         animate();
 
         function animate() {
