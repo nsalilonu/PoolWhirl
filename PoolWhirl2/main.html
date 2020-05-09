@@ -143,7 +143,7 @@
             let length = particleNum;
             let totParticles = coneGeometry.vertices.length - 1;
             let randomRanges = [];
-            let scale = 40;
+            let scale = 10;
             let timeScale = 50;
             // selecting random particles
             for (let i = 0; i < length; i++) {
@@ -166,6 +166,19 @@
                 let scale = Math.sin(timer * randomRanges[i].time) * randomRanges[i].scale;
                 let currentVertex = randomRanges[i].vertex; // A random vertex in the list.
                 vertices[currentVertex].setY(randomRanges[i].originalY + scale);
+
+                // // Check if the water is in the vicinity of the teddy.
+                // let teddyPos = teddyMesh.position.clone();
+                // let offset = 13; // Don't let vertices within a box of radius 5 of the teddy go above the teddy.
+                // let EPS = 20; // Distance from the teddy center we want the water to be
+                // let minZ = teddyPos.z - offset;
+                // let maxZ = teddyPos.z + offset;
+                // if (vertices[currentVertex].z <= maxZ && vertices[currentVertex].z >= minZ) {
+                //         // If the water is too high and near the teddy, reduce the y value.
+                //         if (vertices[currentVertex].y > teddyPos.y - EPS) {
+                //             vertices[currentVertex].setY(teddyPos.y - EPS);
+                //         }
+                //     }
             }
         }
 
@@ -178,7 +191,7 @@
 
         scene.add(teddyMesh);
         let teddyPosition = teddyMesh.localToWorld(teddyMesh.position.clone());
-        camera.position.set(-219.61429616527784, 60.79054134136912, 154.64688761281252);
+        camera.position.set(-219.61429616527784, 60.79054134136912, 159.00433133976932);
         controls.target.set(teddyPosition.x, teddyPosition.y, teddyPosition.z);
         controls.update();
 
@@ -374,12 +387,11 @@
 
         function stickyFish(theta, minY, timer) {
             const length = fishes.length;
-            //const EPS = 2 - (92 / 2) - 20;
             for (let i = 0; i < length; i++) {
             //     ducks[i].position.setY(closestVertex[i].y + EPS);
             let temp = fishes[i].position.clone();
             let z = temp.z;
-            let EPS = 50;
+            let EPS = 150;
             let y = Math.tan(theta) * z;
             fishes[i].position.setY(y + minY + EPS);
             let buoyancy = Math.sin(timer*25) * 40;
@@ -405,10 +417,7 @@
         let gamePoints = 0;
         let collision = false;
         function handleDuckCollision() {
-                // for (let i = 0; i < ducks.length; i++) {
-                //if (ducks[i].visible == false) { continue; }
                 var originPoint = teddyMesh.position.clone();
-                //let duck = ducks[i];
                 collision = false;
                 let EPS = 12;
                 for (var vertexIndex = 0; vertexIndex < torus.geometry.vertices.length; vertexIndex++) {
@@ -442,19 +451,19 @@
         var sound = new THREE.Audio(listener);
 
         function handleFishCollision() {
-            for (let i = 0; i < fishes.length; i++) {
-                if (fishes[i].visible == false) { continue; }
                 var originPoint = teddyMesh.position.clone();
-                var fish = fishes[i];
                 fishCollision = false;
+                let foundFish;
                 for (var vertexIndex = 0; vertexIndex < torus.geometry.vertices.length; vertexIndex++) {
                     var localVertex = torus.geometry.vertices[vertexIndex].clone();
                     var globalVertex = localVertex.applyMatrix4(torus.matrix);
                     var directionVector = globalVertex.sub(torus.position);
                     var ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize());
-                    var collisionResults = ray.intersectObject(fish, true);
+                    var collisionResults = ray.intersectObjects(fishes, true);
                     if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()) {
                         fishCollision = true;
+                        foundFish = collisionResults[0].object;
+                        break;  
                     }
                 }
                 if (fishCollision) {
@@ -462,7 +471,11 @@
                     let string = "Points: " + gamePoints;
                     document.getElementById("pointsText").innerHTML = string;
                     teddyInit();
-                    fishes[i].visible = false;
+                    let fish = foundFish.parent;
+                    let guppies = fish.children;
+                    for (let i = 0; i < guppies.length; i++) {
+                        guppies[i].visible = false;
+                    }
                     // load a sound and set it as the Audio object's buffer
                     var audioLoader = new THREE.AudioLoader();
                     audioLoader.load('crunch.mp3', function (buffer) {
@@ -475,7 +488,6 @@
                     controls.update();
                     return true;
                 }
-            }
             controls.update();
             return false;
         }
@@ -520,6 +532,7 @@
         //let randomDuck = Math.floor(ducks.length * Math.random());
         let offsetVector = new THREE.Vector3(0, -10, 0);
         let object = teddyMesh;
+        
 
         // Move with WASD to avoid moving window by accident...
         function moveObject() {
@@ -920,7 +933,7 @@
             let theta = Math.atan(coneHeight / coneRadius);
             bounce(theta, teddyMesh.position.z, -coneHeight / 2, timer);
             stickyDuck(theta, -coneHeight / 2, timer);
-            //stickyFish(theta, -coneHeight / 2, timer);
+            stickyFish(theta, -coneHeight / 2, timer);
 
             if (ticker % 200 == 0) {
                 showDuck();

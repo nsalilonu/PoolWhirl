@@ -138,7 +138,6 @@ function teddyInit() {
 
 function teddyMunch() {
     timer++;
-    console.log(timer);
         if (timer > 0 && timer <=20) {
             teddyRightArm.rotateX(Math.PI/2 / 20);
             return true;
@@ -148,7 +147,8 @@ function teddyMunch() {
             return true;
         }
         else { 
-            timer = 0;       
+            timer = 0;
+            teddyRightArm.rotation.x = 0;       
             return false;
         }
 }
