@@ -9,6 +9,7 @@
 
     <title> COS426 Final Project &mdash; Pool Whirl</title>
 </head>
+
 <script src="teddyMesh.js" type="module"></script>
 <script src="rubberDuckMesh.js" type="module"></script>
 <link href="style.css" type="text/css" rel="stylesheet" />
@@ -182,7 +183,7 @@
         controls.update();
 
         // hard code in the ducks and the fish
-        let ducks = [];
+        /*let ducks = [];
         let duck1 = duckMesh.clone();
         duck1.rotateZ(Math.PI);
         duck1.scale.set(0.8, 0.8, 0.8);
@@ -227,11 +228,11 @@
         duck5.translateY(8);
         duck5.translateZ(100);
         ducks.push(duck5);
-        cone.add(duck5);
+        cone.add(duck5);*/
 
 
         // place ducks at various points in the scene
-        //let ducks = [];
+        let ducks = [];
         let closestVertex = [];
         function ducksInit() {
             let coneRadius = 10 * 50;
@@ -242,6 +243,7 @@
             axis.normalize();
             // find the height of the cone
             let coneHeight = 4 * 50;
+            let firstDuck = true;
             let noMotherDuck = true;
             let motherDuck;
             for (let i = 0; i < coneHeight; i += 20) {
@@ -261,30 +263,37 @@
                         let orthoDist = position.sub(axis.clone().multiplyScalar(dist)).length();
                         // is the position on the cone?
                         if (orthoDist == rad) {
+                            if (firstDuck)
+                            {
+                                firstDuck = false;
+                                continue;
+                            }
                             // if so, place an invisible rubber duck there
                             let newDuck = duckMesh.clone();
-                            if (noMotherDuck) {
+                            /*if (noMotherDuck) {
                                 motherDuck = newDuck;
                                 motherDuck.translateY(92);
-                            }
+                            }*/
                             newDuck.translateX(j);
                             newDuck.translateY(-i);
+                            newDuck.translateY(92);
                             newDuck.translateZ(k);
                             newDuck.scale.set(0.8, 0.8, 0.8);
                             let random = Math.random() * Math.PI * 2;
                             newDuck.rotateY(random);
-
+                            
                             ducks.push(newDuck);
-                            newDuck.visible = true;
+                            newDuck.visible = false;
 
-                            if (noMotherDuck) {
-                                cone.add(motherDuck);
-                                noMotherDuck = false;
-                            }
-                            else {
+                            //  if (noMotherDuck) {
+                            //      cone.add(motherDuck);
+                            //      noMotherDuck = false;
+                            //  }
+                            //else {
                                 newDuck.rotateZ(Math.PI);
-                                motherDuck.add(newDuck);
-                            }
+                                //motherDuck.add(newDuck); 
+                                cone.add(newDuck);
+                            //}
                         }
                     }
                 }
@@ -314,12 +323,18 @@
             }
         }
 
-        function stickyDuck() {
-            const length = closestVertex.length;
-            const EPS = 2 - 92 / 2 - 10;
-            for (let i = 0; i < length; i++) {
-                ducks[i].position.setY(closestVertex[i].y + EPS);
-            }
+        function stickyDuck(theta, minY, timer) {
+            // const length = closestVertex.length;
+            // const EPS = 2 - 92 / 2 - 10;
+             for (let i = 0; i < length; i++) {
+            //     ducks[i].position.setY(closestVertex[i].y + EPS);
+        let z = ducks[i].position.z.clone();
+        let EPS = 50;
+        let y = Math.tan(theta) * z;
+        ducks[i].position.setY(y + minY + EPS);
+        let buoyancy = Math.sin(timer*25) * 40;
+        ducks[i].translateY(buoyancy/10);
+             }
         }
 
         // place fish at various points in the scene
@@ -427,25 +442,49 @@
         let gamePoints = 0;
         let collision = false;
         function handleDuckCollision() {
-            var originPoint = teddyMesh.position.clone();
-            collision = false;
-            for (var vertexIndex = 0; vertexIndex < torus.geometry.vertices.length; vertexIndex++) {
-                var localVertex = torus.geometry.vertices[vertexIndex].clone();
-                var globalVertex = localVertex.applyMatrix4(torus.matrix);
-                var directionVector = globalVertex.sub(torus.position);
-                var ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize());
-                var collisionResults = ray.intersectObjects(ducks);
-                if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()) {
-                    collision = true;
+                // for (let i = 0; i < ducks.length; i++) {
+                //if (ducks[i].visible == false) { continue; }
+                var originPoint = teddyMesh.position.clone();
+                //let duck = ducks[i];
+                collision = false;
+                let EPS = 12;
+                for (var vertexIndex = 0; vertexIndex < torus.geometry.vertices.length; vertexIndex++) {
+                    var localVertex = torus.geometry.vertices[vertexIndex].clone(); 
+                    var globalVertex = localVertex.applyMatrix4(torus.matrix); 
+                    var directionVector = globalVertex.sub(torus.position);
+                    var ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize());
+                    var collisionResults = ray.intersectObjects(ducks, true);
+                    if (collisionResults.length > 0 && collisionResults[0].distance < (directionVector.length() + EPS)) {
+                        collision = true;
+                        break;
+                    }
                 }
-            }
-            if (collision) {
+                if (collision) {
                 teddyMesh.position.setZ(teddyMesh.position.z - 10); // Pushes you further into the whirlpool.
                 gamePoints--;
                 let string = "Points: " + gamePoints;
                 document.getElementById("pointsText").innerHTML = string;
-            }
-            controls.update();
+                }
+                controls.update();
+            //}
+
+            // let torusRadius = 13;
+            // let EPS = 2;
+
+            /*for (let i = 0; i < ducks.length; i++) {
+                var localDuck = ducks[i].position.clone(); // Origin: Torus origin.
+                //var globalVertex = localDuck.applyMatrix4(ducks[i].matrix); // Origin: (0,0).
+                var directionVector = localDuck.sub(originPoint);
+                var ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize());
+                var collisionResults = ray.intersectObject(ducks[i]);
+                //debugger;
+                if (collisionResults.length > 0 && collisionResults[0].distance < 13 + EPS && collisionResults[0].object.visible) {
+                    collision = true;
+                    break;
+                }
+            }*/
+
+            
         }
 
         // Add fish:
@@ -539,7 +578,7 @@
 
         // run a for loop where if the selected random duck is not 
         // currently seen by the camera, make it visible
-        let randomDuck = Math.floor(ducks.length * Math.random());
+        //let randomDuck = Math.floor(ducks.length * Math.random());
         let offsetVector = new THREE.Vector3(0, -10, 0);
         let object = teddyMesh;
 
@@ -812,19 +851,19 @@
 
         let target;
         let loader = new THREE.TextureLoader();
-        loader.load('lightning_water.jpg', function (texture) {
-            // add lightning target ring
-            let targetGeo = new THREE.CircleGeometry(10, 32);
-            targetGeo.scale(5, 5, 5);
-            let targetMaterial = new THREE.MeshPhongMaterial({ map: texture });
-            target = new THREE.Mesh(targetGeo, targetMaterial);
-            teddyMesh.add(target);
-            target.visible = false;
-            target.rotateX(-0.55 * Math.PI);
-            target.translateY(10);
-            target.translateX(60);
-            target.translateZ(30);
-        });
+        // loader.load('lightning_water.jpg', function (texture) {
+        //     // add lightning target ring
+        //     let targetGeo = new THREE.CircleGeometry(10, 32);
+        //     targetGeo.scale(5, 5, 5);
+        //     let targetMaterial = new THREE.MeshPhongMaterial({ map: texture });
+        //     target = new THREE.Mesh(targetGeo, targetMaterial);
+        //     teddyMesh.add(target);
+        //     target.visible = false;
+        //     target.rotateX(-0.55 * Math.PI);
+        //     target.translateY(10);
+        //     target.translateX(60);
+        //     target.translateZ(30);
+        // });
 
         let time = 0;
         let then = 0;
@@ -868,6 +907,7 @@
             var intro3Pic = document.getElementById("intro3Pic");
             var intro3 = document.getElementById("intro3");
 
+            intro.style.display = "block"
             intro1Pic.style.display = "block";
             intro1.style.display = "block";
 
@@ -902,9 +942,9 @@
 
         // Populate Scene:
         let randomRanges = getRandomRanges(300);
-        //ducksInit();
+        ducksInit();
         //fishInit();
-        intro();
+        // intro();
         animate();
 
         function animate() {
@@ -923,6 +963,7 @@
         function render() {
             timer = whirlTime * 0.0002 * 0.8;
             cone.rotation.y = timer * coneSpeed;
+            console.log(ticker);
 
             // Increase the cone speed and lightning frequency every 15 seconds.
             if (ticker % 300 == 0 && coneSpeed < 20) { // Cone speed cannot be higher than 20 to keep game playable.
@@ -944,8 +985,12 @@
             let coneRadius = cone.geometry.parameters.radius * coneScale;
             let theta = Math.atan(coneHeight / coneRadius);
             bounce(theta, teddyMesh.position.z, -coneHeight / 2, timer);
-            stickyDuck();
-            //stickyFish();
+            stickyDuck(theta, -coneHeight / 2, timer);
+            stickyFish();
+
+            if (ticker % 200 == 0) {
+                showDuck();
+            }
 
             // Ignore duck collisions for 10 seconds so that the player has time to mentally prepare.
             if (ticker > 200) {
@@ -964,8 +1009,8 @@
             // Render! (by golly I hope this works!)
             ticker++;
             renderer.render(scene, camera);
-            if (ticker % 100 == 0) //Activates lightning every 5 seconds.
-                activate_lightning();
+            if (ticker % 100 == 0) {}//Activates lightning every 5 seconds.
+                // activate_lightning();
 
         }
     </script>

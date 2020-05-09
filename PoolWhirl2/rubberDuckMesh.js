@@ -2,6 +2,7 @@ let duckHeadGeometry = new THREE.BoxGeometry(14, 12, 12);
 
 // duck material which is set to a golden yellow
 let duckMaterial = new THREE.MeshPhongMaterial({color: 0xFFC300})
+duckMaterial.side = THREE.DoubleSide;
 
 // stores the entirety of the duck
 let duckMesh = new THREE.Mesh(duckHeadGeometry, duckMaterial);
@@ -23,6 +24,7 @@ duckMesh.add(leftEye);
 // create the duck's bill
 let billGeometry = new THREE.BoxGeometry(10, 2, 5);
 let billMaterial = new THREE.MeshPhongMaterial({color: 0xFF7919});
+billMaterial.side = THREE.DoubleSide;
 let bill = new THREE.Mesh(billGeometry, billMaterial);
 bill.translateY(-2);
 bill.translateZ(-8);

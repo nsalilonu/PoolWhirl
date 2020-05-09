@@ -163,10 +163,9 @@ function teddyMunch() {
         teddyBody.translateY(bodyBounce/10);
 
         // Move the teddy along the cone in correspondance to the cone position.
-        let EPS = 30;
+        let EPS = 20;
         let y = Math.tan(theta) * z;
         teddyMesh.position.setY(y + minY + EPS);
-        console.log(teddyMesh.position);
         let buoyancy = Math.sin(timer*25) * 40;
         teddyMesh.translateY(buoyancy/10);
 
