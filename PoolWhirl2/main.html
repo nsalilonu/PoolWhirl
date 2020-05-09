@@ -268,12 +268,7 @@
                                 firstDuck = false;
                                 continue;
                             }
-                            // if so, place an invisible rubber duck there
                             let newDuck = duckMesh.clone();
-                            /*if (noMotherDuck) {
-                                motherDuck = newDuck;
-                                motherDuck.translateY(92);
-                            }*/
                             newDuck.translateX(j);
                             newDuck.translateY(-i);
                             newDuck.translateY(92);
@@ -285,41 +280,11 @@
                             ducks.push(newDuck);
                             newDuck.visible = false;
 
-                            //  if (noMotherDuck) {
-                            //      cone.add(motherDuck);
-                            //      noMotherDuck = false;
-                            //  }
-                            //else {
                                 newDuck.rotateZ(Math.PI);
-                                //motherDuck.add(newDuck); 
                                 cone.add(newDuck);
-                            //}
                         }
                     }
                 }
-            }
-
-
-
-            // find the closest vertex to each duck and store the index of the that vertex in an array
-            // access the corresponding vertex for each duck to update it's y position to be
-            // that vertex's y position + EPS
-            let duck_length = ducks.length;
-            let vertices = coneGeometry.vertices;
-            let vertices_length = coneGeometry.vertices.length;
-            // stores the index of the closest vertex to each duck
-            for (let i = 0; i < duck_length; i++) {
-                let minVertex = new THREE.Vector3(600, 600, 600);
-                let minLength = minVertex.length();
-                // look through all the vertices to find the closest one
-                for (let j = 0; j < vertices_length; j++) {
-                    let currLength = coneGeometry.vertices[j].clone().sub(ducks[i].position).length();
-                    if (currLength <= minLength) {
-                        minLength = currLength;
-                        minVertex = coneGeometry.vertices[j];
-                    }
-                }
-                closestVertex.push(minVertex);
             }
         }
 
@@ -341,18 +306,19 @@
         let fishes = [];
         let closestFishVertex = [];
         function fishInit() {
-            let coneRadius = 10 * 100;
+            let coneRadius = 10 * 50;
             // find the axis of the cone
             let axis = new THREE.Vector3(0, 1, 0);
             let x_axis = new THREE.Vector3(1, 0, 0);
             axis.applyAxisAngle(axis, -Math.PI * 1.25);
             axis.normalize();
             // find the height of the cone
-            let coneHeight = 4 * 100;
+            let coneHeight = 4 * 50;
             let noMotherFish = true;
             let motherFish;
-            for (let i = 0; i < coneHeight; i += 15) {
-                for (let j = -coneRadius; j < coneRadius; j += 20) {
+            let firstFish = true;
+            for (let i = 0; i < coneHeight; i += 10) {
+                for (let j = -coneRadius; j < coneRadius; j += 30) {
                     for (let k = -coneRadius; k < coneRadius; k += 20) {
                         let position = new THREE.Vector3(j, i, k);
                         // check to see if the position is within the cone
@@ -368,63 +334,60 @@
                         let orthoDist = position.sub(axis.clone().multiplyScalar(dist)).length();
                         // is the position on the cone?
                         if (orthoDist == rad) {
+                            if (firstFish)
+                            {
+                                firstFish = false;
+                                continue;
+                            }
                             // if so, place an invisible rubber duck there
                             let newFish = fish.clone();
-                            if (noMotherFish) {
+                           /* if (noMotherFish) {
                                 motherFish = newFish;
                                 motherFish.position.set(0, 0, 0);
                                 motherFish.translateY(92);
-                            }
+                            }*/
                             newFish.translateX(j);
                             newFish.translateY(-i);
+                            newFish.translateY(92);
                             newFish.translateZ(k);
                             newFish.scale.set(0.3, 0.3, 0.3);
+                            newFish.scale.set(0.1, 0.1, 0.1);
                             let random = Math.random() * Math.PI * 2;
                             newFish.rotateY(random);
                             newFish.visible = false;
                             fishes.push(newFish);
 
-                            if (noMotherFish) {
+                            /*if (noMotherFish) {
                                 cone.add(motherFish);
                                 noMotherFish = false;
-                            }
-                            else {
+                            }*/
+                            //else {
                                 newFish.rotateZ(Math.PI);
-                                motherFish.add(newFish);
-                            }
+                                //motherFish.add(newFish);
+                                cone.add(newFish);
+                            //}
                         }
                     }
                 }
             }
+         }
 
-            // find the closest vertex to each fish and store the index of the that vertex in an array
-            // access the corresponding vertex for each fish to update it's y position to be
-            // that vertex's y position + EPS
-            let fishes_length = fishes.length;
-            let vertices = coneGeometry.vertices;
-            let vertices_length = coneGeometry.vertices.length;
-            // stores the index of the closest vertex to each duck
-            for (let i = 0; i < fishes_length; i++) {
-                let minVertex = new THREE.Vector3(600, 600, 600);
-                let minLength = minVertex.length();
-                // look through all the vertices to find the closest one
-                for (let j = 0; j < vertices_length; j++) {
-                    let currLength = coneGeometry.vertices[j].clone().sub(fishes[i].position).length();
-                    if (currLength <= minLength) {
-                        minLength = currLength;
-                        minVertex = coneGeometry.vertices[j].clone();
-                    }
-                }
-                closestFishVertex.push(minVertex);
-            }
-        }
-
-        function stickyFish() {
-            const length = closestFishVertex.length;
-            const EPS = 2 - (92 / 2) - 20;
+        function stickyFish(theta, minY, timer) {
+            const length = fishes.length;
+            //const EPS = 2 - (92 / 2) - 20;
             for (let i = 0; i < length; i++) {
-                fishes[i].position.setY(closestFishVertex[i].y + EPS);
-            }
+            //     ducks[i].position.setY(closestVertex[i].y + EPS);
+            let temp = fishes[i].position.clone();
+            let z = temp.z;
+            let EPS = 50;
+            let y = Math.tan(theta) * z;
+            fishes[i].position.setY(y + minY + EPS);
+            let buoyancy = Math.sin(timer*25) * 40;
+            fishes[i].translateY(buoyancy/10);
+             }
+            // for (let i = 0; i < length; i++) {
+            //     fishes[i].position.setY(closestFishVertex[i].y + EPS);
+            // }
         }
 
         function showFish() {
@@ -466,35 +429,9 @@
                 document.getElementById("pointsText").innerHTML = string;
                 }
                 controls.update();
-            //}
-
-            // let torusRadius = 13;
-            // let EPS = 2;
-
-            /*for (let i = 0; i < ducks.length; i++) {
-                var localDuck = ducks[i].position.clone(); // Origin: Torus origin.
-                //var globalVertex = localDuck.applyMatrix4(ducks[i].matrix); // Origin: (0,0).
-                var directionVector = localDuck.sub(originPoint);
-                var ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize());
-                var collisionResults = ray.intersectObject(ducks[i]);
-                //debugger;
-                if (collisionResults.length > 0 && collisionResults[0].distance < 13 + EPS && collisionResults[0].object.visible) {
-                    collision = true;
-                    break;
-                }
-            }*/
-
-            
         }
 
-        // Add fish:
-        fish.scale.set(0.083, 0.083, 0.083);
-        fish.translateZ(150);
-        fish.translateX(100);
-        scene.add(fish);
-        let fishies = []; // All the fish both visible and invisible.
-        let guppy = fish.children[0];
-        fishies.push(fish);
+        
 
         let fishCollision = false;
         // create an AudioListener and add it to the camera
@@ -505,10 +442,10 @@
         var sound = new THREE.Audio(listener);
 
         function handleFishCollision() {
-            for (let i = 0; i < fishies.length; i++) {
-                if (fishies[i].visible == false) { continue; }
+            for (let i = 0; i < fishes.length; i++) {
+                if (fishes[i].visible == false) { continue; }
                 var originPoint = teddyMesh.position.clone();
-                var fish = fishies[i];
+                var fish = fishes[i];
                 fishCollision = false;
                 for (var vertexIndex = 0; vertexIndex < torus.geometry.vertices.length; vertexIndex++) {
                     var localVertex = torus.geometry.vertices[vertexIndex].clone();
@@ -525,7 +462,7 @@
                     let string = "Points: " + gamePoints;
                     document.getElementById("pointsText").innerHTML = string;
                     teddyInit();
-                    fishies[i].visible = false;
+                    fishes[i].visible = false;
                     // load a sound and set it as the Audio object's buffer
                     var audioLoader = new THREE.AudioLoader();
                     audioLoader.load('crunch.mp3', function (buffer) {
@@ -534,11 +471,10 @@
                         sound.setVolume(1.0);
                         sound.setPlaybackRate(3);
                         sound.play();
-
                     });
                 }
-                controls.update();
             }
+            controls.update();
         }
 
 
@@ -634,10 +570,6 @@
         scene.add(ambient);
 
         window.addEventListener('keydown', moveObject, false);
-
-
-        var axesHelper = new THREE.AxesHelper(100);
-        teddyMesh.add(axesHelper);
 
         // create an EffectComposer
         const composer = new POSTPROCESSING.EffectComposer(renderer);
@@ -943,7 +875,7 @@
         // Populate Scene:
         let randomRanges = getRandomRanges(300);
         ducksInit();
-        //fishInit();
+        fishInit();
         // intro();
         animate();
 
@@ -963,11 +895,10 @@
         function render() {
             timer = whirlTime * 0.0002 * 0.8;
             cone.rotation.y = timer * coneSpeed;
-            console.log(ticker);
 
             // Increase the cone speed and lightning frequency every 15 seconds.
-            if (ticker % 300 == 0 && coneSpeed < 20) { // Cone speed cannot be higher than 20 to keep game playable.
-                coneSpeed++;
+            if (ticker % 10 == 0 && coneSpeed < 20) { // Cone speed cannot be higher than 20 to keep game playable.
+                coneSpeed+=0.01;
                 if (lightningDelay > 40) // Lightning frequency must be at least 2 seconds to avoid modulus 0;
                     lightningDelay--;
             }
@@ -986,10 +917,13 @@
             let theta = Math.atan(coneHeight / coneRadius);
             bounce(theta, teddyMesh.position.z, -coneHeight / 2, timer);
             stickyDuck(theta, -coneHeight / 2, timer);
-            stickyFish();
+            //stickyFish(theta, -coneHeight / 2, timer);
 
             if (ticker % 200 == 0) {
                 showDuck();
+            }
+            if (ticker % 100 == 0) {
+                showFish();
             }
 
             // Ignore duck collisions for 10 seconds so that the player has time to mentally prepare.
