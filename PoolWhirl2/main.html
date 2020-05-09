@@ -40,14 +40,15 @@
     <div id= "Intro" class="intro">
         <div id="intro1Pic" class="intro-picture" style="background-image:url('teddyImage.PNG');"></div>
         <div id="intro1" class="intro-content">
-            <p>You are a teddy bear on a tube in a whirlpool! How did you get here? Who knows? But you must stay away from the center! Move around with WASD keys</p>
+            <p>You are a teddy bear on a tube in a whirlpool! How did you get here? Who knows? But you must stay away
+                from the center! Move around with WASD keys</p>
         </div>
         <div id="intro2Pic" class="intro-picture" style="background-image:url('duckImage.PNG');"></div>
-        <div id= "intro2" class="intro-content">
+        <div id="intro2" class="intro-content">
             <p>Avoid the ducks, they will knock you closer to the center!</p>
         </div>
-        <div id= "intro3Pic" class="intro-picture" style="background-image:url('fishImage.PNG');"></div>
-        <div id= "intro3" class="intro-content">
+        <div id="intro3Pic" class="intro-picture" style="background-image:url('fishImage.PNG');"></div>
+        <div id="intro3" class="intro-content">
             <p>Grab the fish! They will increase your points!</p>
         </div>
     </div>
@@ -55,7 +56,7 @@
     <canvas id="canvas"></canvas>
 
     <script type="module">
-        import {teddyMesh, teddyMunch, teddyInit, bounce} from "./teddyMesh.js";
+        import { teddyMesh, teddyMunch, teddyInit, bounce } from "./teddyMesh.js";
         import { duckMesh } from "./rubberDuckMesh.js";
         import { fish } from "./fishMesh.js";
 
@@ -277,8 +278,7 @@
                         let orthoDist = position.sub(axis.clone().multiplyScalar(dist)).length();
                         // is the position on the cone?
                         if (orthoDist == rad) {
-                            if (firstDuck)
-                            {
+                            if (firstDuck) {
                                 firstDuck = false;
                                 continue;
                             }
@@ -290,12 +290,12 @@
                             newDuck.scale.set(0.8, 0.8, 0.8);
                             let random = Math.random() * Math.PI * 2;
                             newDuck.rotateY(random);
-                            
+
                             ducks.push(newDuck);
                             newDuck.visible = false;
 
-                                newDuck.rotateZ(Math.PI);
-                                cone.add(newDuck);
+                            newDuck.rotateZ(Math.PI);
+                            cone.add(newDuck);
                         }
                     }
                 }
@@ -305,15 +305,15 @@
         function stickyDuck(theta, minY, timer) {
             // const length = closestVertex.length;
             // const EPS = 2 - 92 / 2 - 10;
-             for (let i = 0; i < length; i++) {
-            //     ducks[i].position.setY(closestVertex[i].y + EPS);
-        let z = ducks[i].position.z.clone();
-        let EPS = 50;
-        let y = Math.tan(theta) * z;
-        ducks[i].position.setY(y + minY + EPS);
-        let buoyancy = Math.sin(timer*25) * 40;
-        ducks[i].translateY(buoyancy/10);
-             }
+            for (let i = 0; i < length; i++) {
+                //     ducks[i].position.setY(closestVertex[i].y + EPS);
+                let z = ducks[i].position.z.clone();
+                let EPS = 50;
+                let y = Math.tan(theta) * z;
+                ducks[i].position.setY(y + minY + EPS);
+                let buoyancy = Math.sin(timer * 25) * 40;
+                ducks[i].translateY(buoyancy / 10);
+            }
         }
 
         // place fish at various points in the scene
@@ -348,21 +348,20 @@
                         let orthoDist = position.sub(axis.clone().multiplyScalar(dist)).length();
                         // is the position on the cone?
                         if (orthoDist == rad) {
-                            if (firstFish)
-                            {
+                            if (firstFish) {
                                 firstFish = false;
                                 continue;
                             }
                             // if so, place an invisible rubber duck there
                             let newFish = fish.clone();
-                           /* if (noMotherFish) {
-                                motherFish = newFish;
-                                motherFish.position.set(0, 0, 0);
-                                motherFish.translateY(92);
-                            }*/
+                            /* if (noMotherFish) {
+                                 motherFish = newFish;
+                                 motherFish.position.set(0, 0, 0);
+                                 motherFish.translateY(92);
+                             }*/
                             newFish.translateX(j);
                             newFish.translateY(-i);
-                            newFish.translateY(92);
+                            newFish.translateY(46);
                             newFish.translateZ(k);
                             newFish.scale.set(0.3, 0.3, 0.3);
                             newFish.scale.set(0.1, 0.1, 0.1);
@@ -376,15 +375,15 @@
                                 noMotherFish = false;
                             }*/
                             //else {
-                                newFish.rotateZ(Math.PI);
-                                //motherFish.add(newFish);
-                                cone.add(newFish);
+                            newFish.rotateZ(Math.PI);
+                            //motherFish.add(newFish);
+                            cone.add(newFish);
                             //}
                         }
                     }
                 }
             }
-         }
+        }
 
         function stickyFish(theta, minY, timer) {
             const length = fishes.length;
@@ -432,16 +431,17 @@
                         break;
                     }
                 }
-                if (collision) {
+            
+            if (collision) {
                 teddyMesh.position.setZ(teddyMesh.position.z - 10); // Pushes you further into the whirlpool.
                 gamePoints--;
                 let string = "Points: " + gamePoints;
                 document.getElementById("pointsText").innerHTML = string;
-                }
-                controls.update();
+            }
+            controls.update();
         }
 
-        
+
 
         let fishCollision = false;
         // create an AudioListener and add it to the camera
@@ -455,13 +455,14 @@
                 var originPoint = teddyMesh.position.clone();
                 fishCollision = false;
                 let foundFish;
+                let EPS = 10;
                 for (var vertexIndex = 0; vertexIndex < torus.geometry.vertices.length; vertexIndex++) {
                     var localVertex = torus.geometry.vertices[vertexIndex].clone();
                     var globalVertex = localVertex.applyMatrix4(torus.matrix);
                     var directionVector = globalVertex.sub(torus.position);
                     var ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize());
                     var collisionResults = ray.intersectObjects(fishes, true);
-                    if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()) {
+                    if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length() + EPS) {
                         fishCollision = true;
                         foundFish = collisionResults[0].object;
                         break;  
@@ -614,7 +615,9 @@
             storm_dlight.visible = true;
             storm_ambient.visible = true;
             lightning.visible = true;
-            target.visible = true;
+            if (typeof target != "undefined") {
+                target.visible = true;
+            }
             scene.background = 'black';
 
             // activate glow 
@@ -629,7 +632,9 @@
             storm_dlight.visible = false;
             storm_ambient.visible = false;
             lightning.visible = false;
-            target.visible = false;
+            if (typeof target != "undefined") {
+                target.visible = false;
+            }
             scene.background = sceneColor;
 
             // deactivate glow 
@@ -800,19 +805,19 @@
 
         let target;
         let loader = new THREE.TextureLoader();
-        // loader.load('lightning_water.jpg', function (texture) {
-        //     // add lightning target ring
-        //     let targetGeo = new THREE.CircleGeometry(10, 32);
-        //     targetGeo.scale(5, 5, 5);
-        //     let targetMaterial = new THREE.MeshPhongMaterial({ map: texture });
-        //     target = new THREE.Mesh(targetGeo, targetMaterial);
-        //     teddyMesh.add(target);
-        //     target.visible = false;
-        //     target.rotateX(-0.55 * Math.PI);
-        //     target.translateY(10);
-        //     target.translateX(60);
-        //     target.translateZ(30);
-        // });
+        loader.load('lightning_water.jpg', function (texture) {
+            // add lightning target ring
+            let targetGeo = new THREE.CircleGeometry(10, 32);
+            targetGeo.scale(5, 5, 5);
+            let targetMaterial = new THREE.MeshPhongMaterial({ map: texture });
+            target = new THREE.Mesh(targetGeo, targetMaterial);
+            teddyMesh.add(target);
+            target.visible = false;
+            target.rotateX(-0.55 * Math.PI);
+            target.translateY(10);
+            target.translateX(60);
+            target.translateZ(30);
+        });
 
         let time = 0;
         let then = 0;
@@ -829,11 +834,16 @@
 
             if (time % 2 == 0) {
                 lightning.visible = false;
-                target.visible = false;
+                if (typeof target != "undefined") {
+                    target.visible = false;
+                }
             }
+
             else {
                 lightning.visible = true;
-                target.visible = true;
+                if (typeof target != "undefined") {
+                    target.visible = true;
+                }
             }
             time = time + 1;
 
@@ -848,7 +858,7 @@
         }
 
         function intro() {
-            var intro= document.getElementById("Intro");
+            var intro = document.getElementById("Intro");
             var intro1Pic = document.getElementById("intro1Pic");
             var intro1 = document.getElementById("intro1");
             var intro2Pic = document.getElementById("intro2Pic");
@@ -929,7 +939,7 @@
 
             // Increase the cone speed and lightning frequency every 15 seconds.
             if (ticker % 10 == 0 && coneSpeed < 20) { // Cone speed cannot be higher than 20 to keep game playable.
-                coneSpeed+=0.01;
+                coneSpeed += 0.01;
                 if (lightningDelay > 40) // Lightning frequency must be at least 2 seconds to avoid modulus 0;
                     lightningDelay--;
             }
@@ -973,8 +983,8 @@
             // Render! (by golly I hope this works!)
             ticker++;
             renderer.render(scene, camera);
-            if (ticker % 100 == 0) {}//Activates lightning every 5 seconds.
-                // activate_lightning();
+            if (ticker % 100 == 0) { }//Activates lightning every 5 seconds.
+            //activate_lightning();
 
         }
     </script>
