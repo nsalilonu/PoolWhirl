@@ -167,7 +167,7 @@ function teddyMunch() {
         let EPS = 20;
         let y = Math.tan(theta) * z;
         teddyMesh.position.setY(y + minY + EPS);
-        let buoyancy = Math.sin(timer*25) * 40;
+        let buoyancy = Math.sin(timer*50) * 40;
         teddyMesh.translateY(buoyancy/10);
 
         // Find intersections of tube with cone.

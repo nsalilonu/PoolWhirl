@@ -467,12 +467,12 @@
 
             }
             else if (event.keyCode == LEFT) {
-                object.translateX(1);
+                object.translateX(2.5);
 
 
             }
             else if (event.keyCode == RIGHT) {
-                object.translateX(-1);
+                object.translateX(-2.5);
 
 
             }
@@ -775,6 +775,14 @@
             composer.render(deltaTime);
             if (lightningTimer == 0) {
                 lightningInProgress = false;
+                var audioLoader = new THREE.AudioLoader();
+                    audioLoader.load('thunder.mp3', function (buffer) {
+                        sound.setBuffer(buffer);
+                        sound.setLoop(false);
+                        sound.setVolume(1.0);
+                        sound.setPlaybackRate(2);
+                        sound.play();
+                    });
                 deactivate_lightning();
             }
             else {
@@ -909,7 +917,7 @@
             ticker++;
             renderer.render(scene, camera);
             if (ticker % lightningDelay == 0) { // Activates lightning after a certain amount of seconds.
-            activate_lightning();
+                activate_lightning();
             }
 
         }
