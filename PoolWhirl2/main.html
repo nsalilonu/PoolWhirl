@@ -197,111 +197,33 @@
         controls.target.set(teddyPosition.x, teddyPosition.y, teddyPosition.z);
         controls.update();
 
-        // hard code in the ducks and the fish
-        /*let ducks = [];
-        let duck1 = duckMesh.clone();
-        duck1.rotateZ(Math.PI);
-        duck1.scale.set(0.8, 0.8, 0.8);
-        duck1.translateX(100);
-        duck1.translateY(-30);
-        duck1.translateZ(100);
-        duck1.rotateY(Math.PI);
-        ducks.push(duck1);
-        cone.add(duck1);
-
-        let duck2 = duckMesh.clone();
-        duck2.rotateZ(Math.PI);
-        duck2.scale.set(0.8, 0.8, 0.8);
-        duck2.translateX(100);
-        duck2.translateY(-30);
-        duck2.translateZ(-100);
-        ducks.push(duck2);
-        cone.add(duck2);
-
-        let duck3 = duckMesh.clone();
-        duck3.rotateZ(Math.PI);
-        duck3.scale.set(0.8, 0.8, 0.8);
-        duck3.translateX(-100);
-        duck3.translateY(-30);
-        duck3.translateZ(-100);
-        ducks.push(duck3);
-        cone.add(duck3);
-
-        let duck4 = duckMesh.clone();
-        duck4.rotateZ(Math.PI);
-        duck4.scale.set(0.8, 0.8, 0.8);
-        duck4.translateX(-200);
-        duck4.translateY(8);
-        duck4.translateZ(-100);
-        ducks.push(duck4);
-        cone.add(duck4);
-
-        let duck5 = duckMesh.clone();
-        duck5.rotateZ(Math.PI);
-        duck5.scale.set(0.8, 0.8, 0.8);
-        duck5.translateX(200);
-        duck5.translateY(8);
-        duck5.translateZ(100);
-        ducks.push(duck5);
-        cone.add(duck5);*/
-
+        
 
         // place ducks at various points in the scene
         let ducks = [];
-        let closestVertex = [];
         function ducksInit() {
-            let coneRadius = 10 * 50;
-            // find the axis of the cone
-            let axis = new THREE.Vector3(0, 1, 0);
-            let x_axis = new THREE.Vector3(1, 0, 0);
-            axis.applyAxisAngle(axis, -Math.PI * 1.25);
-            axis.normalize();
-            // find the height of the cone
-            let coneHeight = 4 * 50;
-            let firstDuck = true;
-            let noMotherDuck = true;
-            let motherDuck;
-            for (let i = 0; i < coneHeight; i += 20) {
-                for (let j = -coneRadius; j < coneRadius; j += 20) {
-                    for (let k = -coneRadius; k < coneRadius; k += 20) {
-                        let position = new THREE.Vector3(j, i, k);
-                        // check to see if the position is within the cone
-                        // method found at this website: https://stackoverflow.com/questions/12826117/how-can-i-detect-if-a-point-is-inside-a-cone-or-not-in-3d-space
-                        // first, find points distance along the axis
-                        let dist = position.dot(axis);
-                        if (dist > coneHeight) {
-                            continue;
-                        }
-                        // calculate cone radius at that position of the axis
-                        let rad = (dist / coneHeight) * coneRadius;
-                        // calculate the point's orthogonal distance
-                        let orthoDist = position.sub(axis.clone().multiplyScalar(dist)).length();
-                        // is the position on the cone?
-                        if (orthoDist == rad) {
-                            if (firstDuck) {
-                                firstDuck = false;
-                                continue;
-                            }
-                            let newDuck = duckMesh.clone();
-                            newDuck.translateX(j);
-                            newDuck.translateY(-i);
-                            newDuck.translateY(92);
-                            newDuck.translateZ(k);
-                            newDuck.scale.set(0.8, 0.8, 0.8);
-                            let random = Math.random() * Math.PI * 2;
-                            newDuck.rotateY(random);
-
-                            ducks.push(newDuck);
-                            newDuck.visible = false;
-
-                            newDuck.rotateZ(Math.PI);
-                            cone.add(newDuck);
-                        }
-                    }
+            // assign ducks to every few vertices
+            let length = coneGeometry.vertices.length;
+            for (let i = 9; i < length; i++) {
+                if (i % 8 == 0) {
+                    // create a new duck and translate it to that vertex
+                    let newDuck = duckMesh.clone();
+                    newDuck.translateX(coneGeometry.vertices[i].x);
+                    newDuck.translateY(coneGeometry.vertices[i].y);
+                    newDuck.translateY(-12);
+                    newDuck.translateZ(coneGeometry.vertices[i].z);
+                    newDuck.rotateZ(Math.PI);
+                    let random = Math.random() * Math.PI * 2;
+                    newDuck.rotateY(random);
+                    newDuck.visible = false;
+                    // make the new duck a child of the cone
+                    ducks.push(newDuck);
+                    cone.add(newDuck);
                 }
             }
             haloesInit();
         }
+        
 
         function stickyDuck(theta, minY, timer) {
             // const length = closestVertex.length;
@@ -336,72 +258,30 @@
 
         // place fish at various points in the scene
         let fishes = [];
-        let closestFishVertex = [];
         function fishInit() {
-            let coneRadius = 10 * 50;
-            // find the axis of the cone
-            let axis = new THREE.Vector3(0, 1, 0);
-            let x_axis = new THREE.Vector3(1, 0, 0);
-            axis.applyAxisAngle(axis, -Math.PI * 1.25);
-            axis.normalize();
-            // find the height of the cone
-            let coneHeight = 4 * 50;
-            let noMotherFish = true;
-            let motherFish;
-            let firstFish = true;
-            for (let i = 0; i < coneHeight; i += 10) {
-                for (let j = -coneRadius; j < coneRadius; j += 30) {
-                    for (let k = -coneRadius; k < coneRadius; k += 20) {
-                        let position = new THREE.Vector3(j, i, k);
-                        // check to see if the position is within the cone
-                        // method found at this website: https://stackoverflow.com/questions/12826117/how-can-i-detect-if-a-point-is-inside-a-cone-or-not-in-3d-space
-                        // first, find points distance along the axis
-                        let dist = position.dot(axis);
-                        if (dist > coneHeight) {
-                            continue;
-                        }
-                        // calculate cone radius at that position of the axis
-                        let rad = (dist / coneHeight) * coneRadius;
-                        // calculate the point's orthogonal distance
-                        let orthoDist = position.sub(axis.clone().multiplyScalar(dist)).length();
-                        // is the position on the cone?
-                        if (orthoDist == rad) {
-                            if (firstFish) {
-                                firstFish = false;
-                                continue;
-                            }
-                            // if so, place an invisible rubber duck there
-                            let newFish = fish.clone();
-                            /* if (noMotherFish) {
-                                 motherFish = newFish;
-                                 motherFish.position.set(0, 0, 0);
-                                 motherFish.translateY(92);
-                             }*/
-                            newFish.translateX(j);
-                            newFish.translateY(-i);
-                            newFish.translateY(46);
-                            newFish.translateZ(k);
-                            newFish.scale.set(0.3, 0.3, 0.3);
-                            newFish.scale.set(0.1, 0.1, 0.1);
-                            let random = Math.random() * Math.PI * 2;
-                            newFish.rotateY(random);
-                            newFish.visible = false;
-                            fishes.push(newFish);
-
-                            /*if (noMotherFish) {
-                                cone.add(motherFish);
-                                noMotherFish = false;
-                            }*/
-                            //else {
-                            newFish.rotateZ(Math.PI);
-                            //motherFish.add(newFish);
-                            cone.add(newFish);
-                            //}
-                        }
-                    }
+            // assign fish to every few vertices
+            let length = coneGeometry.vertices.length - 10;
+            for (let i = 9; i < length; i++) {
+                if (i % 4 == 0) {
+                    // create a new fish and translate it to that vertex
+                    let newFish = fish.clone();
+                    newFish.translateX(coneGeometry.vertices[i].x);
+                    newFish.translateY(coneGeometry.vertices[i].y);
+                    newFish.translateY(-6);
+                    newFish.translateZ(coneGeometry.vertices[i].z);
+                    newFish.rotateZ(Math.PI);
+                    newFish.scale.set(0.3, 0.3, 0.3);
+                    newFish.scale.set(0.1, 0.1, 0.1);
+                    let random = Math.random() * Math.PI * 2;
+                    newFish.rotateY(random);
+                    newFish.visible = false;
+                    // make the new fish a child of the cone
+                    fishes.push(newFish);
+                    cone.add(newFish);
                 }
             }
         }
+        
 
         function stickyFish(theta, minY, timer) {
             const length = fishes.length;
@@ -1003,9 +883,9 @@
             let theta = Math.atan(coneHeight / coneRadius);
             bounce(theta, teddyMesh.position.z, -coneHeight / 2, timer);
             stickyDuck(theta, -coneHeight / 2, timer);
-            stickyFish(theta, -coneHeight / 2, timer);
+            //stickyFish(theta, -coneHeight / 2, timer);
 
-            if (ticker % 200 == 0) {
+            if (ticker % 120 == 0) {
                 showDuck();
             }
             if (ticker % 100 == 0) {
