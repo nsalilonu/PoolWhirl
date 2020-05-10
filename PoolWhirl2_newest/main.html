@@ -572,7 +572,7 @@
             if (typeof target != "undefined") {
                 target.visible = false;
             }
-            scene.background = sceneColor;
+            scene.background = texture;
 
             // deactivate glow 
             composer.renderToScreen = false;
@@ -751,19 +751,19 @@
 
         let target;
         let loader = new THREE.TextureLoader();
-        loader.load('lightning_water.jpg', function (texture) {
-            // add lightning target ring
-            let targetGeo = new THREE.CircleGeometry(10, 32);
-            targetGeo.scale(5, 5, 5);
-            let targetMaterial = new THREE.MeshPhongMaterial({ map: texture });
-            target = new THREE.Mesh(targetGeo, targetMaterial);
-            teddyMesh.add(target);
-            target.visible = false;
-            target.rotateX(-0.55 * Math.PI);
-            target.translateY(10);
-            target.translateX(60);
-            target.translateZ(30);
-        });
+        // loader.load('lightning_water.jpg', function (texture) {
+        //     // add lightning target ring
+        //     let targetGeo = new THREE.CircleGeometry(10, 32);
+        //     targetGeo.scale(5, 5, 5);
+        //     let targetMaterial = new THREE.MeshPhongMaterial({ map: texture });
+        //     target = new THREE.Mesh(targetGeo, targetMaterial);
+        //     teddyMesh.add(target);
+        //     target.visible = false;
+        //     target.rotateX(-0.55 * Math.PI);
+        //     target.translateY(10);
+        //     target.translateX(60);
+        //     target.translateZ(30);
+        // });
 
         let time = 0;
         let then = 0;
