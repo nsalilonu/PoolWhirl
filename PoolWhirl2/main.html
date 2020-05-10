@@ -460,7 +460,13 @@
                         sound.play();
                     });
                 teddyMesh.position.setZ(teddyMesh.position.z - 10); // Pushes you further into the whirlpool.
+                // Ducks with haloes deal 10 times more damage.
+                if (haloes_active) {
+                    gamePoints -= 10;
+                } 
+                else {
                 gamePoints--;
+                }
                 let string = "Points: " + gamePoints;
                 document.getElementById("pointsText").innerHTML = string;
             }
@@ -652,11 +658,12 @@
             // activate glow 
             composer.renderToScreen = true;
 
-            lightningTimer = 20;
+            lightningTimer = 5; // Made it a little shorter?
             requestAnimationFrame(animate_lightning);
             return;
         }
 
+        let haloes_active = false;
         function deactivate_lightning() {
             storm_dlight.visible = false;
             storm_ambient.visible = false;
@@ -670,6 +677,7 @@
             composer.renderToScreen = false;
             composer.render();
             setTimeout(deactivate_haloes, 20000);
+             haloes_active = true;
             return;
         }
 
@@ -677,6 +685,7 @@
             for (let halo of haloes) {
                 halo.visible = false;
             }
+            haloes_active = false;
         }
 
 
@@ -944,7 +953,7 @@
         var whirlTime = 0;
         let timer;
         let coneSpeed = 5;
-        let lightningDelay = 100; // Starts off generating lightning every 5 seconds.
+        let lightningDelay = 400; // Starts off generating lightning every 20 seconds.
         let ticker = 0; // When ticker = 20, 1 second has gone by
         let teddyTime = false;
         teddyInit();
@@ -976,7 +985,7 @@
             // Increase the cone speed and lightning frequency every half second.
             if (ticker % 1200 == 0 && coneSpeed < 20) { // Cone speed cannot be higher than 20 to keep game playable.
                 coneSpeed += 1;
-                if (lightningDelay > 40) // Lightning frequency must be at least 2 seconds to avoid modulus 0;
+                if (lightningDelay > 200) // Lightning frequency must be at least 10 seconds to keep game playable.
                     lightningDelay--;
             }
 
@@ -1019,8 +1028,9 @@
             // Render! (by golly I hope this works!)
             ticker++;
             renderer.render(scene, camera);
-            if (ticker % 100 == 0) { }//Activates lightning every 5 seconds.
+            if (ticker % lightningDelay == 0) { // Activates lightning after a certain amount of seconds.
             activate_lightning();
+            }
 
         }
     </script>
