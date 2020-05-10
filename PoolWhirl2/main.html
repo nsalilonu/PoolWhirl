@@ -300,6 +300,7 @@
                     }
                 }
             }
+            haloesInit();
         }
 
         function stickyDuck(theta, minY, timer) {
@@ -315,6 +316,23 @@
                 ducks[i].translateY(buoyancy / 10);
             }
         }
+
+        let haloes = [];
+        function haloesInit() {
+            let haloGeom = new THREE.TorusGeometry(20, 3, 16, 100);
+            let haloMaterial = new THREE.MeshToonMaterial({color: 0xFFFF99, shininess: 60});
+            let halo = new THREE.Mesh(haloGeom, haloMaterial);
+            halo.rotation.x = Math.PI / 2;
+            halo.position.y += 10;
+            for (let duck of ducks) {
+                let newHalo = halo.clone();
+                haloes.push(newHalo);
+                duck.add(newHalo);
+                newHalo.visible = false;
+            }
+        }
+
+        
 
         // place fish at various points in the scene
         let fishes = [];
@@ -623,6 +641,9 @@
             storm_dlight.visible = true;
             storm_ambient.visible = true;
             lightning.visible = true;
+            for (let halo of haloes) {
+                halo.visible = true;
+            }
             if (typeof target != "undefined") {
                 target.visible = true;
             }
@@ -648,7 +669,14 @@
             // deactivate glow 
             composer.renderToScreen = false;
             composer.render();
+            setTimeout(deactivate_haloes, 20000);
             return;
+        }
+
+        function deactivate_haloes() {
+            for (let halo of haloes) {
+                halo.visible = false;
+            }
         }
 
 
@@ -992,7 +1020,7 @@
             ticker++;
             renderer.render(scene, camera);
             if (ticker % 100 == 0) { }//Activates lightning every 5 seconds.
-            //activate_lightning();
+            activate_lightning();
 
         }
     </script>
