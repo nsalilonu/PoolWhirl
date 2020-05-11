@@ -17,7 +17,6 @@
 <body style="background-color: rgb(226, 113, 147);">
     <h1 id="h1" , style="color: white;">Pool Whirl</h1>
     <p style="color:rgb(248, 248, 248)">By: Sean-Wyn Ng, Nsomma Alilonu, Rachel Lee, and Emily Yin</p>
-    <p style="color:rgb(5, 146, 99)">Save your teddy bear from an untimely demise!</p>
     <script src="three.min.js"></script>
     <script src="Lightning/postprocessing.min.js"></script>
     <script src="Lightning/THREE.MeshLine.js"></script>
@@ -1032,11 +1031,11 @@
             }    
 
             // Ignore duck collisions for 10 seconds so that the player has time to mentally prepare.
-            if (ticker > 200) {
+            let fishCollided;
+            if (ticker > 400 || introSkip) {
                 handleDuckCollision();
-            }
-
-            let fishCollided = handleFishCollision();
+                fishCollided = handleFishCollision();
+            }     
 
             // When teddyMunch animation is done, it will set teddyTime to false.
             if (fishCollided || teddyTime) {
