@@ -886,7 +886,7 @@
                 audioLoader.load('thunder.mp3', function (buffer) {
                     sound.setBuffer(buffer);
                     sound.setLoop(false);
-                    sound.setVolume(2.0);
+                    sound.setVolume(5.0);
                     sound.setPlaybackRate(2);
                     sound.play();
                 });
@@ -960,7 +960,7 @@
         // Animation:
         var whirlTime = 0;
         let timer;
-        let coneSpeed = 7;
+        let coneSpeed = 10;
         let lightningDelay = 800; // Starts off generating lightning every 40 seconds.
         let ticker = 0; // When ticker = 20, 1 second has gone by
         let teddyTime = false;
@@ -994,7 +994,7 @@
 
             // Increase the cone speed and lightning frequency every 30 seconds.
             if (ticker % 600 == 0 && coneSpeed < 20) { // Cone speed cannot be higher than 20 to keep game playable.
-                coneSpeed += 1;
+                coneSpeed += 2;
                 if (lightningDelay > 200) // Lightning frequency must be at least 10 seconds to keep game playable.
                     lightningDelay--;
             }
