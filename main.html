@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- the next three lines try to discourage browser from keeping page in cache -->
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="-1">
+    <meta http-equiv="cache-control" content="no-store">
+
+    <title> COS426 Final Project &mdash; Pool Whirl</title>
+</head>
+
+<script src="teddyMesh.js" type="module"></script>
+<script src="rubberDuckMesh.js" type="module"></script>
+<link href="style.css" type="text/css" rel="stylesheet" />
+
+<body style="background-color: rgb(226, 113, 147);">
+    <h1 id="h1" , style="color: white;">Pool Whirl</h1>
+    <p style="color:rgb(248, 248, 248)">By: Sean-Wyn Ng, Nsomma Alilonu, Rachel Lee, and Emily Yin</p>
+    <p style="color:rgb(5, 146, 99)">Save your teddy bear from an untimely demise!</p>
+    <script src="three.min.js"></script>
+    <script src="Lightning/postprocessing.min.js"></script>
+    <script src="Lightning/THREE.MeshLine.js"></script>
+    <script src="OrbitControls.js"></script>
+
+    <div id="points" class="points">
+        <div class="points-content">
+            <p id="pointsText">Points: 0</p>
+        </div>
+    </div>
+
+    <div id="LostGame" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p>You lost! Close this box or click off the box to play again!</p>
+        </div>
+    </div>
+
+    <button type="button" id="skip">Skip Intro</button>
+    <div id= "Intro" class="intro">
+        <div id="intro1Pic" class="intro-picture" style="background-image:url('teddyImage.PNG');"></div>
+        <div id="intro1" class="intro-content">
+            <p>You are a teddy bear on a tube in a whirlpool! How did you get here? Who knows? But you must stay away
+                from the center! Move around with WASD keys</p>
+        </div>
+        <div id="intro2Pic" class="intro-picture" style="background-image:url('duckImage.PNG');"></div>
+        <div id="intro2" class="intro-content">
+            <p>Avoid the ducks, they will knock you closer to the center and decrease your points!</p>
+        </div>
+        <div id="intro3Pic" class="intro-picture" style="background-image:url('fishImage.PNG');"></div>
+        <div id="intro3" class="intro-content">
+            <p>Grab the fish! They will increase your points!</p>
+        </div>
+        <div id="intro4Pic" class="intro-picture" style="background-image:url('halo.PNG');"></div>
+        <div id="intro4" class="intro-content">
+            <p>When lightning strikes, you get haloed ducks for a brief period of time! Watch out, they will cost you more points!</p>
+        </div>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <script type="module">
+        import { teddyMesh, teddyMunch, teddyInit, bounce } from "./teddyMesh.js";
+        import { duckMesh } from "./rubberDuckMesh.js";
+        import { fish } from "./fishMesh.js";
+
+        // Camera controls:
+        const canvas = document.getElementById('canvas');
+        const renderer = new THREE.WebGLRenderer({ canvas });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        var camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 1, 10000);
+
+        // Orbit Controls:
+        const controls = new THREE.OrbitControls(camera, canvas);
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        const scene = new THREE.Scene();
+
+        // Background scene:
+        let texture = new THREE.TextureLoader().load( "textures/sky.png" );
+        scene.background = texture;
+
+        // background storm scene:
+
+        // Cone:
+        let coneGeometry = new THREE.ConeGeometry(7, 5, 10, 10, true);
+        coneGeometry.elementsNeedUpdate = true;
+        coneGeometry.verticesNeedUpdate = true;
+        coneGeometry.colorsNeedUpdate = true;
+        let coneScale = 50;
+        coneGeometry.scale(coneScale, coneScale, coneScale);
+
+        let vertColors = new Array(coneGeometry.vertices.length);
+
+        // assign colors to vertices first, and then iterate through faces and assign the colors 
+        // to the faces array
+
+        let lightBlue = [30, 99, 101, 57, 62, 90, 81, 17, 24, 84, 43, 97]
+
+        for (let i = 0; i < vertColors.length; i++) {
+            let color;
+            if ((i < 11)) {
+                //color = new THREE.Color(0x006464);
+                color = new THREE.Color(0x001C55);
+            } else if (i < 21) {
+                color = new THREE.Color(0x003192);
+            } 
+            else if (lightBlue.includes(i)) {
+                //color = new THREE.Color(0x66fff5);
+                //color = new THREE.Color(0x5BFFF5);
+                //color = new THREE.Color(0x0066FF);
+                color = new THREE.Color(0x1A66FF);
+            }
+            else if ((i % 3) == 0) {
+                // darker lines
+                //color = new THREE.Color(0x00c2b5);
+                //color = new THREE.Color(0x00f0e0);
+                color =  new THREE.Color(0x0049DB);
+            }
+            else {
+                color = new THREE.Color(0x0056ff);
+                //color = new THREE.Color(0x001AFF);
+                //color = new THREE.Color(0x0065a5);
+            }
+            vertColors[i] = color.clone();
+        }
+
+        for (var faceIndex = 0; faceIndex < coneGeometry.faces.length; faceIndex++) {
+            let face = coneGeometry.faces[faceIndex];
+            face.vertexColors.push(vertColors[face.a].clone());
+            face.vertexColors.push(vertColors[face.b].clone());
+            face.vertexColors.push(vertColors[face.c].clone());
+        }
+
+        let coneMaterial = new THREE.MeshToonMaterial({ vertexColors: THREE.VertexColors });
+        coneMaterial.side = THREE.DoubleSide;
+
+        let cone = new THREE.Mesh(coneGeometry, coneMaterial);
+        cone.castShadow = true;
+        cone.dynamic = true;
+        scene.add(cone);
+        cone.rotation.x = - Math.PI;
+
+        // Tube:
+        var tubeGeometry = new THREE.TorusGeometry(10, 3, 16, 100);
+
+        for (var i = 0; i < tubeGeometry.faces.length; i++) {
+            let hue = Math.random(); //* 0.166 (if red/orange/yellow);
+            // setting lightness to higher value will make it more pastel
+            tubeGeometry.faces[i].color.setHSL(hue, 1.0, 0.8);
+        }
+
+        var tubeMaterial = new THREE.MeshToonMaterial({ color: 0xffffff, vertexColors: true, shininess: 60 });
+        tubeGeometry.scale(1.7, 1.7, 1.7);
+        var torus = new THREE.Mesh(tubeGeometry, tubeMaterial);
+        torus.rotateX(Math.PI / 2);
+        torus.position.set(0, -17.000000000000007, -1.0000000000000142);
+        teddyMesh.add(torus);
+
+        function getRandomRanges(particleNum) {
+            let vertices = coneGeometry.vertices;
+            let length = particleNum;
+            let totParticles = coneGeometry.vertices.length - 1;
+            let randomRanges = [];
+            let scale = 10;
+            let timeScale = 50;
+            // selecting random particles
+            for (let i = 0; i < length; i++) {
+                let randomVertex = Math.round(Math.random() * totParticles);
+                let vertexY = vertices[randomVertex].y;
+                let randomTime = Math.random() * timeScale; // [0,50] 
+                let randomScale = Math.round(Math.random() * scale); // Random number between 0 and 20.
+                // added direction to keep track
+                // keep track of original position
+                randomRanges.push({ vertex: randomVertex, originalY: vertexY, time: randomTime, scale: randomScale });
+            }
+            return randomRanges;
+        }
+
+
+        function moveVertices(timer, randomRanges) {
+            let length = randomRanges.length;
+            let vertices = coneGeometry.vertices;
+            for (let i = 0; i < length; i++) {
+                let scale = Math.sin(timer * randomRanges[i].time) * randomRanges[i].scale;
+                let currentVertex = randomRanges[i].vertex; // A random vertex in the list.
+                vertices[currentVertex].setY(randomRanges[i].originalY + scale);
+
+                // // Check if the water is in the vicinity of the teddy.
+                // let teddyPos = teddyMesh.position.clone();
+                // let offset = 13; // Don't let vertices within a box of radius 5 of the teddy go above the teddy.
+                // let EPS = 20; // Distance from the teddy center we want the water to be
+                // let minZ = teddyPos.z - offset;
+                // let maxZ = teddyPos.z + offset;
+                // if (vertices[currentVertex].z <= maxZ && vertices[currentVertex].z >= minZ) {
+                //         // If the water is too high and near the teddy, reduce the y value.
+                //         if (vertices[currentVertex].y > teddyPos.y - EPS) {
+                //             vertices[currentVertex].setY(teddyPos.y - EPS);
+                //         }
+                //     }
+            }
+        }
+
+        let yAxis = new THREE.Vector3(0, 1, 0);
+
+        teddyMesh.translateZ(175);
+        teddyMesh.translateY(10);
+        teddyMesh.rotateY(Math.PI / 2);
+
+
+        scene.add(teddyMesh);
+        let teddyPosition = teddyMesh.localToWorld(teddyMesh.position.clone());
+        //camera.position.set(-219.61429616527784, 60.79054134136912, 159.00433133976932);
+        camera.position.set(-179.61429616527784, 60.79054134136912, 84.64688761281252);
+        controls.target.set(teddyPosition.x, teddyPosition.y, teddyPosition.z);
+        controls.update();
+
+        
+
+        // place ducks at various points in the scene
+        let ducks = [];
+        function ducksInit() {
+            // assign ducks to every few vertices
+            let length = coneGeometry.vertices.length;
+            for (let i = 9; i < length; i++) {
+                if (i % 8 == 0) {
+                    // create a new duck and translate it to that vertex
+                    let newDuck = duckMesh.clone();
+                    newDuck.translateX(coneGeometry.vertices[i].x);
+                    newDuck.translateY(coneGeometry.vertices[i].y);
+                    newDuck.translateY(-12);
+                    newDuck.translateZ(coneGeometry.vertices[i].z);
+                    newDuck.rotateZ(Math.PI);
+                    let random = Math.random() * Math.PI * 2;
+                    newDuck.rotateY(random);
+                    newDuck.visible = false;
+                    // make the new duck a child of the cone
+                    ducks.push(newDuck);
+                    cone.add(newDuck);
+                }
+            }
+            haloesInit();
+        }
+        
+
+        function stickyDuck(theta, minY, timer) {
+            // const length = closestVertex.length;
+            // const EPS = 2 - 92 / 2 - 10;
+            for (let i = 0; i < length; i++) {
+                //     ducks[i].position.setY(closestVertex[i].y + EPS);
+                let z = ducks[i].position.z.clone();
+                let EPS = 50;
+                let y = Math.tan(theta) * z;
+                ducks[i].position.setY(y + minY + EPS);
+                let buoyancy = Math.sin(timer * 25) * 40;
+                ducks[i].translateY(buoyancy / 10);
+            }
+        }
+
+        let haloes = [];
+        function haloesInit() {
+            let haloGeom = new THREE.TorusGeometry(20, 3, 16, 100);
+            let haloMaterial = new THREE.MeshToonMaterial({color: 0xFFFF99, shininess: 60});
+            let halo = new THREE.Mesh(haloGeom, haloMaterial);
+            halo.rotation.x = Math.PI / 2;
+            halo.position.y += 10;
+            for (let duck of ducks) {
+                let newHalo = halo.clone();
+                haloes.push(newHalo);
+                duck.add(newHalo);
+                newHalo.visible = false;
+            }
+        }
+
+        
+
+        // place fish at various points in the scene
+        let fishes = [];
+        function fishInit() {
+            // assign fish to every few vertices
+            let length = coneGeometry.vertices.length - 10;
+            let EPS = -10;
+            for (let i = 9; i < length; i++) {
+                if (i % 4 == 0) {
+                    // create a new fish and translate it to that vertex
+                    let newFish = fish.clone();
+                    newFish.translateX(coneGeometry.vertices[i].x);
+                    newFish.translateY(coneGeometry.vertices[i].y + EPS);
+                    newFish.translateY(-6);
+                    newFish.translateZ(coneGeometry.vertices[i].z);
+                    newFish.rotateZ(Math.PI);
+                    newFish.scale.set(0.3, 0.3, 0.3);
+                    newFish.scale.set(0.1, 0.1, 0.1);
+                    let random = Math.random() * Math.PI * 2;
+                    newFish.rotateY(random);
+                    newFish.visible = false;
+                    // make the new fish a child of the cone
+                    fishes.push(newFish);
+                    cone.add(newFish);
+                }
+            }
+        }
+        
+
+        function stickyFish(theta, minY, timer) {
+            const length = fishes.length;
+            for (let i = 0; i < length; i++) {
+            let temp = fishes[i].position.clone();
+            let z = temp.z;
+            let EPS = 200;
+            let y = Math.tan(theta) * z;
+            fishes[i].position.setY(y + minY + EPS);
+            let buoyancy = Math.sin(timer*25) * 40;
+            fishes[i].translateY(buoyancy/10);
+             }
+ 
+        }
+
+        function showFish() {
+            let randomFish = Math.floor(fishes.length * Math.random());
+            fishes[randomFish].visible = true;
+        }
+
+        function showDuck() {
+            let randomDuck = Math.floor(ducks.length * Math.random());
+            ducks[randomDuck].visible = true;
+        }
+
+
+        // Code taken from https://github.com/stemkoski/stemkoski.github.com/blob/master/Three.js/Collision-Detection.html.
+        let gamePoints = 0;
+        let collision = false;
+        function handleDuckCollision() {
+                var originPoint = teddyMesh.position.clone();
+                collision = false;
+                let EPS = 12;
+                for (var vertexIndex = 0; vertexIndex < torus.geometry.vertices.length; vertexIndex++) {
+                    var localVertex = torus.geometry.vertices[vertexIndex].clone(); 
+                    var globalVertex = localVertex.applyMatrix4(torus.matrix); 
+                    var directionVector = globalVertex.sub(torus.position);
+                    var ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize());
+                    var collisionResults = ray.intersectObjects(ducks, true);
+                    if (collisionResults.length > 0 && collisionResults[0].distance < (directionVector.length() + EPS)) {
+                        collision = true;
+                        break;
+                    }
+                }
+            
+            if (collision) {
+                var audioLoader = new THREE.AudioLoader();
+                    audioLoader.load('quack.mp3', function (buffer) {
+                        sound.setBuffer(buffer);
+                        sound.setLoop(false);
+                        sound.setVolume(1.0);
+                        sound.setPlaybackRate(1);
+                        sound.play();
+                    });
+                teddyMesh.position.setZ(teddyMesh.position.z - 10); // Pushes you further into the whirlpool.
+                // Ducks with haloes deal 10 times more damage.
+                if (haloes_active) {
+                    gamePoints -= 10;
+                } 
+                else {
+                gamePoints--;
+                }
+                let string = "Points: " + gamePoints;
+                document.getElementById("pointsText").innerHTML = string;
+            }
+            controls.update();
+        }
+
+
+
+        let fishCollision = false;
+        // create an AudioListener and add it to the camera
+        var listener = new THREE.AudioListener();
+        camera.add(listener);
+
+        // create a global audio source
+        var sound = new THREE.Audio(listener);
+
+        function handleFishCollision() {
+                var originPoint = teddyMesh.position.clone();
+                fishCollision = false;
+                let foundFish;
+                let EPS = 10;
+                for (var vertexIndex = 0; vertexIndex < torus.geometry.vertices.length; vertexIndex++) {
+                    var localVertex = torus.geometry.vertices[vertexIndex].clone();
+                    var globalVertex = localVertex.applyMatrix4(torus.matrix);
+                    var directionVector = globalVertex.sub(torus.position);
+                    var ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize());
+                    var collisionResults = ray.intersectObjects(fishes, true);
+                    if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length() + EPS) {
+                        fishCollision = true;
+                        foundFish = collisionResults[0].object;
+                        break;  
+                    }
+                }
+                if (fishCollision) {
+                    gamePoints++;
+                    let string = "Points: " + gamePoints;
+                    document.getElementById("pointsText").innerHTML = string;
+                    teddyInit();
+                    let fish = foundFish.parent;
+                    let guppies = fish.children;
+                    for (let i = 0; i < guppies.length; i++) {
+                        guppies[i].visible = false;
+                    }
+                    // load a sound and set it as the Audio object's buffer
+                    var audioLoader = new THREE.AudioLoader();
+                    audioLoader.load('crunch.mp3', function (buffer) {
+                        sound.setBuffer(buffer);
+                        sound.setLoop(false);
+                        sound.setVolume(1.0);
+                        sound.setPlaybackRate(3);
+                        sound.play();
+                    });
+                    controls.update();
+                    return true;
+                }
+            controls.update();
+            return false;
+        }
+
+
+
+        function checkGameStatus() {
+            let lostGame = false;
+            if (teddyMesh.position.z <= 50) {
+                lostGame = true;
+            }
+
+            if (lostGame) {
+                var modal = document.getElementById("LostGame");
+                var span = document.getElementsByClassName("close")[0];
+                modal.style.display = "block";
+
+                // When the user clicks on <span> (x), close the modal and refresh the page
+                span.onclick = function () {
+                    modal.style.display = "none";
+                    window.location.reload();
+                }
+
+                // When the user clicks anywhere outside of the modal, close it and refresh the page.
+                window.onclick = function (event) {
+                    if (event.target == modal) {
+                        modal.style.display = "none";
+                        window.location.reload();
+                    }
+                }
+            }
+            return lostGame;
+        }
+
+        function reset() {
+            teddyMesh.position.set(0, 10, 175);
+        }
+
+        // have a constant force the moves teddy towards the center of the whirlpool
+        function attract() {
+            object.translateX(0.4);
+            let EPS = 100;
+            //debugger;
+            //if (Math.abs(teddyMesh.position.y) > coneGeometry.height) {
+            //    teddyMesh.position.x = coneGeometry.height;
+            //}
+        }
+
+
+        // run a for loop where if the selected random duck is not 
+        // currently seen by the camera, make it visible
+        //let randomDuck = Math.floor(ducks.length * Math.random());
+        let offsetVector = new THREE.Vector3(0, -10, 0);
+        let object = teddyMesh;
+        
+
+        // Move with WASD to avoid moving window by accident...
+        function moveObject() {
+            const DOWN = 83;
+            const UP = 87;
+            const LEFT = 65;
+            const RIGHT = 68;
+            const BACK = 188;
+            const FRONT = 190;
+            const key = event.keyCode;
+
+            if (event.keyCode == DOWN) {
+                object.translateY(-1);
+
+            }
+            else if (event.keyCode == UP) {
+                object.translateY(1);
+
+            }
+            else if (event.keyCode == LEFT) {
+                object.translateX(2.5);
+
+
+            }
+            else if (event.keyCode == RIGHT) {
+                object.translateX(-2.5);
+
+
+            }
+            else if (event.keyCode == FRONT) {
+                object.translateZ(1);
+
+            }
+            else if (event.keyCode == BACK) {
+                object.translateZ(-1);
+
+            }
+        }
+
+        // Lighting:
+        const color = 0xFFFFFF;
+        const color2 = 0xffb400;
+        const sunColor = 0xffa51b;
+        const light = new THREE.DirectionalLight(color, 0.25);
+        //light.position.set(-329, -81, -260);
+        light.position.set(0, 100, 0);
+        const teddyLight = new THREE.DirectionalLight(color2, 0.5);
+        teddyLight.position.set(9, 10, -1);
+        const ambient = new THREE.AmbientLight(0x404040, 2);
+        // 329, -11 260 is on right of teddy bear
+        scene.add(light);
+        //scene.add(teddyLight);
+        scene.add(ambient);;
+
+        window.addEventListener('keydown', moveObject, false);
+
+        // create an EffectComposer
+        const composer = new POSTPROCESSING.EffectComposer(renderer);
+        // as the first pass, add a RenderPass that will render the scene
+        // with the camera into the first render target 
+        composer.addPass(new POSTPROCESSING.RenderPass(scene, camera));
+        // next, add a BloomPass, which renders its input to a smaller 
+        // render target and blurs the result, then adds it on top 
+        // of the original input
+        const effectPass = new POSTPROCESSING.EffectPass(
+            camera,
+            new POSTPROCESSING.BloomEffect({ intensity: 2.5 })
+        );
+        effectPass.renderToScreen = true;
+        composer.addPass(effectPass);
+
+
+        let lightningTimer;
+        let lightningInProgress = false;
+        function activate_lightning() {
+            if (lightningInProgress) {
+                return;
+            }
+            lightningInProgress = true;
+            storm_dlight.visible = true;
+            storm_ambient.visible = true;
+            lightning.visible = true;
+            for (let halo of haloes) {
+                halo.visible = true;
+            }
+            if (typeof target != "undefined") {
+                target.visible = true;
+            }
+            scene.background = 'black';
+
+            // activate glow 
+            composer.renderToScreen = true;
+
+            lightningTimer = 5; // Made it a little shorter?
+            requestAnimationFrame(animate_lightning);
+            return;
+        }
+
+        let haloes_active = false;
+        function deactivate_lightning() {
+            storm_dlight.visible = false;
+            storm_ambient.visible = false;
+            lightning.visible = false;
+            if (typeof target != "undefined") {
+                target.visible = false;
+            }
+            scene.background = texture;
+
+            // deactivate glow 
+            composer.renderToScreen = false;
+            composer.render();
+            setTimeout(deactivate_haloes, 20000);
+             haloes_active = true;
+            return;
+        }
+
+        function deactivate_haloes() {
+            for (let halo of haloes) {
+                halo.visible = false;
+            }
+            haloes_active = false;
+        }
+
+
+        // add storm lights 
+        const storm_dlight = new THREE.DirectionalLight(0xffffff, 0.7);
+        storm_dlight.position.set(1, 1, 0).normalize();
+        scene.add(storm_dlight);
+        storm_dlight.visible = false;
+        const storm_ambient = new THREE.AmbientLight(0xffffff, 0.3);
+        scene.add(storm_ambient);
+        storm_ambient.visible = false;
+
+
+        function lightning_init(startPoint, endPoint) {
+            let segmentList = [];
+            let points = [];
+            points.push(startPoint);
+            points.push(endPoint);
+            let geometry = new THREE.Geometry().setFromPoints(points);
+
+            let line = new MeshLine();
+            line.setGeometry(geometry);
+
+            let material = new MeshLineMaterial({ color: new THREE.Color(0xFFFF99) });
+
+            let segMesh = new THREE.Mesh(line.geometry, material);
+
+            let segmentInfo = [];
+            segmentInfo.push(segMesh);
+            segmentInfo.push(startPoint);
+            segmentInfo.push(endPoint);
+
+            segmentList.push(segmentInfo);
+
+            // the maximum amount to offset a lightning bolt
+            let maxOffset = 45;
+
+            const NUM_GENERATIONS = 9;
+
+            let division_count = 0;
+            let lengthScale = 0.7;
+
+            // for each generation
+            for (let i = 0; i < NUM_GENERATIONS; i++) {
+                let array_len = segmentList.length;
+                // for each segment that was in segmentList when this generation started
+                for (let j = array_len - 1; j >= 0; j--) {
+                    let segmentInfo = segmentList[j];
+                    startPoint = segmentInfo[1];
+                    // this.console.log(startPoint);
+                    endPoint = segmentInfo[2];
+                    // this.console.log(endPoint);
+                    // remove it 
+                    segmentList.splice(j, 1);
+
+                    let temp = new THREE.Vector3();
+                    let midPoint = new THREE.Vector3();
+                    midPoint.copy(temp.addVectors(startPoint, endPoint).divideScalar(2));
+                    // offset the midpoint by a random amount along the normal
+                    // midPoint += Perpendicular(Normalize(endPoint-startPoint))*RandomFloat(-offset,offset)
+
+                    // compute the unit direction vector of the line segment
+                    temp.subVectors(endPoint, startPoint).normalize();
+                    // compute its normal
+                    let refVector = new THREE.Vector3(1, 0, 0);
+                    let norm = new THREE.Vector3();
+                    norm.crossVectors(temp, refVector).normalize();
+
+                    // get three random floats between -MAX_OFFSET and MAX_OFFSET 
+                    // to form the random offset 
+                    let n1 = (2 * maxOffset) * Math.random() - maxOffset;
+                    let n2 = (2 * maxOffset) * Math.random() - maxOffset;
+                    let n3 = (2 * maxOffset) * Math.random() - maxOffset;
+                    let randOffset = new THREE.Vector3(n1, n2, n3);
+
+                    norm.multiply(randOffset);
+                    midPoint.add(norm);
+
+                    // Create two new segments that span from the start point to the end point,
+                    // but with the new (randomly-offset) midpoint.
+                    let points1 = [];
+                    points1.push(startPoint);
+                    points1.push(midPoint);
+                    let geometry1 = new THREE.Geometry().setFromPoints(points1);
+
+                    let line1 = new MeshLine();
+                    line1.setGeometry(geometry1);
+                    let segMesh1 = new THREE.Mesh(line1.geometry, material);
+
+                    let segmentInfo1 = [];
+                    segmentInfo1.push(segMesh1);
+                    segmentInfo1.push(startPoint);
+                    segmentInfo1.push(midPoint);
+
+                    let points2 = [];
+                    points2.push(midPoint);
+                    points2.push(endPoint);
+                    let geometry2 = new THREE.Geometry().setFromPoints(points2);
+                    let line2 = new MeshLine();
+                    line2.setGeometry(geometry2);
+                    let segMesh2 = new THREE.Mesh(line2.geometry, material);
+
+                    let segmentInfo2 = [];
+                    segmentInfo2.push(segMesh2);
+                    segmentInfo2.push(midPoint);
+                    segmentInfo2.push(endPoint);
+
+                    segmentList.push(segmentInfo1);
+                    segmentList.push(segmentInfo2);
+
+                    // create branches every other division 
+                    // instead of just adding two segments (one for each side of the split), 
+                    // you add three. the third continues in the first segment’s direction 
+                    // (with some randomization thrown in)
+                    if (division_count % 2 == 0) {
+                        let direction = new THREE.Vector3();
+                        direction.subVectors(midPoint, startPoint);
+                        // generate a random angle between 0 and 2 * pi radians 
+                        let x_angle = Math.random() * Math.PI / 2;
+                        let y_angle = Math.random() * Math.PI / 2;
+                        let z_angle = Math.random() * Math.PI / 2;
+                        let rotation = new THREE.Euler(x_angle, y_angle, z_angle);
+                        let rotated_vec = new THREE.Vector3();
+                        rotated_vec.copy(direction.applyEuler(rotation));
+                        let splitEnd = new THREE.Vector3();
+                        splitEnd.copy(rotated_vec.multiplyScalar(lengthScale).add(midPoint));
+
+                        let points_div = [];
+                        points_div.push(midPoint);
+                        points_div.push(splitEnd);
+                        let geometry_div = new THREE.Geometry().setFromPoints(points_div);
+                        let line_div = new MeshLine();
+                        line_div.setGeometry(geometry_div);
+                        let segMesh_div = new THREE.Mesh(line_div.geometry, material);
+
+                        let segmentInfo_div = [];
+                        segmentInfo_div.push(segMesh_div);
+                        segmentInfo_div.push(midPoint);
+                        segmentInfo_div.push(splitEnd);
+                        segmentList.push(segmentInfo_div);
+                    }
+
+                    division_count++;
+                }
+                // each subsequent generation offsets at most half as much as 
+                // the previous generation
+                maxOffset /= 2;
+            }
+
+            let lightning = new THREE.Group();
+            // add every line segment in the array to the group
+            for (let segment of segmentList) {
+                lightning.add(segment[0]);
+            }
+            scene.add(lightning);
+
+            lightning.visible = false;
+            return lightning;
+        }
+
+        let lightning = lightning_init(new THREE.Vector3(300, 500, -2), new THREE.Vector3(200, -5, -2));
+
+        let target;
+        let loader = new THREE.TextureLoader();
+        // loader.load('lightning_water.jpg', function (texture) {
+        //     // add lightning target ring
+        //     let targetGeo = new THREE.CircleGeometry(10, 32);
+        //     targetGeo.scale(5, 5, 5);
+        //     let targetMaterial = new THREE.MeshPhongMaterial({ map: texture });
+        //     target = new THREE.Mesh(targetGeo, targetMaterial);
+        //     teddyMesh.add(target);
+        //     target.visible = false;
+        //     target.rotateX(-0.55 * Math.PI);
+        //     target.translateY(10);
+        //     target.translateX(60);
+        //     target.translateZ(30);
+        // });
+
+        let time = 0;
+        let then = 0;
+        let deltaTime = 0;
+
+        // requestAnimationFrame passes the time since the page was loaded to the callback (in ms) 
+        function animate_lightning(now) {
+            lightningTimer--;
+            // convert to seconds
+            now *= 0.001;
+            const deltaTime = now - then;
+
+            then = now;
+
+            if (time % 2 == 0) {
+                lightning.visible = false;
+                if (typeof target != "undefined") {
+                    target.visible = false;
+                }
+            }
+
+            else {
+                lightning.visible = true;
+                if (typeof target != "undefined") {
+                    target.visible = true;
+                }
+            }
+            time = time + 1;
+
+            composer.render(deltaTime);
+            if (lightningTimer == 0) {
+                lightningInProgress = false;
+                var audioLoader = new THREE.AudioLoader();
+                    audioLoader.load('thunder.mp3', function (buffer) {
+                        sound.setBuffer(buffer);
+                        sound.setLoop(false);
+                        sound.setVolume(1.0);
+                        sound.setPlaybackRate(2);
+                        sound.play();
+                    });
+                deactivate_lightning();
+            }
+            else {
+                requestAnimationFrame(animate_lightning);
+            }
+        }
+        let introSkip = false;
+        function intro() {
+            var intro = document.getElementById("Intro");
+            var intro1Pic = document.getElementById("intro1Pic");
+            var intro1 = document.getElementById("intro1");
+            var intro2Pic = document.getElementById("intro2Pic");
+            var intro2 = document.getElementById("intro2");
+            var intro3Pic = document.getElementById("intro3Pic");
+            var intro3 = document.getElementById("intro3");
+            var intro4Pic = document.getElementById("intro4Pic");
+            var intro4 = document.getElementById("intro4");
+            var skip = document.getElementById("skip");
+
+            intro.style.display = "block"
+            intro1Pic.style.display = "block";
+            intro1.style.display = "block";
+            skip.style.display = "block";
+
+            skip.onclick = function () {
+                intro.style.display = "none";
+                intro1.style.display = "none";
+                intro2.style.display = "none";
+                intro3.style.display = "none";
+                intro4.style.display = "none";
+                intro1Pic.style.display = "none";
+                intro2Pic.style.display = "none";
+                intro3Pic.style.display = "none";
+                intro4Pic.style.display = "none";
+                skip.style.display = "none";
+                introSkip = true;
+            }
+
+            setTimeout(function () {
+                intro1Pic.style.display = "none";
+                intro1.style.display = "none";
+                intro2Pic.style.display = "block";
+                intro2.style.display = "block";
+            }, 8000);
+            setTimeout(function () {
+                intro2Pic.style.display = "none";
+                intro2.style.display = "none";
+                intro3Pic.style.display = "block";
+                intro3.style.display = "block";
+            }, 11000);
+            setTimeout(function () {
+                intro3Pic.style.display = "none";
+                intro3.style.display = "none";
+                intro4Pic.style.display = "block";
+                intro4.style.display = "block";
+            }, 15000);
+            setTimeout(function () {
+                intro4Pic.style.display = "none";
+                intro4.style.display = "none";
+                intro.style.display = "none";
+                skip.style.display = "none";
+            }, 19000);
+        }
+
+
+        // Animation:
+        var whirlTime = 0;
+        let timer;
+        let coneSpeed = 5;
+        let lightningDelay = 800; // Starts off generating lightning every 40 seconds.
+        let ticker = 0; // When ticker = 20, 1 second has gone by
+        let teddyTime = false;
+        teddyInit();
+
+        // Populate Scene:
+        let randomRanges = getRandomRanges(300);
+        ducksInit();
+        fishInit();
+        intro();
+        animate();
+
+        function animate() {
+            whirlTime += 30;
+            let lostGame = checkGameStatus();
+            if (lostGame) {
+                renderer.render(scene, camera);
+            }
+            else {
+                requestAnimationFrame(animate);
+                render();
+            }
+        }
+
+
+        function render() {
+            timer = whirlTime * 0.0002 * 0.8;
+            cone.rotation.y = timer * coneSpeed;
+
+            // Increase the cone speed and lightning frequency every half second.
+            if (ticker % 1200 == 0 && coneSpeed < 20) { // Cone speed cannot be higher than 20 to keep game playable.
+                coneSpeed += 1;
+                if (lightningDelay > 200) // Lightning frequency must be at least 10 seconds to keep game playable.
+                    lightningDelay--;
+            }
+
+            moveVertices(timer, randomRanges);
+
+
+            cone.geometry.computeFaceNormals();
+            cone.geometry.computeVertexNormals();
+            cone.geometry.normalsNeedUpdate = true;
+            cone.geometry.verticesNeedUpdate = true;
+
+
+            let coneHeight = cone.geometry.parameters.height * coneScale;
+            let coneRadius = cone.geometry.parameters.radius * coneScale;
+            let theta = Math.atan(coneHeight / coneRadius);
+            bounce(theta, teddyMesh.position.z, -coneHeight / 2, timer);
+            stickyDuck(theta, -coneHeight / 2, timer);
+            // stickyFish(theta, -coneHeight / 2, timer);
+
+            if (ticker % 120 == 0) {
+                showDuck();
+            }
+            if (ticker % 100 == 0) {
+                showFish();
+            }
+            // have the whirlpool take affect after the intro ends
+            if (ticker > 700 || introSkip) {
+             attract();
+            }   
+
+            // Ignore duck collisions for 10 seconds so that the player has time to mentally prepare.
+            if (ticker > 200) {
+                handleDuckCollision();
+            }
+
+            let fishCollided = handleFishCollision();
+
+            // When teddyMunch animation is done, it will set teddyTime to false.
+            if (fishCollided || teddyTime) {
+                teddyTime = teddyMunch();
+                fishCollision = false;
+            }
+
+            // Render! (by golly I hope this works!)
+            ticker++;
+            renderer.render(scene, camera);
+            if (ticker % lightningDelay == 0) { // Activates lightning after a certain amount of seconds.
+                activate_lightning();
+            }
+
+        }
+    </script>
+
+</body>
+
+</html>
