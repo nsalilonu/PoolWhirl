@@ -484,7 +484,15 @@
             return false;
         }
 
-
+        let drainTimer = 0;
+        let radius;
+        function drain(){
+            drainTimer++;
+            teddyMesh.translateZ(5);
+            teddyMesh.translateX(10);
+            teddyMesh.translateY(-5);
+            if (drainTimer == 100) {return;}
+        }
 
         function checkGameStatus() {
             let lostGame = false;
@@ -493,6 +501,7 @@
             }
 
             if (lostGame) {
+                drain();
                 var modal = document.getElementById("LostGame");
                 var span = document.getElementsByClassName("close")[0];
                 modal.style.display = "block";
