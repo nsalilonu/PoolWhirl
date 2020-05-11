@@ -4,7 +4,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const buildPath = './build/';
 
 module.exports = {
-    entry: ['./src/app.js'],
+    entry: ['./main.html'],
     output: {
         path: path.join(__dirname, buildPath),
         filename: '[name].[hash].js',
@@ -45,11 +45,11 @@ module.exports = {
         ],
     },
     resolve: {
-        alias: {
-            lights$: path.resolve(__dirname, 'src/components/lights'),
-            objects$: path.resolve(__dirname, 'src/components/objects'),
-            scenes$: path.resolve(__dirname, 'src/components/scenes'),
-        },
+        // alias: {
+        //     lights$: path.resolve(__dirname, 'src/components/lights'),
+        //     objects$: path.resolve(__dirname, 'src/components/objects'),
+        //     scenes$: path.resolve(__dirname, 'src/components/scenes'),
+        // },
     },
     plugins: [
         new HtmlWebpackPlugin({ title: pkg.title, favicon: 'src/favicon.ico' }),

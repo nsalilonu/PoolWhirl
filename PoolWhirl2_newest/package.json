@@ -1,25 +1,25 @@
 {
-  "name": "lower-case-dashed-name-of-project",
-  "repository": "REPOSITORY-NAME-AS-IT-APPEARS-IN-GITHUB-URL",
+  "name": "pool-whirl",
+  "repository": "PoolWhirl",
   "version": "0.1.0",
-  "title": "PROJECT TITLE HERE",
-  "description": "SHORT DESCRIPTION OF PROJECT HERE. ONE TO TWO SENTENCES MAX",
+  "title": "Pool Whirl",
+  "description": "Save your teddy from an untimely end by keeping it away from the center of the whirlpool, catching fish and avoiding ducks!",
   "keywords": [
     "Princeton",
     "graphics",
     "three.js",
     "COS 426",
     "ivy league",
-    "keyword1",
-    "keyword2",
-    "...",
-    "this last entry CANNOT have a comma after it ->"
+    "whirlpool",
+    "teddy",
+    "cute",
+    "water games"
   ],
   "scripts": {
     "start": "webpack-dev-server --mode development --output-public-path \"\"",
     "prebuild": "rimraf ./build && mkdirp ./build",
     "build": "npm run prebuild && webpack --mode production --progress --output-public-path \"\"",
-    "format": "prettier --write '*.js' 'src/**/*.js'",
+    "format": "prettier --write '*.js'",
     "deploy": "npm run prebuild && webpack --mode production --progress && gh-pages -d build"
   },
   "dependencies": {

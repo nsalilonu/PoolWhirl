@@ -2,11 +2,9 @@
 // Pseudocode source: http://drilian.com/2009/02/25/lightning-bolts/
 // Work-in-progress
 
-
-
 window.onload = function () {
     const canvas = document.getElementById('canvas');
-    let renderer = new THREE.WebGLRenderer({canvas});
+    let renderer = new THREE.WebGLRenderer({ canvas });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
 
@@ -17,29 +15,27 @@ window.onload = function () {
     // Orbit Controls:
     const controls = new THREE.OrbitControls(camera, canvas);
     controls.target.set(0, 0, 0);
-    controls.update(); 
+    controls.update();
 
     let scene = new THREE.Scene();
     scene.add(camera);
 
-    let sceneColor = new THREE.Color(0xadd8e6);
-    scene.background = sceneColor;  
-
     let segmentList = [];
 
     let startPoint = new THREE.Vector3(10, 25, 30);
-    let endPoint = new THREE.Vector3(100, 120, 120);
+    let endPoint = new THREE.Vector3(100, 120, 150);
     let points = [];
     points.push(startPoint);
     points.push(endPoint);
     let geometry = new THREE.BufferGeometry().setFromPoints(points);
-    
+
     let material = new THREE.LineBasicMaterial({
-        color: 0x000000,
-        linewidth: 5,
-    }); 
+        color: 0xCCCC00,
+        linewidth: 30,
+    });
+
     let segMesh = new THREE.Line(geometry, material);
-    
+
     let segmentInfo = [];
     segmentInfo.push(segMesh);
     segmentInfo.push(startPoint);
@@ -48,7 +44,7 @@ window.onload = function () {
     segmentList.push(segmentInfo);
 
     // the maximum amount to offset a lightning bolt
-    let maxOffset = 50;
+    let maxOffset = 45;
 
     const NUM_GENERATIONS = 10;
 
@@ -67,7 +63,7 @@ window.onload = function () {
             // this.console.log(endPoint);
             // remove it 
             segmentList.splice(j, 1);
-            
+
             let temp = new THREE.Vector3();
             let midPoint = new THREE.Vector3();
             midPoint.copy(temp.addVectors(startPoint, endPoint).divideScalar(2));
@@ -98,6 +94,7 @@ window.onload = function () {
             points1.push(midPoint);
             let geometry1 = new THREE.BufferGeometry().setFromPoints(points1);
             let segMesh1 = new THREE.Line(geometry1, material);
+
             let segmentInfo1 = [];
             segmentInfo1.push(segMesh1);
             segmentInfo1.push(startPoint);
@@ -108,13 +105,14 @@ window.onload = function () {
             points2.push(endPoint);
             let geometry2 = new THREE.BufferGeometry().setFromPoints(points2);
             let segMesh2 = new THREE.Line(geometry2, material);
+
             let segmentInfo2 = [];
             segmentInfo2.push(segMesh2);
             segmentInfo2.push(midPoint);
             segmentInfo2.push(endPoint);
-            
+
             segmentList.push(segmentInfo1);
-            segmentList.push(segmentInfo2); 
+            segmentList.push(segmentInfo2);
 
             // create branches every other division 
             // instead of just adding two segments (one for each side of the split), 
@@ -124,12 +122,12 @@ window.onload = function () {
                 let direction = new THREE.Vector3();
                 direction.subVectors(midPoint, startPoint);
                 // generate a random angle between 0 and 2 * pi radians 
-                let x_angle = Math.random() * this.Math.PI * 2; 
-                let y_angle = Math.random() * this.Math.PI * 2;
-                let z_angle = Math.random() * this.Math.PI * 2;
+                let x_angle = Math.random() * this.Math.PI / 2;
+                let y_angle = Math.random() * this.Math.PI / 2;
+                let z_angle = Math.random() * this.Math.PI / 2;
                 let rotation = new THREE.Euler(x_angle, y_angle, z_angle);
                 let rotated_vec = new THREE.Vector3();
-                rotated_vec.copy(direction.applyEuler(rotation)); 
+                rotated_vec.copy(direction.applyEuler(rotation));
                 let splitEnd = new THREE.Vector3();
                 splitEnd.copy(rotated_vec.multiplyScalar(lengthScale).add(midPoint));
 
@@ -138,6 +136,7 @@ window.onload = function () {
                 points_div.push(splitEnd);
                 let geometry_div = new THREE.BufferGeometry().setFromPoints(points_div);
                 let segMesh_div = new THREE.Line(geometry_div, material);
+
                 let segmentInfo_div = [];
                 segmentInfo_div.push(segMesh_div);
                 segmentInfo_div.push(midPoint);
@@ -155,6 +154,6 @@ window.onload = function () {
     for (segment of segmentList) {
         scene.add(segment[0]);
     }
-    this.console.log(segmentList.length);
-    renderer.render(scene, camera); 
+
+    renderer.render(scene, camera);
 }
