@@ -886,7 +886,7 @@
                 audioLoader.load('thunder.mp3', function (buffer) {
                     sound.setBuffer(buffer);
                     sound.setLoop(false);
-                    sound.setVolume(1.0);
+                    sound.setVolume(2.0);
                     sound.setPlaybackRate(2);
                     sound.play();
                 });
@@ -960,7 +960,7 @@
         // Animation:
         var whirlTime = 0;
         let timer;
-        let coneSpeed = 5;
+        let coneSpeed = 7;
         let lightningDelay = 800; // Starts off generating lightning every 40 seconds.
         let ticker = 0; // When ticker = 20, 1 second has gone by
         let teddyTime = false;
@@ -1061,7 +1061,7 @@
             }
             // Speed up music when ducks are haloed.
             if (haloes_active) {
-                backgroundSound.setPlaybackRate(2);
+                backgroundSound.setPlaybackRate(1.5);
             }
             else {
                 backgroundSound.setPlaybackRate(1);
