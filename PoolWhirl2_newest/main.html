@@ -446,6 +446,15 @@
             teddyMesh.position.set(0, 10, 175);
         }
 
+         // have a constant force the moves teddy towards the center of the whirlpool 
+
+
+
+
+        function attract() { 
+            teddyMesh.translateX(0.4); 
+            let EPS = 100; 
+        } 
 
         // run a for loop where if the selected random duck is not 
         // currently seen by the camera, make it visible
@@ -805,9 +814,8 @@
             }
         }
 
+        let introSkip = false;
         function intro() {
-
-            let buttonClick = false;
             var intro = document.getElementById("Intro");
             var intro1Pic = document.getElementById("intro1Pic");
             var intro1 = document.getElementById("intro1");
@@ -834,6 +842,7 @@
                 intro3Pic.style.display = "none";
                 intro4Pic.style.display = "none";
                 skip.style.display = "none";
+                introSkip = true;
             }
 
             setTimeout(function () {
@@ -929,6 +938,15 @@
             if (ticker % 100 == 0) {
                 showFish();
             }
+
+             // have the whirlpool take affect after the intro ends 
+
+
+
+
+            if (ticker > 700 || introSkip) { 
+                attract(); 
+            }    
 
             // Ignore duck collisions for 10 seconds so that the player has time to mentally prepare.
             if (ticker > 200) {
