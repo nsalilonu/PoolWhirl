@@ -101,11 +101,37 @@
 
   #skip {
     position: fixed;
-    display: none;
+    display: block;
     margin: auto;
+    width: 100px;
+    height: 50px;
     z-index: 1;
     background-color: plum;
   }
+  
+  #musicOn {
+    display: none;
+    position: absolute;
+    top: 30%;
+    display: block;
+    margin: auto;
+    width: 100px;
+    height: 50px;
+    z-index: 1;
+    background-color: salmon;
+  }
+  #musicOff {
+    display: block;
+    position: absolute;
+    top: 30%;
+    display: block;
+    margin: auto;
+    width: 100px;
+    height: 50px;
+    z-index: 1;
+    background-color: salmon;
+  }
+  
 
 
 
