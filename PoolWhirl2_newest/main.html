@@ -187,19 +187,6 @@
                 let scale = Math.sin(timer * randomRanges[i].time) * randomRanges[i].scale;
                 let currentVertex = randomRanges[i].vertex; // A random vertex in the list.
                 vertices[currentVertex].setY(randomRanges[i].originalY + scale);
-
-                // // Check if the water is in the vicinity of the teddy.
-                // let teddyPos = teddyMesh.position.clone();
-                // let offset = 13; // Don't let vertices within a box of radius 5 of the teddy go above the teddy.
-                // let EPS = 20; // Distance from the teddy center we want the water to be
-                // let minZ = teddyPos.z - offset;
-                // let maxZ = teddyPos.z + offset;
-                // if (vertices[currentVertex].z <= maxZ && vertices[currentVertex].z >= minZ) {
-                //         // If the water is too high and near the teddy, reduce the y value.
-                //         if (vertices[currentVertex].y > teddyPos.y - EPS) {
-                //             vertices[currentVertex].setY(teddyPos.y - EPS);
-                //         }
-                //     }
             }
         }
 
@@ -212,7 +199,6 @@
 
         scene.add(teddyMesh);
         let teddyPosition = teddyMesh.localToWorld(teddyMesh.position.clone());
-        //camera.position.set(-219.61429616527784, 60.79054134136912, 159.00433133976932);
         camera.position.set(-179.61429616527784, 60.79054134136912, 84.64688761281252);
         controls.target.set(teddyPosition.x, teddyPosition.y, teddyPosition.z);
         controls.update();
@@ -246,10 +232,7 @@
         
 
         function stickyDuck(theta, minY, timer) {
-            // const length = closestVertex.length;
-            // const EPS = 2 - 92 / 2 - 10;
             for (let i = 0; i < length; i++) {
-                //     ducks[i].position.setY(closestVertex[i].y + EPS);
                 let z = ducks[i].position.z.clone();
                 let EPS = 50;
                 let y = Math.tan(theta) * z;
@@ -336,7 +319,6 @@
         var backgroundSound = new THREE.Audio(listener);
 
 
-        // Code taken from https://github.com/stemkoski/stemkoski.github.com/blob/master/Three.js/Collision-Detection.html.
         let gamePoints = 0;
         let collision = false;
         function handleDuckCollision() {
@@ -483,7 +465,7 @@
             else if (event.keyCode == RIGHT) {
                 movingRight = true;
             }
-            }
+        }
 
         // Stops moving if keyup.
         function stopMoveObject() {
