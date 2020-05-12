@@ -396,10 +396,10 @@
                     if (backgroundSound.isPlaying)
                     sound.play();
                 });
-                teddyMesh.position.setZ(teddyMesh.position.z - 10); // Pushes you further into the whirlpool.
+                teddyMesh.position.setZ(teddyMesh.position.z - 50); // Pushes you further into the whirlpool.
                 // Ducks with haloes deal 10 times more damage.
                 if (haloes_active) {
-                    gamePoints -= 10;
+                    gamePoints -= 3;
                 }
                 else {
                     gamePoints--;
@@ -845,23 +845,6 @@
         }
 
         let lightning = lightning_init(new THREE.Vector3(300, 500, -2), new THREE.Vector3(200, -5, -2));
-
-        let target;
-        let loader = new THREE.TextureLoader();
-        // loader.load('lightning_water.jpg', function (texture) {
-        //     // add lightning target ring
-        //     let targetGeo = new THREE.CircleGeometry(10, 32);
-        //     targetGeo.scale(5, 5, 5);
-        //     let targetMaterial = new THREE.MeshPhongMaterial({ map: texture });
-        //     target = new THREE.Mesh(targetGeo, targetMaterial);
-        //     teddyMesh.add(target);
-        //     target.visible = false;
-        //     target.rotateX(-0.55 * Math.PI);
-        //     target.translateY(10);
-        //     target.translateX(60);
-        //     target.translateZ(30);
-        // });
-
         let time = 0;
         let then = 0;
         let deltaTime = 0;
@@ -969,7 +952,6 @@
             let theta = Math.atan(coneHeight / coneRadius);
             bounce(theta, teddyMesh.position.z, -coneHeight / 2, timer);
             stickyDuck(theta, -coneHeight / 2, timer);
-            // stickyFish(theta, -coneHeight / 2, timer);
 
             if (ticker % 120 == 0) {
                 showDuck();
@@ -982,13 +964,17 @@
 
             handleDuckCollision();
             let fishCollided = handleFishCollision();
-                
 
             // When teddyMunch animation is done, it will set teddyTime to false.
             if (fishCollided || teddyTime) {
                 teddyTime = teddyMunch();
                 fishCollision = false;
             }
+
+            if (ticker > 700) { 
+                // make clouds darker 
+                console.log(ticker % lightningDelay);
+            }  
 
             // Render! (by golly I hope this works!)
             ticker++;
