@@ -97,7 +97,6 @@
 
         // assign colors to vertices first, and then iterate through faces and assign the colors 
         // to the faces array
-
         let lightBlue = [30, 99, 101, 57, 62, 90, 81, 17, 24, 84, 43, 97]
 
         for (let i = 0; i < vertColors.length; i++) {
@@ -256,14 +255,11 @@
         const color2 = 0xffb400;
         const sunColor = 0xffa51b;
         const light = new THREE.DirectionalLight(color, 0.25);
-        //light.position.set(-329, -81, -260);
         light.position.set(0, 100, 0);
         const teddyLight = new THREE.DirectionalLight(color2, 0.5);
         teddyLight.position.set(9, 10, -1);
         const ambient = new THREE.AmbientLight(0x404040, 2);
-        // 329, -11 260 is on right of teddy bear
         scene.add(light);
-        //scene.add(teddyLight);
         scene.add(ambient);
 
         
