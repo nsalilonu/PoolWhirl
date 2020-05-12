@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- the next three lines try to discourage browser from keeping page in cache -->
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="-1">
+    <meta http-equiv="cache-control" content="no-store">
+
+    <title> COS426 Final Project &mdash; Pool Whirl</title>
+</head>
+
+<script src="teddyMesh.js" type="module"></script>
+<script src="rubberDuckMesh.js" type="module"></script>
+<link href="style.css" type="text/css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<body style="background-color: rgb(226, 113, 147); overflow: hidden;">
+    <script src="three.min.js"></script>
+    <script src="Lightning/postprocessing.min.js"></script>
+    <script src="Lightning/THREE.MeshLine.js"></script>
+    <script src="OrbitControls.js"></script>
+
+    <button type="button" id="musicOn"><i class="fa fa-volume-up"></i></button>
+    <button type="button" id="musicOff"><i class="fa fa-volume-off"></i></button>
+    <button type="button" id="next"><i class= "fa fa-hand-o-right"></i></button>
+    <button type="button" id="previous"><i class= "fa fa-hand-o-left"></i></button>
+    <button type="button" id="startGameFromIntro">Start Game</button>
+    <div class=intro-content>
+        <p id="p0">You are a teddy bear! Move left and right with the left and right arrow keys, and avoid the center of the whirlpool!</p>
+        <p id="p1">The ducks will randomly appear in the whirlpool! Avoid them, or you will lose points!</p>
+        <p id="p2">Fish will randomly appear in the whirlpool! Eat them to gain points!</p>
+        <p id="p3">Lightning will strike the pool, freezing the teddy, from time to time. The ducks will become haloed briefly, and you will lose more points for collisions!</p>
+    </div>
+
+    <canvas id="canvas"></canvas>
+    <script type="module">
+        import { teddyMesh, teddyMunch, teddyInit, bounce } from "./teddyMesh.js";
+        import { duckMesh } from "./rubberDuckMesh.js";
+        import { fish } from "./fishMesh.js";
+
+        let musicOff = document.getElementById("musicOff");
+        let musicOn = document.getElementById("musicOn");
+        let start = document.getElementById("startGameFromIntro");
+        let next = document.getElementById("next");
+        let previous = document.getElementById("previous");
+        let state = 0;
+        var scene;
+        let p0 = document.getElementById("p0");
+        let p1 = document.getElementById("p1");
+        let p2 = document.getElementById("p2");
+        let p3 = document.getElementById("p3");
+
+
+        musicOff.addEventListener('click', function () { // Turn music on.
+            backgroundSound.context.resume();
+            musicOff.style.display = "none";
+            musicOn.style.display = "block";
+            var backgroundMusic = new THREE.AudioLoader();
+            backgroundMusic.load('PirateMusic.mp3', function (buffer) {
+                backgroundSound.setBuffer(buffer);
+                backgroundSound.setLoop(true);
+                backgroundSound.setVolume(3.0);
+                backgroundSound.setPlaybackRate(1);
+                if (!backgroundSound.isPlaying)
+                backgroundSound.play();
+            });
+        });
+
+        musicOn.addEventListener('click', function() { // Turn music off.
+            backgroundSound.pause();
+            musicOn.style.display = "none";
+            musicOff.style.display = "block";
+        });
+
+        start.addEventListener('click', function() {
+            window.location.href = "main.html";
+        });
+        next.addEventListener('click', nextPage, false);
+        previous.addEventListener('click', previousPage, false);
+
+
+        // Camera controls:
+        const canvas = document.getElementById('canvas');
+        const renderer = new THREE.WebGLRenderer({ canvas });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        var camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 1, 10000);
+        camera.position.set(0,0,30);
+
+        // Orbit Controls:
+        const controls = new THREE.OrbitControls(camera, canvas);
+        controls.target.set(teddyMesh.position.x, teddyMesh.position.y, teddyMesh.position.z);
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 4.0;
+        controls.update();
+
+        var listener = new THREE.AudioListener();
+        camera.add(listener);
+        // create global audio sources
+        var sound = new THREE.Audio(listener);
+        var backgroundSound = new THREE.Audio(listener);
+
+        const scene0 = new THREE.Scene();
+        scene0.background = new THREE.Color(0xbfd8f0);
+        teddyMesh.rotateY(Math.PI);
+        teddyMesh.position.set(0,10,0);
+        scene0.add(teddyMesh);
+
+        var tubeGeometry = new THREE.TorusGeometry(10, 3, 16, 100);
+        for (var i = 0; i < tubeGeometry.faces.length; i++) {
+            let hue = Math.random(); //* 0.166 (if red/orange/yellow);
+            // setting lightness to higher value will make it more pastel
+            tubeGeometry.faces[i].color.setHSL(hue, 1.0, 0.8);
+        }
+        var tubeMaterial = new THREE.MeshToonMaterial({ color: 0xffffff, vertexColors: true, shininess: 60 });
+        tubeGeometry.scale(1.7, 1.7, 1.7);
+        var torus = new THREE.Mesh(tubeGeometry, tubeMaterial);
+        torus.rotateX(Math.PI / 2);
+        torus.position.set(0, -17.000000000000007, -1.0000000000000142);
+        teddyMesh.add(torus);
+       
+        scene = scene0; // Initial state.
+
+        const scene1 = new THREE.Scene();
+        scene1.background = new THREE.Color(0xffe886);
+        let unhaloedDuck = duckMesh.clone();
+        scene1.add(unhaloedDuck);
+
+        const scene2 = new THREE.Scene();
+        scene2.background = new THREE.Color(0xf4d1f3);
+        fish.scale.set(0.1, 0.1, 0.1);
+        scene2.add(fish);
+
+        const scene3 = new THREE.Scene();
+        scene3.background = new THREE.Color(0xffca58);
+        scene3.add(duckMesh);
+        let haloGeom = new THREE.TorusGeometry(20, 3, 16, 100);
+        let haloMaterial = new THREE.MeshToonMaterial({ color: 0xFFFF99, shininess: 60 });
+        let halo = new THREE.Mesh(haloGeom, haloMaterial);
+        halo.rotation.x = Math.PI / 2;
+        halo.position.y += 10;
+        halo.scale.set(0.5,0.5,0.5);
+        duckMesh.add(halo);
+
+        // Lighting:
+        const color = 0xFFFFFF;
+        const light = new THREE.DirectionalLight(color, 0.25);
+        light.position.set(camera.position.x, camera.position.y, camera.position.z);
+        const ambient = new THREE.AmbientLight(0x404040, 2);
+        scene.add(light);
+        scene.add(ambient);
+
+        function nextPage() {
+            if (state == 0) {
+            scene = scene1;
+            state = 1;
+            p0.style.display = "none";
+            p1.style.display = "block";
+            controls.target.set(duckMesh.position.x, duckMesh.position.y, duckMesh.position.z);
+            controls.update();
+            scene.add(light);
+            scene.add(ambient);
+            
+            }
+            else if (state == 1) { 
+            scene = scene2;
+            state = 2;
+            p1.style.display = "none";
+            p2.style.display = "block";
+            controls.target.set(duckMesh.position.x, duckMesh.position.y, duckMesh.position.z);
+            controls.update();
+            scene.add(light);
+            scene.add(ambient);
+            
+            }
+            else if (state == 2) {
+            scene = scene3;
+            state = 3;
+            p2.style.display = "none";
+            p3.style.display = "block";
+            controls.target.set(duckMesh.position.x, duckMesh.position.y, duckMesh.position.z);
+            controls.update();
+            scene.add(light);
+            scene.add(ambient);
+            }
+            else 
+            return;
+        }
+
+        function previousPage() {
+            if (state == 1) {
+            scene = scene0;
+            state = 0;
+            p1.style.display = "none";
+            p0.style.display = "block";
+            controls.target.set(teddyMesh.position.x, teddyMesh.position.y - 10, teddyMesh.position.z);
+            controls.update();
+            scene.add(light);
+            scene.add(ambient);
+            }
+            else if (state == 2) {
+            scene = scene1;
+            state = 1;
+            p2.style.display = "none";
+            p1.style.display = "block";
+            controls.target.set(duckMesh.position.x, duckMesh.position.y, duckMesh.position.z);
+            controls.update();
+            scene.add(light);
+            scene.add(ambient);
+            }
+            else if (state == 3) {
+            scene = scene2;
+            state = 2;
+            p3.style.display = "none";
+            p2.style.display = "block";
+            controls.target.set(duckMesh.position.x, duckMesh.position.y, duckMesh.position.z);
+            controls.update();
+            scene.add(light);
+            scene.add(ambient);
+            }
+            else
+            return;
+        }   
+        
+        render();
+
+        function render(time) {
+            controls.update();
+            renderer.render(scene, camera);
+            requestAnimationFrame(render);
+        }
+    </script>
+
+    </body>
+    </html>
