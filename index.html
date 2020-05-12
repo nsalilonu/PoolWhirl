@@ -212,6 +212,8 @@
         cloud5.rotateY(Math.PI / 10);
         scene.add(cloud5);
 
+        let clouds = [cloud, cloud2, cloud3, cloud4, cloud5]
+
         function getRandomRanges(particleNum) {
             let vertices = coneGeometry.vertices;
             let length = particleNum;
@@ -533,6 +535,10 @@
             cone.geometry.normalsNeedUpdate = true;
             cone.geometry.verticesNeedUpdate = true;
 
+            // the closer to 0, the darker it should be
+            for (let i = 0; i < clouds.length; i++) {
+                //clouds[i].setColor = 
+            }
             ticker++;
             renderer.render(scene, camera);
             if (ticker % lightningDelay == 0) { // Activates lightning after a certain amount of seconds.
