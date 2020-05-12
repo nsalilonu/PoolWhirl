@@ -1,6 +1,29 @@
+/* source: https://tympanus.net/codrops/css_reference/keyframes/ */
+@keyframes bounce {
+  from {
+    top: 100px;
+    animation-timing-function: ease-out;
+  }
+  25% {
+    top: 50px;
+    animation-timing-function: ease-in;
+  }
+  50% {
+    top: 150px;
+    animation-timing-function: ease-out;
+  }
+  75% {
+    top: 75px;
+    animation-timing-function: ease-in;
+  }
+  to {
+    top: 100px;
+  }
+}
+
 #header {
 color: white;
-font-size: 60px;
+font-size: 90px;
 font-weight: bold;
 font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 position: absolute;
@@ -9,7 +32,8 @@ top: 15%;
 left: 34%;
 z-index: 1;
 text-align: center;
-
+animation: 
+  bounce 5s infinite ease-in-out
 }
 
 .points {
