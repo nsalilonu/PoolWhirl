@@ -60,7 +60,6 @@
         // Background scene:
         let texture = new THREE.TextureLoader().load("textures/sky.png");
         scene.background = texture;
-
         // background storm scene:
 
         // Cone:
@@ -193,6 +192,15 @@
         //scene.add(cloud5);
 
         let clouds = [cloud, cloud2, cloud3, cloud4]
+        let flashArray = new Array(4);
+
+        for (let i = 0; i < clouds.length; i++) {
+            let flash = new THREE.PointLight(0x062d89, 0, 2000, 1.7);
+            flash.position.set(clouds[i].position.x, clouds[i].position.y, clouds[i].position.z);
+            clouds[i].add(flash);
+            flashArray[i] = flash;
+        }
+        console.log(flashArray)
 
         // Tube:
         var tubeGeometry = new THREE.TorusGeometry(10, 3, 16, 100);
@@ -546,7 +554,6 @@
             else if (event.keyCode == CAMLEFT) {
                 camera.translateX(-1);
             }
-            console.log(camera.position);
 
 
         }
@@ -974,17 +981,41 @@
                 fishCollision = false;
             }
 
+            // make clouds change
             for (let i = 0; i < clouds.length; i++) {
-                for (let j = 0; j < clouds[i].children.length; j++) {
+                for (let j = 0; j < clouds[i].children.length - 1; j++) {
                     // goes from lightningDelay to 0
-                    let scale =  1 - 0.6 * (ticker % lightningDelay / lightningDelay);
+                    let scale = 1 - 0.6 * (ticker % lightningDelay / lightningDelay);
                     clouds[i].children[j].material.color.setHSL(0, 0, scale);
+
                     if (Math.floor((ticker / 500)) % 2 == 0)
                         clouds[i].children[j].translateX(-0.02);
-                    else 
+                    else
                         clouds[i].children[j].translateX(0.02);
+
                 }
             }
+
+            let flashDelay = 800 - ticker % lightningDelay;
+
+            // lighting change too?
+            for (let j = 0; j < flashArray.length; j++) {
+                // flash it!
+                if (Math.random() > 0.96 || flashArray[j].power > 100) {
+                    if (flashDelay < 40 && flashDelay > 10) {
+                        flashArray[j].intensity = 30;
+                        flashArray[j].power = 50 + Math.random() * 500;
+                    }
+                    // nope!
+                    else {
+                        flashArray[j].intensity = 0;
+                    }
+                } else {
+                    flashArray[j].intensity = 0;
+                }
+            }
+
+            // rain? 
 
             // Render! (by golly I hope this works!)
             ticker++;
