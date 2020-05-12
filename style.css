@@ -167,7 +167,7 @@ display: none;
 
 #previous {
   font-size: xx-large;
-  display: block;
+  display: none;
   bottom: 10%;
   left: 10%;
   position: absolute;
