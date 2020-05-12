@@ -1043,6 +1043,11 @@
                 fishCollision = false;
             }
 
+            if (ticker > 700 || introSkip) { 
+                // make clouds darker 
+                console.log(ticker % lightningDelay);
+            }  
+
             // Render! (by golly I hope this works!)
             ticker++;
             renderer.render(scene, camera);
