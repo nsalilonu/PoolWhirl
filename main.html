@@ -158,8 +158,9 @@
         cloud.add(s6);
         cloud.add(s7);
 
-        cloud.translateY(35);
-        cloud.translateX(-15);
+        cloud.translateX(0)
+        cloud.translateY(0);
+        cloud.translateX(0);
         scene.add(cloud);
 
         let cloud3 = cloud.clone();
@@ -183,13 +184,15 @@
         scene.add(cloud4);
 
         let cloud5 = cloud.clone();
-        cloud5.position.set(1200, 500, 500);
-        cloud5.scale.x = 3.0;
-        cloud5.scale.y = 3.0;
-        cloud5.scale.z = 3.0;
+        cloud5.position.set(300, 150, -250);
+        cloud5.scale.x = 1.0;
+        cloud5.scale.y = 2.0;
+        cloud5.scale.z = 1.0;
         cloud5.rotateX(Math.PI / 3);
         cloud5.rotateY(Math.PI / 10);
-        scene.add(cloud5);
+        //scene.add(cloud5);
+
+        let clouds = [cloud, cloud2, cloud3, cloud4]
 
         // Tube:
         var tubeGeometry = new THREE.TorusGeometry(10, 3, 16, 100);
@@ -394,7 +397,7 @@
                     sound.setVolume(1.0);
                     sound.setPlaybackRate(1);
                     if (backgroundSound.isPlaying)
-                    sound.play();
+                        sound.play();
                 });
                 teddyMesh.position.setZ(teddyMesh.position.z - 50); // Pushes you further into the whirlpool.
                 // Ducks with haloes deal 10 times more damage.
@@ -454,7 +457,7 @@
                     sound.setVolume(1.0);
                     sound.setPlaybackRate(3);
                     if (backgroundSound.isPlaying)
-                    sound.play();
+                        sound.play();
                 });
                 controls.update();
                 return true;
@@ -465,12 +468,12 @@
 
         let drainTimer = 0;
         let radius;
-        function drain(){
+        function drain() {
             drainTimer++;
             teddyMesh.translateZ(5);
             teddyMesh.translateX(10);
             teddyMesh.translateY(-15);
-            if (drainTimer == 100) {return;}
+            if (drainTimer == 100) { return; }
         }
 
         function checkGameStatus() {
@@ -490,16 +493,16 @@
                 replay.style.display = "block";
                 menu.style.display = "block";
             }
-            
+
             return lostGame;
         }
 
 
-         // have a constant force the moves teddy towards the center of the whirlpool 
-        function attract() { 
-            teddyMesh.translateX(0.4); 
-            let EPS = 100; 
-        } 
+        // have a constant force the moves teddy towards the center of the whirlpool 
+        function attract() {
+            teddyMesh.translateX(0.4);
+            let EPS = 100;
+        }
 
         // run a for loop where if the selected random duck is not 
         // currently seen by the camera, make it visible
@@ -544,7 +547,7 @@
                 camera.translateX(-1);
             }
             console.log(camera.position);
-            
+
 
         }
 
@@ -590,7 +593,7 @@
                 backgroundSound.setVolume(3.0);
                 backgroundSound.setPlaybackRate(1);
                 if (!backgroundSound.isPlaying)
-                backgroundSound.play();
+                    backgroundSound.play();
             });
         });
 
@@ -601,19 +604,19 @@
         });
 
         // When the user clicks on replay, close the modal and refresh the page
-        replay.addEventListener ('click', function () {
-        var modal = document.getElementById("modal");
-        var contents = document.getElementById("pLostGame");
-        var replay = document.getElementById("replay");
-        var menu = document.getElementById("menu");
-        modal.style.display = "none";
-        contents.style.display = "none";
-        replay.style.display = "none";
-        menu.style.display = "none";
-        window.location.reload();
+        replay.addEventListener('click', function () {
+            var modal = document.getElementById("modal");
+            var contents = document.getElementById("pLostGame");
+            var replay = document.getElementById("replay");
+            var menu = document.getElementById("menu");
+            modal.style.display = "none";
+            contents.style.display = "none";
+            replay.style.display = "none";
+            menu.style.display = "none";
+            window.location.reload();
         });
 
-        menu.addEventListener('click', function() {
+        menu.addEventListener('click', function () {
             window.location.href = "index.html";
         });
 
@@ -883,7 +886,7 @@
                     sound.setVolume(5.0);
                     sound.setPlaybackRate(2);
                     if (backgroundSound.isPlaying)
-                    sound.play();
+                        sound.play();
                 });
                 deactivate_lightning();
             }
@@ -892,7 +895,7 @@
             }
         }
 
-    
+
 
 
 
@@ -960,7 +963,7 @@
                 showFish();
             }
 
-            attract();   
+            attract();
 
             handleDuckCollision();
             let fishCollided = handleFishCollision();
@@ -971,10 +974,17 @@
                 fishCollision = false;
             }
 
-            if (ticker > 700) { 
-                // make clouds darker 
-                console.log(ticker % lightningDelay);
-            }  
+            for (let i = 0; i < clouds.length; i++) {
+                for (let j = 0; j < clouds[i].children.length; j++) {
+                    // goes from lightningDelay to 0
+                    let scale =  1 - 0.6 * (ticker % lightningDelay / lightningDelay);
+                    clouds[i].children[j].material.color.setHSL(0, 0, scale);
+                    if (Math.floor((ticker / 500)) % 2 == 0)
+                        clouds[i].children[j].translateX(-0.02);
+                    else 
+                        clouds[i].children[j].translateX(0.02);
+                }
+            }
 
             // Render! (by golly I hope this works!)
             ticker++;
