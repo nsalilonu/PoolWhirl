@@ -61,7 +61,8 @@
 
         // Background scene:
         let texture = new THREE.TextureLoader().load("textures/sky.png");
-        scene.background = texture;
+
+        scene.background = new THREE.Color( 0x87ceeb  );
         // background storm scene:
 
         // Cone:
@@ -600,6 +601,11 @@
         scene.add(light);
         //scene.add(teddyLight);
         scene.add(ambient);
+        let light2 = new THREE.DirectionalLight(color, 0.25);
+        light2.position.set(0, 300, 0);
+        light2.target.position.set(0, 100, 0);
+        light2.intensity = 0.1;
+        scene.add(light2);
 
         let musicOff = document.getElementById("musicOff");
         let musicOn = document.getElementById("musicOn");
@@ -695,7 +701,7 @@
             if (typeof target != "undefined") {
                 target.visible = false;
             }
-            scene.background = texture;
+            scene.background = new THREE.Color( 0x87ceeb  );
 
             // deactivate glow 
             composer.renderToScreen = false;
@@ -1031,7 +1037,11 @@
                 }
             }
 
-            // rain? 
+            // light change
+            let vScale = 0.7 - 0.25 * (ticker % lightningDelay) / lightningDelay
+            let hScale = 0.55 + 0.03 * (ticker % lightningDelay) / lightningDelay
+            let sScale = 0.43 + 0.2 * (ticker % lightningDelay) / lightningDelay
+            scene.background.setHSL(hScale, sScale, vScale)
 
             // Render! (by golly I hope this works!)
             ticker++;
