@@ -37,6 +37,8 @@
     <button type="button" id="musicOn"><i class="fa fa-volume-up"></i></button>
     <button type="button" id="musicOff"><i class="fa fa-volume-off"></i></button>
 
+    <p id=lightningMove>You are frozen with fright!</p>
+
     <canvas id="canvas"></canvas>
 
     <script type="module">
@@ -402,7 +404,7 @@
                 audioLoader.load('quack.mp3', function (buffer) {
                     sound.setBuffer(buffer);
                     sound.setLoop(false);
-                    sound.setVolume(1.0);
+                    sound.setVolume(2.0);
                     sound.setPlaybackRate(1);
                     if (backgroundSound.isPlaying)
                         sound.play();
@@ -462,7 +464,7 @@
                 audioLoader.load('crunch.mp3', function (buffer) {
                     sound.setBuffer(buffer);
                     sound.setLoop(false);
-                    sound.setVolume(1.0);
+                    sound.setVolume(2.0);
                     sound.setPlaybackRate(3);
                     if (backgroundSound.isPlaying)
                         sound.play();
@@ -531,29 +533,41 @@
             const CAMLEFT = 70;
 
             if (event.keyCode == LEFT) {
+                if (lightningInProgress) { // If you move while lighting is in progress, show the text for 1 second.
+                    let frozen = document.getElementById("lightningMove");
+                    frozen.style.display = "block";
+                    setTimeout(function(){frozen.style.display = "none"; },1000);
+                }
+                else
                 movingLeft = true;
             }
             else if (event.keyCode == RIGHT) {
+                if (lightningInProgress) { // If you move while lighting is in progress, show the text for 1 second.
+                    let frozen = document.getElementById("lightningMove");
+                    frozen.style.display = "block";
+                    setTimeout(function(){frozen.style.display = "none"; },1000);
+                }
+                else
                 movingRight = true;
             }
-            else if (event.keyCode == UP) {
-                camera.translateY(1);
-            }
-            else if (event.keyCode == DOWN) {
-                camera.translateY(-1);
-            }
-            else if (event.keyCode == BACK) {
-                camera.translateZ(-1);
-            }
-            else if (event.keyCode == FORTH) {
-                camera.translateZ(1);
-            }
-            else if (event.keyCode == CAMRIGHT) {
-                camera.translateX(1);
-            }
-            else if (event.keyCode == CAMLEFT) {
-                camera.translateX(-1);
-            }
+            // else if (event.keyCode == UP) {
+            //     camera.translateY(1);
+            // }
+            // else if (event.keyCode == DOWN) {
+            //     camera.translateY(-1);
+            // }
+            // else if (event.keyCode == BACK) {
+            //     camera.translateZ(-1);
+            // }
+            // else if (event.keyCode == FORTH) {
+            //     camera.translateZ(1);
+            // }
+            // else if (event.keyCode == CAMRIGHT) {
+            //     camera.translateX(1);
+            // }
+            // else if (event.keyCode == CAMLEFT) {
+            //     camera.translateX(-1);
+            // }
 
 
         }
@@ -563,9 +577,11 @@
             const LEFT = 37;
             const RIGHT = 39;
             if (event.keyCode == LEFT) {
+                if (!lightningInProgress)
                 movingLeft = false;
             }
             else if (event.keyCode == RIGHT) {
+                if (!lightningInProgress)
                 movingRight = false;
             }
         }
