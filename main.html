@@ -577,11 +577,9 @@
             const LEFT = 37;
             const RIGHT = 39;
             if (event.keyCode == LEFT) {
-                if (!lightningInProgress)
                 movingLeft = false;
             }
             else if (event.keyCode == RIGHT) {
-                if (!lightningInProgress)
                 movingRight = false;
             }
         }
@@ -927,7 +925,7 @@
         var whirlTime = 0;
         let timer;
         let coneSpeed = 10;
-        let lightningDelay = 800; // Starts off generating lightning every 40 seconds.
+        let lightningDelay = 80; // Starts off generating lightning every 40 seconds.
         let ticker = 0; // When ticker = 20, 1 second has gone by
         let teddyTime = false;
         teddyInit();
